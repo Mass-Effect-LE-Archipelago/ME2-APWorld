@@ -10,10 +10,15 @@ from ..world import MassEffectLE2World
 SEEDS = 40  # per option set here; tools/seed_sweep.py runs the long sweep
 OPTION_SETS = (
     {},
-    {"assignments": "off", "enabled_dlc": [], "intel_total": 10, "intel_required": 10, "weapon_unlocks": False},
-    {"assignments": "off", "enabled_dlc": [], "intel_total": 1, "intel_required": 1},
+    {"assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False, "intel_total": 10,
+     "intel_required": 10, "weapon_unlocks": False},
+    {"assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False, "intel_total": 1,
+     "intel_required": 1},
     {"assignments": "all", "endgame_readiness": "ship_upgrades"},
     {"assignments": "n7", "enabled_dlc": ["Kasumi"], "intel_total": 10, "intel_required": 7},
+    {"assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False, "pickups": "any",
+     "intel_total": 10, "intel_required": 10},
+    {"assignments": "all", "pickups": "off", "weapon_unlocks": False},
 )
 
 

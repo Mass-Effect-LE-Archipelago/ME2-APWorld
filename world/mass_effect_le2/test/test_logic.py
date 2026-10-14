@@ -153,16 +153,21 @@ class TestAssignmentsAll(LE2Helpers):
     def test_hub_assignments_follow_their_hub(self) -> None:
         self.assertTrue(self.can_reach_location("Omega: Packages for Ish"))
         self.assertFalse(self.can_reach_location("Illium: Medical Scans"))
-        self.assertFalse(self.can_reach_location("Tuchanka: Krogan Sushi"))
+        self.assertFalse(self.can_reach_location("Tuchanka: Combustion Manifold"))
         self.collect_event(EVENT_HORIZON)
         self.assertTrue(self.can_reach_location("Illium: Medical Scans"))
-        self.assertFalse(self.can_reach_location("Tuchanka: Krogan Sushi"))
+        self.assertFalse(self.can_reach_location("Tuchanka: Combustion Manifold"))
         self.collect_event(recruited("Grunt"))
-        self.assertTrue(self.can_reach_location("Tuchanka: Krogan Sushi"))
+        self.assertTrue(self.can_reach_location("Tuchanka: Combustion Manifold"))
+        # the missing scout is found inside Mordin's loyalty mission
+        self.assertFalse(self.can_reach_location("Tuchanka: Missing Scout"))
+        self.collect_event(recruited("Mordin Solus"))
+        self.assertTrue(self.can_reach_location("Tuchanka: Missing Scout"))
 
 
 class TestMinimal(LE2Helpers):
-    options = {"assignments": "off", "enabled_dlc": [], "intel_total": 10, "intel_required": 10}
+    options = {"assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False,
+               "intel_total": 10, "intel_required": 10}
 
     def test_intel_clamped_to_room(self) -> None:
         # 27 locations - 4 excluded - 7 dossiers - 3 upgrades - 4 reserved filler slots = 9
@@ -177,3 +182,70 @@ class TestPresetStoryFocus(MassEffectLE2TestBase):
 
 class TestPresetCompletionist(MassEffectLE2TestBase):
     options = options_presets["Completionist"]
+
+
+class TestLateGame(LE2Helpers):
+    def test_research_waits_for_collector_ship_and_loyalty(self) -> None:
+        name = "Research: Assault Rifle Damage"
+        self.assertIn(name, self.names())
+        self.collect_event(EVENT_COLLECTOR_SHIP)
+        self.assertFalse(self.can_reach_location(name))
+        self.collect_all_but([])
+        self.assertTrue(self.can_reach_location(name))
+
+    def test_ship_upgrades_are_never_research_checks(self) -> None:
+        # their delivery sets the research "unlocked" bools 5642/5648/5645, which would fake a check
+        for loc in LOCATIONS.values():
+            self.assertFalse({5642, 5648, 5645} & {int(n) for n in re.findall(r"\d+", loc.plot)})
+
+    def test_squadmate_research_needs_the_squadmate(self) -> None:
+        self.assertIn(recruited("Legion"), LOCATIONS["Research: Legion's Sniper Rifle"].needs)
+
+
+class TestNoResearchOrCollectibles(LE2Helpers):
+    options = {"research": False, "collectibles": False}
+
+    def test_removed(self) -> None:
+        self.assertFalse(any(n.startswith(("Research: ", "Cabin: ", "Armor: ")) for n in self.names()))
+
+
+class TestPickups(LE2Helpers):
+    def test_safe_pickups_hold_no_progression(self) -> None:
+        pickups = [loc for loc in self.multiworld.get_locations(self.player) if LOCATIONS.get(loc.name)
+                   and LOCATIONS[loc.name].category == "pickup" and not LOCATIONS[loc.name].excluded]
+        self.assertGreater(len(pickups), 200)
+        for loc in pickups:
+            self.assertFalse(loc.item_rule(self.world.create_item(DOSSIERS["Jack"])), loc.name)
+            self.assertTrue(loc.item_rule(self.world.create_item("Credits")), loc.name)
+
+    def test_loyalty_pickups_follow_their_mission(self) -> None:
+        name = "Subject Zero: Lobby Credits"
+        self.assertEqual(LOCATIONS[name].needs, LOCATIONS["Jack: Subject Zero"].needs)
+        self.collect_event(EVENT_HORIZON)
+        self.assertFalse(self.can_reach_location(name))
+        self.collect_event(recruited("Jack"))
+        self.assertTrue(self.can_reach_location(name))
+
+    def test_arrival_pickups_are_excluded(self) -> None:
+        self.assertEqual(self.location("Arrival: Credits 1").progress_type, LocationProgressType.EXCLUDED)
+
+    def test_every_plot_predicate_is_unique(self) -> None:
+        seen: dict[int, str] = {}
+        for name, loc in LOCATIONS.items():
+            for plot in map(int, re.findall(r"\d+", loc.plot)):
+                self.assertNotIn(plot, seen, f"{name} and {seen.get(plot)} read the same plot bool")
+                seen[plot] = name
+
+
+class TestPickupsOff(LE2Helpers):
+    options = {"pickups": "off"}
+
+    def test_removed(self) -> None:
+        self.assertFalse(any(LOCATIONS[n].category == "pickup" for n in self.names()))
+
+
+class TestPickupsAny(LE2Helpers):
+    options = {"pickups": "any"}
+
+    def test_pickups_can_hold_progression(self) -> None:
+        self.assertTrue(self.location("Horizon: Credits 1").item_rule(self.world.create_item(DOSSIERS["Jack"])))

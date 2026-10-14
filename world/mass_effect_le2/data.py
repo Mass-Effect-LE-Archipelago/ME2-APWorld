@@ -14,10 +14,12 @@ from enum import Enum
 
 from BaseClasses import ItemClassification
 
+from .pickups import PICKUPS
+
 ID_BASE = 0x4D32_0000  # "M2": deliberately not LE1's 0x4D45_0000 (feasibility plan, "Runtime contract")
 # Offsets inside ID_BASE: items 0x0000-0x0FFF, locations 0x1000-0x7FFF:
 #   0x1000 prologue and story, 0x1100 recruitment, 0x1200 loyalty, 0x1300 Collector Base, 0x1400 N7 assignments,
-#   0x1500 hub assignments, 0x1600 DLC missions.
+#   0x1500 hub assignments, 0x1600 DLC missions, 0x1700 research, 0x1800 collectibles, 0x1900-0x1BFF pickups.
 GAME_NAME = "Mass Effect Legendary Edition 2"
 
 
@@ -37,6 +39,7 @@ class Region(str, Enum):
     UNCHARTED = "Uncharted Worlds"  # N7 assignments
     DLC = "DLC Missions"
     COLLECTOR_BASE = "Collector Base"
+    LATE_GAME = "Late Game"  # after the Collector Ship with every loyalty mission done (D16): research, shops, unplaced
 
 
 @dataclass(frozen=True)
@@ -129,7 +132,7 @@ class LocationData:
     plot: str  # check predicate, see the module docstring
     needs: tuple[str, ...] = ()  # items/events logic requires beyond the region's entrance
     any_of: tuple[str, ...] = ()  # at least one of these items/events
-    category: str = "story"  # story, recruitment, loyalty, n7, hub, dlc, endgame
+    category: str = "story"  # story, recruitment, loyalty, n7, hub, dlc, endgame, research, collectible, pickup
     dlc: str | None = None  # enabled_dlc key that must be on
     excluded: bool = False  # filler only (point of no return, or the predicate can be skipped by a choice)
 
@@ -233,11 +236,28 @@ HUB_ASSIGNMENTS: dict[str, tuple[Region, int, tuple[str, ...]]] = {
     "Illium: Indentured Service": (Region.ILLIUM, 5854, ()),
     "Illium: Salarian Family Data": (Region.ILLIUM, 5856, ()),
     "Tuchanka: Combustion Manifold": (Region.TUCHANKA, 5865, ()),
-    "Tuchanka: Krogan Sushi": (Region.TUCHANKA, 5866, ()),
-    "Tuchanka: Missing Scout": (Region.TUCHANKA, 5875, ()),
+    "Citadel: Krogan Sushi": (Region.CITADEL, 5866, ()),  # XP_citfish
+    # XP_prlbrain: the scout's body is found during Mordin's loyalty mission on Tuchanka
+    "Tuchanka: Missing Scout": (Region.TUCHANKA, 5875, (recruited("Mordin Solus"),)),
     "Normandy: Special Ingredients": (Region.NORMANDY, 5845, _H),
     "Normandy: Serrice Ice Brandy": (Region.NORMANDY, 5846, _H),
     "Normandy: FBA Couplings": (Region.NORMANDY, 5847, _H),
+    "Illium: Liara: Systems Hacking": (Region.ILLIUM, 5848, ()),
+    "Illium: Liara: The Observer": (Region.ILLIUM, 5849, ()),
+    # Placed from le2.json Global/Experience map codes (XP_omgaria, XP_twrlocket, ...): asa/mwa are the Assassin and
+    # Justicar recruitment missions on Illium, kro is Tuchanka. IDs keep their original order (append-only).
+    "Omega: Aria's Datapad": (Region.OMEGA, 5862, ()),
+    "Illium: Lost Locket": (Region.ILLIUM, 5855, ()),
+    "Illium: Stolen Goods": (Region.ILLIUM, 5857, ()),
+    "Illium: Smuggling Evidence": (Region.ILLIUM, 5871, ("Dossier: The Justicar",)),
+    "Illium: Report Elnora": (Region.ILLIUM, 5870, ("Dossier: The Justicar",)),
+    "Tuchanka: Killing Pyjacks": (Region.TUCHANKA, 5864, ()),
+    "Illium: Help Nassana's Workers": (Region.ILLIUM, 5863, ("Dossier: The Assassin",)),
+    "Hub: Astrosmash": (Region.LATE_GAME, 5844, ()),  # no map code in its XP name; stays late until traced
+    # Not placed before: names from the XP codes, provisional until seen in game
+    "Omega: The Oracle": (Region.OMEGA, 5859, ()),
+    "Omega: Sun Assignment": (Region.OMEGA, 5860, ()),
+    "Omega: Daniel": (Region.OMEGA, 5874, ("Dossier: The Professor",)),  # XP_pradaniel: inside Mordin's mission
 }
 LOCATIONS.update({name: LocationData(_L + 0x500 + i, region, f"bool {plot}", needs, category="hub")
                   for i, (name, (region, plot, needs)) in enumerate(HUB_ASSIGNMENTS.items())})
@@ -255,16 +275,93 @@ LOCATIONS.update({
     "Normandy Crash Site: Recover Shepard's Helmet": LocationData(_L + 0x608, Region.DLC, "bool 6157", _H, category="dlc", dlc="Normandy Crash Site"),
 })
 
-DLC_KEYS = ("Kasumi", "Zaeed", "Overlord", "Shadow Broker", "Arrival", "Firewalker", "Normandy Crash Site")
-
-LOCATION_NAME_TO_ID = {name: ID_BASE + data.offset for name, data in LOCATIONS.items()}
-LOCATION_NAME_GROUPS: dict[str, set[str]] = {
-    region.value: {name for name, data in LOCATIONS.items() if data.region is region} for region in Region
+# Research purchases in the Normandy's tech lab (research option): each project's "unlocked" bool (me2_plot_db
+# research_upgrades). The three suicide-mission ship upgrades are items, and their delivery sets the unlocked bool, so
+# they are never checks. Late game (D16) because blueprints are found across the whole campaign.
+RESEARCH: dict[str, tuple[int, str | None]] = {
+    "Research: Assault Rifle Damage": (6051, None),
+    "Research: Assault Rifle Accuracy": (5134, None),
+    "Research: Assault Rifle Penetration": (5133, None),
+    "Research: SMG Damage": (6052, None),
+    "Research: SMG Shield Piercing": (5135, None),
+    "Research: SMG Extra Rounds": (5136, None),
+    "Research: Heavy Pistol Damage": (6056, None),
+    "Research: Heavy Pistol Penetration": (5139, None),
+    "Research: Heavy Pistol Critical": (5140, None),
+    "Research: Shotgun Damage": (6061, None),
+    "Research: Shotgun Shield Piercing": (5152, None),
+    "Research: Shotgun Extra Rounds": (5153, None),
+    "Research: Sniper Rifle Damage": (6062, None),
+    "Research: Sniper Rifle Penetration": (5148, None),
+    "Research: Sniper Rifle Headshot Damage": (5149, None),
+    "Research: Heavy Weapon Ammo": (6055, None),
+    "Research: ML-77 Missile Launcher": (5137, None),
+    "Research: M-622 Avalanche": (5138, None),
+    "Research: M-920 Cain": (5290, None),
+    "Research: Medi-Gel Capacity": (6058, None),
+    "Research: Trauma Module": (5141, None),
+    "Research: Emergency Shielding": (5142, None),
+    "Research: Shield Damage Protection": (6060, None),
+    "Research: Hard Shields": (5147, None),
+    "Research: Redundant Field Generator": (5146, None),
+    "Research: Biotic Damage": (6053, None),
+    "Research: Biotic Cooldown": (5155, None),
+    "Research: Biotic Duration": (5154, None),
+    "Research: Tech Damage": (6063, None),
+    "Research: Tech Cooldowns": (5151, None),
+    "Research: Tech Duration": (5150, None),
+    "Research: Dermal Regeneration": (6144, None),
+    "Research: Heavy Skin Weave": (6059, None),
+    "Research: Heavy Bone Weave": (5144, None),
+    "Research: Heavy Muscle Weave": (5145, None),
+    "Research: Extended Fuel Cells": (5644, None),
+    "Research: Modular Probe Bay": (5646, None),
+    "Research: Advanced Mineral Scanner": (5647, None),
+    "Research: Krogan Vitality": (6054, "Grunt"),
+    "Research: Krogan Shotgun": (5638, "Grunt"),
+    "Research: Subject Zero Biotic Boost": (5639, "Jack"),
+    "Research: Mordin's Omni-tool": (5641, "Mordin Solus"),
+    "Research: Geth Shield Strength": (6057, "Legion"),
+    "Research: Legion's Sniper Rifle": (5640, "Legion"),
 }
-for _category, _group in (("recruitment", "Recruitment"), ("loyalty", "Loyalty Missions"), ("n7", "N7 Assignments"),
-                          ("hub", "Hub Assignments"), ("dlc", "DLC")):
-    LOCATION_NAME_GROUPS[_group] = {name for name, data in LOCATIONS.items() if data.category == _category}
-LOCATION_NAME_GROUPS = {group: names for group, names in LOCATION_NAME_GROUPS.items() if names}
+LOCATIONS.update({name: LocationData(_L + 0x700 + i, Region.LATE_GAME, f"bool {plot}",
+                                     (recruited(who),) if who else (), category="research")
+                  for i, (name, (plot, who)) in enumerate(RESEARCH.items())})
+
+# Collectibles (collectibles option): captain's cabin purchases and base-game armor pieces, bought or found across the
+# hubs. Pre-order and DLC-pack armor (Terminus, Blood Dragon, Inferno, Collector, Cerberus, Kestrel, the Aegis pack and
+# the Genesis/Equalizer helmets) is left out: Legendary Edition may grant it at the start (LE1 lesson: starting flags
+# completed checks on the first run).
+COLLECTIBLES: dict[str, tuple[int, str | None]] = {
+    "Cabin: Space Hamster": (3321, None),
+    "Cabin: Normandy SR-1 Model": (3326, None),
+    "Cabin: Destiny Ascension Model": (3328, None),
+    "Cabin: Sovereign Model": (3329, None),
+    "Cabin: Turian Cruiser Model": (3330, None),
+    "Cabin: Alliance Cruiser Model": (3331, None),
+    "Cabin: Flotilla Vessel Model": (3332, None),
+    "Cabin: Kodiak Drop Shuttle Model": (3334, None),
+    "Cabin: Athabasca Freighter Model": (3337, None),
+    "Cabin: Geth Ship Model": (3338, None),
+    "Cabin: Illium Skald Fish": (3322, None),
+    "Cabin: Thessian Sunfish": (3323, None),
+    "Cabin: Prejek Paddle Fish": (3324, None),
+    "Cabin: Shadow Broker Base Model": (7200, "Shadow Broker"),
+    "Cabin: Prothean Relic": (6206, "Firewalker"),
+    "Armor: Kuwashii Visor": (4433, None),
+    "Armor: Death Mask": (4450, None),
+    "Armor: Capacitor Chestplate": (4438, None),
+    "Armor: Shield Harness": (4453, None),
+    "Armor: Amplifier Plates": (4423, None),
+    "Armor: Asymmetric Defense Layer": (4451, None),
+    "Armor: Strength Boost Pads": (4437, None),
+    "Armor: Heavy Damping Gauntlets": (4449, None),
+    "Armor: Stabilization Gauntlets": (4435, None),
+    "Armor: Stimulator Conduits": (4436, None),
+    "Armor: Ordnance Packs": (4434, None),
+}
+LOCATIONS.update({name: LocationData(_L + 0x800 + i, Region.LATE_GAME, f"bool {plot}", category="collectible", dlc=dlc)
+                  for i, (name, (plot, dlc)) in enumerate(COLLECTIBLES.items())})
 
 # Squad whose loyalty the "all_loyal" readiness policy requires (D10): everyone recruitable before Omega 4 in the seed.
 LOYALTY_LOCATION = {
@@ -293,3 +390,50 @@ RECRUIT_LOCATION = {
     "Zaeed Massani": "Omega: Recruit Zaeed",
     "Kasumi Goto": "Citadel: Recruit Kasumi",
 }
+
+# Pickups (pickups option): treasure "found" bools, each in the mission or hub where it lies (pickups.py). A mission's
+# pickups share its check's region and rule, so a loyalty mission's pickups wait for that loyalty mission.
+_STORY_AREAS = {
+    "lazarus": (Region.NORMANDY, ()), "freedom": (Region.NORMANDY, ()), "horizon": (Region.HORIZON, ()),
+    "collector_ship": (Region.COLLECTOR_SHIP, ()), "reaper": (Region.DERELICT_REAPER, ()),
+    "citadel": (Region.CITADEL, ()), "omega": (Region.OMEGA, ()), "illium": (Region.ILLIUM, ()),
+    "tuchanka": (Region.TUCHANKA, ()),
+}
+_CHECK_AREAS = {
+    "mordin_acq": RECRUIT_LOCATION["Mordin Solus"], "garrus_acq": RECRUIT_LOCATION["Garrus Vakarian"],
+    "jack_acq": RECRUIT_LOCATION["Jack"], "grunt_acq": RECRUIT_LOCATION["Grunt"],
+    "thane_acq": RECRUIT_LOCATION["Thane Krios"], "samara_acq": RECRUIT_LOCATION["Samara"],
+    "tali_acq": RECRUIT_LOCATION["Tali'Zorah vas Neema"],
+    "miranda_l": LOYALTY_LOCATION["Miranda Lawson"], "jacob_l": LOYALTY_LOCATION["Jacob Taylor"],
+    "mordin_l": LOYALTY_LOCATION["Mordin Solus"], "garrus_l": LOYALTY_LOCATION["Garrus Vakarian"],
+    "jack_l": LOYALTY_LOCATION["Jack"], "grunt_l": LOYALTY_LOCATION["Grunt"],
+    "thane_l": LOYALTY_LOCATION["Thane Krios"], "samara_l": LOYALTY_LOCATION["Samara"],
+    "tali_l": LOYALTY_LOCATION["Tali'Zorah vas Neema"], "legion_l": LOYALTY_LOCATION["Legion"],
+    "zaeed_l": LOYALTY_LOCATION["Zaeed Massani"], "kasumi_l": LOYALTY_LOCATION["Kasumi Goto"],
+    "lotsb": "Lair of the Shadow Broker: Complete", "arrival": "Arrival: Complete",
+    "overlord": "Project Overlord: Complete", "firewalker": "Firewalker: Prothean Site",
+}
+
+
+def _pickup(offset: int, plot: int, area: str) -> LocationData:
+    if area in _STORY_AREAS:
+        region, needs = _STORY_AREAS[area]
+        return LocationData(offset, region, f"bool {plot}", needs, category="pickup")
+    check = LOCATIONS[_CHECK_AREAS[area]]
+    return LocationData(offset, check.region, f"bool {plot}", check.needs, check.any_of, "pickup", check.dlc,
+                        check.excluded)
+
+
+LOCATIONS.update({name: _pickup(_L + 0x900 + i, plot, area) for i, (name, plot, area) in enumerate(PICKUPS)})
+
+DLC_KEYS = ("Kasumi", "Zaeed", "Overlord", "Shadow Broker", "Arrival", "Firewalker", "Normandy Crash Site")
+
+LOCATION_NAME_TO_ID = {name: ID_BASE + data.offset for name, data in LOCATIONS.items()}
+LOCATION_NAME_GROUPS: dict[str, set[str]] = {
+    region.value: {name for name, data in LOCATIONS.items() if data.region is region} for region in Region
+}
+for _category, _group in (("recruitment", "Recruitment"), ("loyalty", "Loyalty Missions"), ("n7", "N7 Assignments"),
+                          ("hub", "Hub Assignments"), ("dlc", "DLC"), ("research", "Research"),
+                          ("collectible", "Collectibles"), ("pickup", "Pickups")):
+    LOCATION_NAME_GROUPS[_group] = {name for name, data in LOCATIONS.items() if data.category == _category}
+LOCATION_NAME_GROUPS = {group: names for group, names in LOCATION_NAME_GROUPS.items() if names}

@@ -4,10 +4,12 @@ Stages follow `LE2-FEASIBILITY-AND-ROUGH-PLAN.md`. This file tracks what exists 
 
 ## Built (2026-10-14)
 
-- **AP world** `world/mass_effect_le2` (0.1.0, AP 0.6.8): 59 locations by default (27 minimum, 77 with every option), 9
-  dossiers, 3 ship upgrades, Reaper IFF Intel, 17 weapon unlocks, resource filler. Options: intel total/required,
-  endgame readiness, assignments (off / n7 / all), enabled DLC, weapon unlocks; two presets.
-- **Tests**: 64 tests (logic, client, 200-seed sweep); 1,000-seed sweeps on three option sets: 0 failures.
+- **AP world** `world/mass_effect_le2` (0.1.0, AP 0.6.8): 387 locations by default (27 minimum, 40 with Story Focus,
+  418 with every option): story, recruitment, loyalty, N7 and hub assignments, DLC, 44 research projects, 26
+  collectibles, 258 pickups. Items: 9 dossiers, 3 ship upgrades, Reaper IFF Intel, 17 weapon unlocks, resource filler.
+  Options: intel total/required, endgame readiness, assignments (off / n7 / all), research, collectibles, pickups (off /
+  safe / any), enabled DLC, weapon unlocks; two presets.
+- **Tests**: 89 tests (logic, client, 280-seed sweep); 1,000-seed sweeps on three option sets: 0 failures.
 - **Client** `client.py`: identity binding, TXN delivery, batched predicate reads, IFF gate, goal. Fake-bridge tests cover
   lost replies, older-save replay and identity.
 - **Bridge source** `tools/le2apbridge` (protocol v1): not yet compiled.
@@ -40,8 +42,11 @@ Needs an installed LE2 (only the backup was found) and ME3Tweaks Mod Manager's A
 - R1 Horizon, Collector Ship and IFF triggers: trace the scheduler (int 23 and its consumers) to replace D7's conservative
   gates with the real ones.
 - R2 Crew abduction: the plan's default is no crew penalty for waiting on remote items; trace and pick the smallest change.
-- R3 Hub assignments without a confident hub (`omgoracle`, `omgsun`, `pradaniel`, Aria's datapad, Lost Locket, Stolen
-  Goods, Smuggling Evidence, Reported Elnora, Killing Pyjacks, Astrosmash, Liara's tasks): place them, then add.
+- R3 Hub assignments: confirm the XP-code placements (D18) and the provisional Oracle / Sun / Daniel names; place
+  Astrosmash.
+- R8 More check families, not added yet: 207 codex entries (le2.json Codex_Text; Paragon/Renegade variants are mutually
+  exclusive and many unlock at the start), the 9 weapon pickups (D17), and cabin items 3325/3327/3333/3335/3336 (likely
+  pre-order). Mission_Landing_Open bools (27) can replace D7's N7 gates once observed.
 - R4 Zaeed and Kasumi recruitment moments: find dedicated bools or transitions to replace the in-party interim (D5).
 - R5 DLC availability: Overlord, Firewalker, Normandy Crash Site, Shadow Broker and Arrival unlock points.
 - R6 HUD notices: LE2 `BioEventNotifier` call for `NOTE`.

@@ -67,11 +67,24 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d32150a | Illium: Indentured Service | Illium | hub | `bool 5854` |  |  |  | V-DB |
 | 0x4d32150b | Illium: Salarian Family Data | Illium | hub | `bool 5856` |  |  |  | V-DB |
 | 0x4d32150c | Tuchanka: Combustion Manifold | Tuchanka | hub | `bool 5865` |  |  |  | V-DB |
-| 0x4d32150d | Tuchanka: Krogan Sushi | Tuchanka | hub | `bool 5866` |  |  |  | V-DB |
-| 0x4d32150e | Tuchanka: Missing Scout | Tuchanka | hub | `bool 5875` |  |  |  | V-DB |
+| 0x4d32150d | Citadel: Krogan Sushi | Citadel | hub | `bool 5866` |  |  |  | V-DB |
+| 0x4d32150e | Tuchanka: Missing Scout | Tuchanka | hub | `bool 5875` | Mordin Solus Recruited |  |  | V-DB |
 | 0x4d32150f | Normandy: Special Ingredients | Normandy | hub | `bool 5845` | Horizon Complete |  |  | V-DB |
 | 0x4d321510 | Normandy: Serrice Ice Brandy | Normandy | hub | `bool 5846` | Horizon Complete |  |  | V-DB |
 | 0x4d321511 | Normandy: FBA Couplings | Normandy | hub | `bool 5847` | Horizon Complete |  |  | V-DB |
+| 0x4d321512 | Illium: Liara: Systems Hacking | Illium | hub | `bool 5848` |  |  |  | V-DB |
+| 0x4d321513 | Illium: Liara: The Observer | Illium | hub | `bool 5849` |  |  |  | V-DB |
+| 0x4d321514 | Omega: Aria's Datapad | Omega | hub | `bool 5862` |  |  |  | V-DB |
+| 0x4d321515 | Illium: Lost Locket | Illium | hub | `bool 5855` |  |  |  | V-DB |
+| 0x4d321516 | Illium: Stolen Goods | Illium | hub | `bool 5857` |  |  |  | V-DB |
+| 0x4d321517 | Illium: Smuggling Evidence | Illium | hub | `bool 5871` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321518 | Illium: Report Elnora | Illium | hub | `bool 5870` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321519 | Tuchanka: Killing Pyjacks | Tuchanka | hub | `bool 5864` |  |  |  | V-DB |
+| 0x4d32151a | Illium: Help Nassana's Workers | Illium | hub | `bool 5863` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d32151b | Hub: Astrosmash | Late Game | hub | `bool 5844` |  |  |  | V-DB |
+| 0x4d32151c | Omega: The Oracle | Omega | hub | `bool 5859` |  |  |  | V-DB |
+| 0x4d32151d | Omega: Sun Assignment | Omega | hub | `bool 5860` |  |  |  | V-DB |
+| 0x4d32151e | Omega: Daniel | Omega | hub | `bool 5874` | Dossier: The Professor |  |  | V-DB |
 | 0x4d321600 | Project Overlord: Complete | DLC Missions | dlc | `bool 6512` | Horizon Complete | Overlord |  | V-DB |
 | 0x4d321601 | Lair of the Shadow Broker: Complete | Illium | dlc | `bool 6815` |  | Shadow Broker |  | V-DB |
 | 0x4d321602 | Arrival: Complete | DLC Missions | dlc | `bool 7451` | Reaper IFF Acquired | Arrival | yes | V-DB |
@@ -81,6 +94,334 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d321606 | Firewalker: Rosalie Lost | DLC Missions | dlc | `bool 5842` | Horizon Complete | Firewalker |  | V-DB |
 | 0x4d321607 | Firewalker: Geth Incursions | DLC Missions | dlc | `bool 5831` | Horizon Complete | Firewalker |  | V-DB |
 | 0x4d321608 | Normandy Crash Site: Recover Shepard's Helmet | DLC Missions | dlc | `bool 6157` | Horizon Complete | Normandy Crash Site |  | V-DB |
+| 0x4d321700 | Research: Assault Rifle Damage | Late Game | research | `bool 6051` |  |  |  | V-DB |
+| 0x4d321701 | Research: Assault Rifle Accuracy | Late Game | research | `bool 5134` |  |  |  | V-DB |
+| 0x4d321702 | Research: Assault Rifle Penetration | Late Game | research | `bool 5133` |  |  |  | V-DB |
+| 0x4d321703 | Research: SMG Damage | Late Game | research | `bool 6052` |  |  |  | V-DB |
+| 0x4d321704 | Research: SMG Shield Piercing | Late Game | research | `bool 5135` |  |  |  | V-DB |
+| 0x4d321705 | Research: SMG Extra Rounds | Late Game | research | `bool 5136` |  |  |  | V-DB |
+| 0x4d321706 | Research: Heavy Pistol Damage | Late Game | research | `bool 6056` |  |  |  | V-DB |
+| 0x4d321707 | Research: Heavy Pistol Penetration | Late Game | research | `bool 5139` |  |  |  | V-DB |
+| 0x4d321708 | Research: Heavy Pistol Critical | Late Game | research | `bool 5140` |  |  |  | V-DB |
+| 0x4d321709 | Research: Shotgun Damage | Late Game | research | `bool 6061` |  |  |  | V-DB |
+| 0x4d32170a | Research: Shotgun Shield Piercing | Late Game | research | `bool 5152` |  |  |  | V-DB |
+| 0x4d32170b | Research: Shotgun Extra Rounds | Late Game | research | `bool 5153` |  |  |  | V-DB |
+| 0x4d32170c | Research: Sniper Rifle Damage | Late Game | research | `bool 6062` |  |  |  | V-DB |
+| 0x4d32170d | Research: Sniper Rifle Penetration | Late Game | research | `bool 5148` |  |  |  | V-DB |
+| 0x4d32170e | Research: Sniper Rifle Headshot Damage | Late Game | research | `bool 5149` |  |  |  | V-DB |
+| 0x4d32170f | Research: Heavy Weapon Ammo | Late Game | research | `bool 6055` |  |  |  | V-DB |
+| 0x4d321710 | Research: ML-77 Missile Launcher | Late Game | research | `bool 5137` |  |  |  | V-DB |
+| 0x4d321711 | Research: M-622 Avalanche | Late Game | research | `bool 5138` |  |  |  | V-DB |
+| 0x4d321712 | Research: M-920 Cain | Late Game | research | `bool 5290` |  |  |  | V-DB |
+| 0x4d321713 | Research: Medi-Gel Capacity | Late Game | research | `bool 6058` |  |  |  | V-DB |
+| 0x4d321714 | Research: Trauma Module | Late Game | research | `bool 5141` |  |  |  | V-DB |
+| 0x4d321715 | Research: Emergency Shielding | Late Game | research | `bool 5142` |  |  |  | V-DB |
+| 0x4d321716 | Research: Shield Damage Protection | Late Game | research | `bool 6060` |  |  |  | V-DB |
+| 0x4d321717 | Research: Hard Shields | Late Game | research | `bool 5147` |  |  |  | V-DB |
+| 0x4d321718 | Research: Redundant Field Generator | Late Game | research | `bool 5146` |  |  |  | V-DB |
+| 0x4d321719 | Research: Biotic Damage | Late Game | research | `bool 6053` |  |  |  | V-DB |
+| 0x4d32171a | Research: Biotic Cooldown | Late Game | research | `bool 5155` |  |  |  | V-DB |
+| 0x4d32171b | Research: Biotic Duration | Late Game | research | `bool 5154` |  |  |  | V-DB |
+| 0x4d32171c | Research: Tech Damage | Late Game | research | `bool 6063` |  |  |  | V-DB |
+| 0x4d32171d | Research: Tech Cooldowns | Late Game | research | `bool 5151` |  |  |  | V-DB |
+| 0x4d32171e | Research: Tech Duration | Late Game | research | `bool 5150` |  |  |  | V-DB |
+| 0x4d32171f | Research: Dermal Regeneration | Late Game | research | `bool 6144` |  |  |  | V-DB |
+| 0x4d321720 | Research: Heavy Skin Weave | Late Game | research | `bool 6059` |  |  |  | V-DB |
+| 0x4d321721 | Research: Heavy Bone Weave | Late Game | research | `bool 5144` |  |  |  | V-DB |
+| 0x4d321722 | Research: Heavy Muscle Weave | Late Game | research | `bool 5145` |  |  |  | V-DB |
+| 0x4d321723 | Research: Extended Fuel Cells | Late Game | research | `bool 5644` |  |  |  | V-DB |
+| 0x4d321724 | Research: Modular Probe Bay | Late Game | research | `bool 5646` |  |  |  | V-DB |
+| 0x4d321725 | Research: Advanced Mineral Scanner | Late Game | research | `bool 5647` |  |  |  | V-DB |
+| 0x4d321726 | Research: Krogan Vitality | Late Game | research | `bool 6054` | Grunt Recruited |  |  | V-DB |
+| 0x4d321727 | Research: Krogan Shotgun | Late Game | research | `bool 5638` | Grunt Recruited |  |  | V-DB |
+| 0x4d321728 | Research: Subject Zero Biotic Boost | Late Game | research | `bool 5639` | Jack Recruited |  |  | V-DB |
+| 0x4d321729 | Research: Mordin's Omni-tool | Late Game | research | `bool 5641` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d32172a | Research: Geth Shield Strength | Late Game | research | `bool 6057` | Legion Recruited |  |  | V-DB |
+| 0x4d32172b | Research: Legion's Sniper Rifle | Late Game | research | `bool 5640` | Legion Recruited |  |  | V-DB |
+| 0x4d321800 | Cabin: Space Hamster | Late Game | collectible | `bool 3321` |  |  |  | V-DB |
+| 0x4d321801 | Cabin: Normandy SR-1 Model | Late Game | collectible | `bool 3326` |  |  |  | V-DB |
+| 0x4d321802 | Cabin: Destiny Ascension Model | Late Game | collectible | `bool 3328` |  |  |  | V-DB |
+| 0x4d321803 | Cabin: Sovereign Model | Late Game | collectible | `bool 3329` |  |  |  | V-DB |
+| 0x4d321804 | Cabin: Turian Cruiser Model | Late Game | collectible | `bool 3330` |  |  |  | V-DB |
+| 0x4d321805 | Cabin: Alliance Cruiser Model | Late Game | collectible | `bool 3331` |  |  |  | V-DB |
+| 0x4d321806 | Cabin: Flotilla Vessel Model | Late Game | collectible | `bool 3332` |  |  |  | V-DB |
+| 0x4d321807 | Cabin: Kodiak Drop Shuttle Model | Late Game | collectible | `bool 3334` |  |  |  | V-DB |
+| 0x4d321808 | Cabin: Athabasca Freighter Model | Late Game | collectible | `bool 3337` |  |  |  | V-DB |
+| 0x4d321809 | Cabin: Geth Ship Model | Late Game | collectible | `bool 3338` |  |  |  | V-DB |
+| 0x4d32180a | Cabin: Illium Skald Fish | Late Game | collectible | `bool 3322` |  |  |  | V-DB |
+| 0x4d32180b | Cabin: Thessian Sunfish | Late Game | collectible | `bool 3323` |  |  |  | V-DB |
+| 0x4d32180c | Cabin: Prejek Paddle Fish | Late Game | collectible | `bool 3324` |  |  |  | V-DB |
+| 0x4d32180d | Cabin: Shadow Broker Base Model | Late Game | collectible | `bool 7200` |  | Shadow Broker |  | V-DB |
+| 0x4d32180e | Cabin: Prothean Relic | Late Game | collectible | `bool 6206` |  | Firewalker |  | V-DB |
+| 0x4d32180f | Armor: Kuwashii Visor | Late Game | collectible | `bool 4433` |  |  |  | V-DB |
+| 0x4d321810 | Armor: Death Mask | Late Game | collectible | `bool 4450` |  |  |  | V-DB |
+| 0x4d321811 | Armor: Capacitor Chestplate | Late Game | collectible | `bool 4438` |  |  |  | V-DB |
+| 0x4d321812 | Armor: Shield Harness | Late Game | collectible | `bool 4453` |  |  |  | V-DB |
+| 0x4d321813 | Armor: Amplifier Plates | Late Game | collectible | `bool 4423` |  |  |  | V-DB |
+| 0x4d321814 | Armor: Asymmetric Defense Layer | Late Game | collectible | `bool 4451` |  |  |  | V-DB |
+| 0x4d321815 | Armor: Strength Boost Pads | Late Game | collectible | `bool 4437` |  |  |  | V-DB |
+| 0x4d321816 | Armor: Heavy Damping Gauntlets | Late Game | collectible | `bool 4449` |  |  |  | V-DB |
+| 0x4d321817 | Armor: Stabilization Gauntlets | Late Game | collectible | `bool 4435` |  |  |  | V-DB |
+| 0x4d321818 | Armor: Stimulator Conduits | Late Game | collectible | `bool 4436` |  |  |  | V-DB |
+| 0x4d321819 | Armor: Ordnance Packs | Late Game | collectible | `bool 4434` |  |  |  | V-DB |
+| 0x4d321900 | Recruit Jack: Credits 1 | Purgatory | pickup | `bool 4339` |  |  |  | V-DB |
+| 0x4d321901 | Recruit Jack: Credits 2 | Purgatory | pickup | `bool 4340` |  |  |  | V-DB |
+| 0x4d321902 | Recruit Jack: Credits 3 | Purgatory | pickup | `bool 4341` |  |  |  | V-DB |
+| 0x4d321903 | Recruit Jack: Credits 4 | Purgatory | pickup | `bool 4342` |  |  |  | V-DB |
+| 0x4d321904 | Recruit Jack: Credits 5 | Purgatory | pickup | `bool 4343` |  |  |  | V-DB |
+| 0x4d321905 | Recruit Garrus: Bedroom Wall Safe | Omega | pickup | `bool 4764` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321906 | Recruit Garrus: Bunk Bed Footlocker | Omega | pickup | `bool 4765` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321907 | Recruit Garrus: Eezo Smuggling Accounts | Omega | pickup | `bool 4761` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321908 | Recruit Garrus: Gunrunner Accounts | Omega | pickup | `bool 4759` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321909 | Recruit Garrus: Mech Components | Omega | pickup | `bool 4762` | Dossier: Archangel |  |  | V-DB |
+| 0x4d32190a | Recruit Garrus: Protection Racket Accounts | Omega | pickup | `bool 4760` | Dossier: Archangel |  |  | V-DB |
+| 0x4d32190b | Derelict Reaper: Base Camp Credits 1 | Derelict Reaper | pickup | `bool 4236` |  |  |  | V-DB |
+| 0x4d32190c | Derelict Reaper: Base Camp Credits 2 | Derelict Reaper | pickup | `bool 4237` |  |  |  | V-DB |
+| 0x4d32190d | Derelict Reaper: Base Camp Credits 3 | Derelict Reaper | pickup | `bool 4238` |  |  |  | V-DB |
+| 0x4d32190e | Derelict Reaper: Core Room Credits 1 | Derelict Reaper | pickup | `bool 4242` |  |  |  | V-DB |
+| 0x4d32190f | Derelict Reaper: Second Airlock Credits 1 | Derelict Reaper | pickup | `bool 4241` |  |  |  | V-DB |
+| 0x4d321910 | Derelict Reaper: Steel Wind Credits 1 | Derelict Reaper | pickup | `bool 4239` |  |  |  | V-DB |
+| 0x4d321911 | Derelict Reaper: Steel Wind Credits 2 | Derelict Reaper | pickup | `bool 4240` |  |  |  | V-DB |
+| 0x4d321912 | Derelict Reaper: Steel Wind Credits 3 | Derelict Reaper | pickup | `bool 4499` |  |  |  | V-DB |
+| 0x4d321913 | Derelict Reaper: Work Site Credits 1 | Derelict Reaper | pickup | `bool 4498` |  |  |  | V-DB |
+| 0x4d321914 | Recruit Grunt: Credits 1 | Korlus | pickup | `bool 4344` |  |  |  | V-DB |
+| 0x4d321915 | Recruit Grunt: Credits 2 | Korlus | pickup | `bool 4345` |  |  |  | V-DB |
+| 0x4d321916 | Recruit Grunt: Credits 3 | Korlus | pickup | `bool 4346` |  |  |  | V-DB |
+| 0x4d321917 | Recruit Grunt: Credits 4 | Korlus | pickup | `bool 4347` |  |  |  | V-DB |
+| 0x4d321918 | Recruit Grunt: Credits 5 | Korlus | pickup | `bool 4348` |  |  |  | V-DB |
+| 0x4d321919 | Recruit Grunt: Credits 6 | Korlus | pickup | `bool 4349` |  |  |  | V-DB |
+| 0x4d32191a | Recruit Grunt: Credits 7 | Korlus | pickup | `bool 4350` |  |  |  | V-DB |
+| 0x4d32191b | Recruit Grunt: Credits 8 | Korlus | pickup | `bool 4351` |  |  |  | V-DB |
+| 0x4d32191c | Recruit Samara: Credits 1 | Illium | pickup | `bool 3950` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d32191d | Recruit Samara: Credits 2 | Illium | pickup | `bool 3951` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d32191e | Recruit Samara: Credits 3 | Illium | pickup | `bool 3952` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d32191f | Recruit Samara: Credits 4 | Illium | pickup | `bool 3953` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321920 | Recruit Samara: Credits 5 | Illium | pickup | `bool 3954` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321921 | Recruit Samara: Credits 6 | Illium | pickup | `bool 5925` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321922 | Recruit Mordin: Credits 1 | Omega | pickup | `bool 3927` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321923 | Recruit Mordin: Credits 2 | Omega | pickup | `bool 3929` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321924 | Recruit Mordin: Credits 3 | Omega | pickup | `bool 3930` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321925 | Recruit Mordin: Credits 4 | Omega | pickup | `bool 3931` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321926 | Recruit Mordin: Credits 5 | Omega | pickup | `bool 3934` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321927 | Recruit Mordin: Credits 6 | Omega | pickup | `bool 3935` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321928 | Recruit Mordin: Credits 7 | Omega | pickup | `bool 4026` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321929 | Recruit Mordin: Credits 8 | Omega | pickup | `bool 4027` | Dossier: The Professor |  |  | V-DB |
+| 0x4d32192a | Recruit Mordin: Credits 9 | Omega | pickup | `bool 4631` | Dossier: The Professor |  |  | V-DB |
+| 0x4d32192b | Recruit Mordin: Credits 10 | Omega | pickup | `bool 4632` | Dossier: The Professor |  |  | V-DB |
+| 0x4d32192c | Recruit Tali: Damaged Destroyer (Base Camp) | Haestrom | pickup | `bool 5011` |  |  |  | V-DB |
+| 0x4d32192d | Recruit Tali: Damaged Destroyer (Gatehouse) | Haestrom | pickup | `bool 5009` |  |  |  | V-DB |
+| 0x4d32192e | Recruit Tali: Damaged Destroyer (Loading Tunnel) | Haestrom | pickup | `bool 5010` |  |  |  | V-DB |
+| 0x4d32192f | Recruit Tali: Damaged Destroyer (Observatory) | Haestrom | pickup | `bool 5012` |  |  |  | V-DB |
+| 0x4d321930 | Recruit Tali: Damaged Prime (Base Camp) | Haestrom | pickup | `bool 5013` |  |  |  | V-DB |
+| 0x4d321931 | Recruit Tali: Wall Safe (Base Camp) | Haestrom | pickup | `bool 5014` |  |  |  | V-DB |
+| 0x4d321932 | Recruit Tali: Wall Safe (Control Room) | Haestrom | pickup | `bool 5015` |  |  |  | V-DB |
+| 0x4d321933 | Freedom's Progress: Credits 1 | Normandy | pickup | `bool 4464` |  |  |  | V-DB |
+| 0x4d321934 | Freedom's Progress: Credits 2 | Normandy | pickup | `bool 4465` |  |  |  | V-DB |
+| 0x4d321935 | Freedom's Progress: Credits 3 | Normandy | pickup | `bool 4466` |  |  |  | V-DB |
+| 0x4d321936 | Freedom's Progress: Credits 4 | Normandy | pickup | `bool 5778` |  |  |  | V-DB |
+| 0x4d321937 | Freedom's Progress: Credits 5 | Normandy | pickup | `bool 5779` |  |  |  | V-DB |
+| 0x4d321938 | Freedom's Progress: Credits 6 | Normandy | pickup | `bool 5993` |  |  |  | V-DB |
+| 0x4d321939 | Lazarus Station: Resources 1 | Normandy | pickup | `bool 4495` |  |  |  | V-DB |
+| 0x4d32193a | Lazarus Station: Resources 2 | Normandy | pickup | `bool 4496` |  |  |  | V-DB |
+| 0x4d32193b | Lazarus Station: Resources 3 | Normandy | pickup | `bool 4497` |  |  |  | V-DB |
+| 0x4d32193c | Lazarus Station: Cache 1 | Normandy | pickup | `bool 4315` |  |  |  | V-DB |
+| 0x4d32193d | Lazarus Station: Cache 2 | Normandy | pickup | `bool 4316` |  |  |  | V-DB |
+| 0x4d32193e | Lazarus Station: Cache 3 | Normandy | pickup | `bool 4317` |  |  |  | V-DB |
+| 0x4d32193f | Lazarus Station: Cache 4 | Normandy | pickup | `bool 4318` |  |  |  | V-DB |
+| 0x4d321940 | Horizon: Credits 1 | Horizon | pickup | `bool 4299` |  |  |  | V-DB |
+| 0x4d321941 | Horizon: Credits 2 | Horizon | pickup | `bool 4300` |  |  |  | V-DB |
+| 0x4d321942 | Horizon: Credits 3 | Horizon | pickup | `bool 4301` |  |  |  | V-DB |
+| 0x4d321943 | Horizon: Credits 4 | Horizon | pickup | `bool 4302` |  |  |  | V-DB |
+| 0x4d321944 | Horizon: Credits 5 | Horizon | pickup | `bool 4303` |  |  |  | V-DB |
+| 0x4d321945 | Horizon: Credits 6 | Horizon | pickup | `bool 4374` |  |  |  | V-DB |
+| 0x4d321946 | Horizon: Credits 7 | Horizon | pickup | `bool 4375` |  |  |  | V-DB |
+| 0x4d321947 | Horizon: Credits 8 | Horizon | pickup | `bool 5089` |  |  |  | V-DB |
+| 0x4d321948 | Horizon: Credits 9 | Horizon | pickup | `bool 5090` |  |  |  | V-DB |
+| 0x4d321949 | Lair of the Shadow Broker: Credits 1 | Illium | pickup | `bool 7084` |  | Shadow Broker |  | V-DB |
+| 0x4d32194a | Lair of the Shadow Broker: Credits 2 | Illium | pickup | `bool 7085` |  | Shadow Broker |  | V-DB |
+| 0x4d32194b | Lair of the Shadow Broker: Credits 3 | Illium | pickup | `bool 7086` |  | Shadow Broker |  | V-DB |
+| 0x4d32194c | Lair of the Shadow Broker: Credits 4 | Illium | pickup | `bool 7087` |  | Shadow Broker |  | V-DB |
+| 0x4d32194d | Lair of the Shadow Broker: Assault Rifle Upgrade | Illium | pickup | `bool 7032` |  | Shadow Broker |  | V-DB |
+| 0x4d32194e | Lair of the Shadow Broker: SMG Upgrade | Illium | pickup | `bool 7030` |  | Shadow Broker |  | V-DB |
+| 0x4d32194f | Lair of the Shadow Broker: Heavy Pistol Upgrade | Illium | pickup | `bool 7031` |  | Shadow Broker |  | V-DB |
+| 0x4d321950 | Lair of the Shadow Broker: Shield Upgrade | Illium | pickup | `bool 7210` |  | Shadow Broker |  | V-DB |
+| 0x4d321951 | Lair of the Shadow Broker: Shotgun Upgrade | Illium | pickup | `bool 7212` |  | Shadow Broker |  | V-DB |
+| 0x4d321952 | Lair of the Shadow Broker: Sniper Rifle Upgrade | Illium | pickup | `bool 7211` |  | Shadow Broker |  | V-DB |
+| 0x4d321953 | Arrival: Credits 1 | DLC Missions | pickup | `bool 7473` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321954 | Arrival: Credits 2 | DLC Missions | pickup | `bool 7474` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321955 | Arrival: Credits 3 | DLC Missions | pickup | `bool 7475` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321956 | Arrival: Credits 4 | DLC Missions | pickup | `bool 7476` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321957 | Arrival: Credits 5 | DLC Missions | pickup | `bool 7477` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321958 | Arrival: Credits 6 | DLC Missions | pickup | `bool 7519` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321959 | Arrival: Credits 7 | DLC Missions | pickup | `bool 7520` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d32195a | Arrival: Heavy Weapon Ammo Upgrade | DLC Missions | pickup | `bool 7462` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d32195b | Arrival: Medi-Gel Upgrade | DLC Missions | pickup | `bool 7463` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d32195c | Arrival: Health Upgrade | DLC Missions | pickup | `bool 7464` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d32195d | Stealing Memory: Credits 1 | Loyalty Missions | pickup | `bool 6650` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d32195e | Stealing Memory: Credits 2 | Loyalty Missions | pickup | `bool 6651` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d32195f | Stealing Memory: Credits 3 | Loyalty Missions | pickup | `bool 6652` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321960 | Stealing Memory: Credits 4 | Loyalty Missions | pickup | `bool 6653` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321961 | Stealing Memory: Credits 5 | Loyalty Missions | pickup | `bool 6654` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321962 | Stealing Memory: Credits 6 | Loyalty Missions | pickup | `bool 6655` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321963 | Stealing Memory: Credits 7 | Loyalty Missions | pickup | `bool 6656` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321964 | Stealing Memory: Credits 8 | Loyalty Missions | pickup | `bool 6657` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321965 | Stealing Memory: Credits 9 | Loyalty Missions | pickup | `bool 6698` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321966 | Stealing Memory: Tech Upgrade | Loyalty Missions | pickup | `bool 6708` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321967 | The Price of Revenge: Assault Rifle Upgrade | Loyalty Missions | pickup | `bool 6275` | Horizon Complete, Zaeed Massani Recruited | Zaeed |  | V-DB |
+| 0x4d321968 | The Price of Revenge: Flamethrower Upgrade | Loyalty Missions | pickup | `bool 6277` | Horizon Complete, Zaeed Massani Recruited | Zaeed |  | V-DB |
+| 0x4d321969 | The Price of Revenge: Heavy Weapon Ammo Upgrade | Loyalty Missions | pickup | `bool 6276` | Horizon Complete, Zaeed Massani Recruited | Zaeed |  | V-DB |
+| 0x4d32196a | Firewalker: Biotic Upgrade | DLC Missions | pickup | `bool 6372` | Horizon Complete | Firewalker |  | V-DB |
+| 0x4d32196b | Project Overlord: Vulcan Station Credits 1 | DLC Missions | pickup | `bool 6723` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32196c | Project Overlord: Vulcan Station Credits 2 | DLC Missions | pickup | `bool 6724` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32196d | Project Overlord: Vulcan Station Credits 3 | DLC Missions | pickup | `bool 6725` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32196e | Project Overlord: Vulcan Station Credits 4 | DLC Missions | pickup | `bool 6734` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32196f | Project Overlord: Vulcan Station Mining Node 1 | DLC Missions | pickup | `bool 6735` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321970 | Project Overlord: Vulcan Station Mining Node 2 | DLC Missions | pickup | `bool 6736` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321971 | Project Overlord: Vulcan Station Mining Node 3 | DLC Missions | pickup | `bool 6737` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321972 | Project Overlord: Vulcan Station Mining Node 4 | DLC Missions | pickup | `bool 6738` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321973 | Project Overlord: Base Siege Credits 1 | DLC Missions | pickup | `bool 6846` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321974 | Project Overlord: Base Siege Credits 2 | DLC Missions | pickup | `bool 6847` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321975 | Project Overlord: Base Siege Credits 3 | DLC Missions | pickup | `bool 6848` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321976 | Project Overlord: Base Siege Credits 4 | DLC Missions | pickup | `bool 6849` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321977 | Project Overlord: Base Siege Credits 5 | DLC Missions | pickup | `bool 6850` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321978 | Project Overlord: Base Siege Credits 6 | DLC Missions | pickup | `bool 6851` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321979 | Project Overlord: Base Siege Resources 1 | DLC Missions | pickup | `bool 6852` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197a | Project Overlord: Base Siege Resources 2 | DLC Missions | pickup | `bool 6853` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197b | Project Overlord: Transition Artifact 1 | DLC Missions | pickup | `bool 6864` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197c | Project Overlord: Transition Artifact 2 | DLC Missions | pickup | `bool 6865` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197d | Project Overlord: Transition Artifact 3 | DLC Missions | pickup | `bool 6866` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197e | Project Overlord: Transition Artifact 4 | DLC Missions | pickup | `bool 6867` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d32197f | Project Overlord: Transition Artifact 5 | DLC Missions | pickup | `bool 6868` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321980 | Project Overlord: Transition Artifact 6 | DLC Missions | pickup | `bool 6869` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321981 | Project Overlord: Health Upgrade | DLC Missions | pickup | `bool 6733` | Horizon Complete | Overlord |  | V-DB |
+| 0x4d321982 | Recruit Thane: Credits 1 | Illium | pickup | `bool 4392` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321983 | Recruit Thane: Credits 2 | Illium | pickup | `bool 4393` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321984 | Recruit Thane: Credits 3 | Illium | pickup | `bool 4394` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321985 | Recruit Thane: Credits 4 | Illium | pickup | `bool 4395` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321986 | Recruit Thane: Credits 5 | Illium | pickup | `bool 4396` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321987 | Rite of Passage: Credits 1 | Tuchanka | pickup | `bool 4399` | Grunt Recruited |  |  | V-DB |
+| 0x4d321988 | Rite of Passage: Credits 10 | Tuchanka | pickup | `bool 4408` | Grunt Recruited |  |  | V-DB |
+| 0x4d321989 | Rite of Passage: Credits 11 | Tuchanka | pickup | `bool 4409` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198a | Rite of Passage: Credits 12 | Tuchanka | pickup | `bool 4410` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198b | Rite of Passage: Credits 2 | Tuchanka | pickup | `bool 4400` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198c | Rite of Passage: Credits 3 | Tuchanka | pickup | `bool 4401` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198d | Rite of Passage: Credits 4 | Tuchanka | pickup | `bool 4402` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198e | Rite of Passage: Credits 5 | Tuchanka | pickup | `bool 4403` | Grunt Recruited |  |  | V-DB |
+| 0x4d32198f | Rite of Passage: Credits 6 | Tuchanka | pickup | `bool 4404` | Grunt Recruited |  |  | V-DB |
+| 0x4d321990 | Rite of Passage: Credits 7 | Tuchanka | pickup | `bool 4405` | Grunt Recruited |  |  | V-DB |
+| 0x4d321991 | Rite of Passage: Credits 8 | Tuchanka | pickup | `bool 4406` | Grunt Recruited |  |  | V-DB |
+| 0x4d321992 | Rite of Passage: Credits 9 | Tuchanka | pickup | `bool 4407` | Grunt Recruited |  |  | V-DB |
+| 0x4d321993 | Subject Zero: Cells Credits | Loyalty Missions | pickup | `bool 4448` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321994 | Subject Zero: Entrance Credits | Loyalty Missions | pickup | `bool 4432` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321995 | Subject Zero: Lobby Credits | Loyalty Missions | pickup | `bool 4431` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321996 | Subject Zero: Morgue Credits | Loyalty Missions | pickup | `bool 4447` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321997 | Subject Zero: Morgue Stairs Credits | Loyalty Missions | pickup | `bool 4446` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321998 | Subject Zero: Torture Room Credits | Loyalty Missions | pickup | `bool 4461` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321999 | Subject Zero: Training Hall Credits 2 | Loyalty Missions | pickup | `bool 4454` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d32199a | Subject Zero: Training Hall Credits 1 | Loyalty Missions | pickup | `bool 4452` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d32199b | Eye for an Eye: Credits 1 | Loyalty Missions | pickup | `bool 4244` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d32199c | Eye for an Eye: Credits 2 | Loyalty Missions | pickup | `bool 4245` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d32199d | Eye for an Eye: Credits 3 | Loyalty Missions | pickup | `bool 4246` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d32199e | Eye for an Eye: Credits 4 | Loyalty Missions | pickup | `bool 4247` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d32199f | Eye for an Eye: Credits 5 | Loyalty Missions | pickup | `bool 4248` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219a0 | Eye for an Eye: Credits 6 | Loyalty Missions | pickup | `bool 4249` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219a1 | Eye for an Eye: Credits 7 | Loyalty Missions | pickup | `bool 4250` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219a2 | Eye for an Eye: Credits 8 | Loyalty Missions | pickup | `bool 4251` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219a3 | Eye for an Eye: Credits 9 | Loyalty Missions | pickup | `bool 4252` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219a4 | A House Divided: Credits 1 | Derelict Reaper | pickup | `bool 4413` | Legion Recruited |  |  | V-DB |
+| 0x4d3219a5 | A House Divided: Credits 2 | Derelict Reaper | pickup | `bool 4414` | Legion Recruited |  |  | V-DB |
+| 0x4d3219a6 | A House Divided: Credits 3 | Derelict Reaper | pickup | `bool 4415` | Legion Recruited |  |  | V-DB |
+| 0x4d3219a7 | A House Divided: Credits 4 | Derelict Reaper | pickup | `bool 4416` | Legion Recruited |  |  | V-DB |
+| 0x4d3219a8 | A House Divided: Credits 5 | Derelict Reaper | pickup | `bool 4417` | Legion Recruited |  |  | V-DB |
+| 0x4d3219a9 | The Gift of Greatness: Credits 1 | Loyalty Missions | pickup | `bool 4293` | Horizon Complete |  |  | V-DB |
+| 0x4d3219aa | The Gift of Greatness: Credits 2 | Loyalty Missions | pickup | `bool 4294` | Horizon Complete |  |  | V-DB |
+| 0x4d3219ab | The Gift of Greatness: Credits 3 | Loyalty Missions | pickup | `bool 4295` | Horizon Complete |  |  | V-DB |
+| 0x4d3219ac | The Gift of Greatness: Credits 4 | Loyalty Missions | pickup | `bool 4296` | Horizon Complete |  |  | V-DB |
+| 0x4d3219ad | The Gift of Greatness: Credits 5 | Loyalty Missions | pickup | `bool 4297` | Horizon Complete |  |  | V-DB |
+| 0x4d3219ae | The Gift of Greatness: Credits 6 | Loyalty Missions | pickup | `bool 4298` | Horizon Complete |  |  | V-DB |
+| 0x4d3219af | The Gift of Greatness: Credits 7 | Loyalty Missions | pickup | `bool 4304` | Horizon Complete |  |  | V-DB |
+| 0x4d3219b0 | The Gift of Greatness: Credits 8 | Loyalty Missions | pickup | `bool 4305` | Horizon Complete |  |  | V-DB |
+| 0x4d3219b1 | Old Blood: Cache 1 | Tuchanka | pickup | `bool 4332` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219b2 | Old Blood: Cache 2 | Tuchanka | pickup | `bool 4333` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219b3 | Old Blood: Cache 3 | Tuchanka | pickup | `bool 4334` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219b4 | Old Blood: Cache 4 | Tuchanka | pickup | `bool 4335` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219b5 | Old Blood: Cache 5 | Tuchanka | pickup | `bool 4336` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219b6 | Treason: Cargo Bay Credits 1 | Loyalty Missions | pickup | `bool 4277` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219b7 | Treason: Cargo Bay Credits 2 | Loyalty Missions | pickup | `bool 4279` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219b8 | Treason: Engineering Credits 1 | Loyalty Missions | pickup | `bool 4281` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219b9 | Treason: Engineering Credits 2 | Loyalty Missions | pickup | `bool 4282` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219ba | Treason: Engineering Credits 3 | Loyalty Missions | pickup | `bool 4283` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219bb | Treason: Flashback Lab Credits 1 | Loyalty Missions | pickup | `bool 4284` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219bc | Treason: LifeBoat Credits 1 | Loyalty Missions | pickup | `bool 4280` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219bd | Treason: Main Lab Credits 1 | Loyalty Missions | pickup | `bool 4285` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219be | Treason: Main Lab Credits 2 | Loyalty Missions | pickup | `bool 4286` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219bf | Treason: Main Lab Credits 3 | Loyalty Missions | pickup | `bool 4287` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219c0 | Treason: Main Lab Credits 4 | Loyalty Missions | pickup | `bool 4288` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219c1 | Treason: Ship Bow Credits 1 | Loyalty Missions | pickup | `bool 4291` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219c2 | The Prodigal: Credits 1 | Loyalty Missions | pickup | `bool 4016` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c3 | The Prodigal: Credits 2 | Loyalty Missions | pickup | `bool 4017` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c4 | The Prodigal: Credits 3 | Loyalty Missions | pickup | `bool 4018` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c5 | The Prodigal: Credits 4 | Loyalty Missions | pickup | `bool 4019` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c6 | The Prodigal: Credits 5 | Loyalty Missions | pickup | `bool 4020` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c7 | The Prodigal: Credits 6 | Loyalty Missions | pickup | `bool 4021` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c8 | The Gift of Greatness: Heavy Pistol Upgrade | Loyalty Missions | pickup | `bool 1054` | Horizon Complete |  |  | V-DB |
+| 0x4d3219c9 | A House Divided: Geth Upgrade | Derelict Reaper | pickup | `bool 1059` | Legion Recruited |  |  | V-DB |
+| 0x4d3219ca | Sins of the Father: Heavy Pistol Upgrade | Loyalty Missions | pickup | `bool 1298` | Thane Krios Recruited |  |  | V-DB |
+| 0x4d3219cb | Eye for an Eye: Sniper Rifle Upgrade | Loyalty Missions | pickup | `bool 1027` | Horizon Complete, Garrus Vakarian Recruited |  |  | V-DB |
+| 0x4d3219cc | Citadel: SMG Upgrade | Citadel | pickup | `bool 4354` |  |  |  | V-DB |
+| 0x4d3219cd | Citadel: Heavy Pistol Upgrade | Citadel | pickup | `bool 4352` |  |  |  | V-DB |
+| 0x4d3219ce | Citadel: Medi-Gel Upgrade | Citadel | pickup | `bool 1322` |  |  |  | V-DB |
+| 0x4d3219cf | Citadel: Shield Upgrade | Citadel | pickup | `bool 4353` |  |  |  | V-DB |
+| 0x4d3219d0 | Citadel: Sniper Rifle Upgrade | Citadel | pickup | `bool 1321` |  |  |  | V-DB |
+| 0x4d3219d1 | Citadel: Tech Upgrade | Citadel | pickup | `bool 1320` |  |  |  | V-DB |
+| 0x4d3219d2 | Horizon: Biotic Upgrade | Horizon | pickup | `bool 909` |  |  |  | V-DB |
+| 0x4d3219d3 | Horizon: Health Upgrade | Horizon | pickup | `bool 908` |  |  |  | V-DB |
+| 0x4d3219d4 | Recruit Grunt: Krogan Upgrade | Korlus | pickup | `bool 1042` |  |  |  | V-DB |
+| 0x4d3219d5 | Recruit Grunt: Sniper Rifle Upgrade | Korlus | pickup | `bool 1793` |  |  |  | V-DB |
+| 0x4d3219d6 | Subject Zero: Biotic Upgrade | Loyalty Missions | pickup | `bool 1300` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d3219d7 | Tuchanka: Assault Rifle Upgrade | Tuchanka | pickup | `bool 4359` |  |  |  | V-DB |
+| 0x4d3219d8 | Tuchanka: Biotic Upgrade | Tuchanka | pickup | `bool 1336` |  |  |  | V-DB |
+| 0x4d3219d9 | Tuchanka: Heavy Weapon Ammo Upgrade | Tuchanka | pickup | `bool 1337` |  |  |  | V-DB |
+| 0x4d3219da | Tuchanka: Heavy Pistol Upgrade | Tuchanka | pickup | `bool 4358` |  |  |  | V-DB |
+| 0x4d3219db | Tuchanka: Shotgun Upgrade | Tuchanka | pickup | `bool 1335` |  |  |  | V-DB |
+| 0x4d3219dc | Rite of Passage: Shotgun Upgrade | Tuchanka | pickup | `bool 1050` | Grunt Recruited |  |  | V-DB |
+| 0x4d3219dd | Old Blood: Krogan Upgrade | Tuchanka | pickup | `bool 1301` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219de | Old Blood: Heavy Weapon Ammo Upgrade | Tuchanka | pickup | `bool 5683` | Mordin Solus Recruited |  |  | V-DB |
+| 0x4d3219df | Recruit Garrus: SMG Upgrade | Omega | pickup | `bool 899` | Dossier: Archangel |  |  | V-DB |
+| 0x4d3219e0 | Recruit Garrus: Tech Upgrade | Omega | pickup | `bool 4481` | Dossier: Archangel |  |  | V-DB |
+| 0x4d3219e1 | Omega: Scanner Upgrade | Omega | pickup | `bool 4357` |  |  |  | V-DB |
+| 0x4d3219e2 | Omega: Heavy Weapon Ammo Upgrade | Omega | pickup | `bool 4356` |  |  |  | V-DB |
+| 0x4d3219e3 | Omega: Hacking Upgrade | Omega | pickup | `bool 1333` |  |  |  | V-DB |
+| 0x4d3219e4 | Omega: Health Upgrade | Omega | pickup | `bool 1332` |  |  |  | V-DB |
+| 0x4d3219e5 | Omega: Shotgun Upgrade | Omega | pickup | `bool 1334` |  |  |  | V-DB |
+| 0x4d3219e6 | Omega: Sniper Rifle Upgrade | Omega | pickup | `bool 4355` |  |  |  | V-DB |
+| 0x4d3219e7 | The Ardat-Yakshi: Assault Rifle Upgrade | Loyalty Missions | pickup | `bool 1045` | Samara Recruited |  |  | V-DB |
+| 0x4d3219e8 | Recruit Mordin: Assault Rifle Upgrade | Omega | pickup | `bool 902` | Dossier: The Professor |  |  | V-DB |
+| 0x4d3219e9 | Recruit Mordin: Medi-Gel Upgrade | Omega | pickup | `bool 903` | Dossier: The Professor |  |  | V-DB |
+| 0x4d3219ea | Freedom's Progress: Heavy Weapon Ammo Upgrade | Normandy | pickup | `bool 1075` |  |  |  | V-DB |
+| 0x4d3219eb | Recruit Jack: Shield Upgrade | Purgatory | pickup | `bool 1795` |  |  |  | V-DB |
+| 0x4d3219ec | Recruit Jack: Shotgun Upgrade | Purgatory | pickup | `bool 1048` |  |  |  | V-DB |
+| 0x4d3219ed | Treason: Geth Upgrade | Loyalty Missions | pickup | `bool 1799` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219ee | Treason: Tech Upgrade | Loyalty Missions | pickup | `bool 1043` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d3219ef | Derelict Reaper: Health Upgrade | Derelict Reaper | pickup | `bool 1040` |  |  |  | V-DB |
+| 0x4d3219f0 | Derelict Reaper: Shotgun Upgrade | Derelict Reaper | pickup | `bool 1794` |  |  |  | V-DB |
+| 0x4d3219f1 | Derelict Reaper: Sniper Rifle Upgrade | Derelict Reaper | pickup | `bool 1039` |  |  |  | V-DB |
+| 0x4d3219f2 | Collector Ship: Shield Upgrade | Collector Ship | pickup | `bool 1303` |  |  |  | V-DB |
+| 0x4d3219f3 | Collector Ship: Tech Upgrade | Collector Ship | pickup | `bool 1036` |  |  |  | V-DB |
+| 0x4d3219f4 | Recruit Tali: Assault Rifle Upgrade | Haestrom | pickup | `bool 1077` |  |  |  | V-DB |
+| 0x4d3219f5 | Recruit Tali: Heavy Pistol Upgrade | Haestrom | pickup | `bool 1800` |  |  |  | V-DB |
+| 0x4d3219f6 | Recruit Thane: SMG Upgrade | Illium | pickup | `bool 1796` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d3219f7 | Illium: Assault Rifle Upgrade | Illium | pickup | `bool 4513` |  |  |  | V-DB |
+| 0x4d3219f8 | Illium: SMG Upgrade | Illium | pickup | `bool 4360` |  |  |  | V-DB |
+| 0x4d3219f9 | Illium: Biotic Upgrade | Illium | pickup | `bool 4361` |  |  |  | V-DB |
+| 0x4d3219fa | Illium: Medi-Gel Upgrade | Illium | pickup | `bool 1323` |  |  |  | V-DB |
+| 0x4d3219fb | Illium: Bypass Upgrade | Illium | pickup | `bool 4362` |  |  |  | V-DB |
+| 0x4d3219fc | Illium: Health Upgrade | Illium | pickup | `bool 4364` |  |  |  | V-DB |
+| 0x4d3219fd | Illium: Shield Upgrade | Illium | pickup | `bool 1324` |  |  |  | V-DB |
+| 0x4d3219fe | Illium: Tech Upgrade | Illium | pickup | `bool 4363` |  |  |  | V-DB |
+| 0x4d3219ff | Recruit Samara: Biotic Upgrade | Illium | pickup | `bool 1797` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321a00 | The Prodigal: SMG Upgrade | Loyalty Missions | pickup | `bool 1053` | Horizon Complete |  |  | V-DB |
+| 0x4d321a01 | The Prodigal: Medi-Gel Upgrade | Loyalty Missions | pickup | `bool 5682` | Horizon Complete |  |  | V-DB |
 
 ## Items
 

@@ -5,7 +5,7 @@ architecture of the completed LE1 integration.
 
 | Part | Path | State |
 |---|---|---|
-| AP world (items, locations, logic, options) | `world/mass_effect_le2` | Generates; 64 tests, 3,000-seed sweeps clean |
+| AP world (items, locations, logic, options) | `world/mass_effect_le2` | Generates; 387 checks by default (418 max); 89 tests, 3,000-seed sweeps clean |
 | Client (Archipelago <-> game) | `world/mass_effect_le2/client.py` | Written and unit-tested against a fake bridge |
 | Game bridge (ASI, named pipe) | `tools/le2apbridge` | Source written; not yet compiled or run |
 | Game-side DLC mod (mission gates) | not started | Next stage |

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from BaseClasses import ItemClassification, Location, LocationProgressType, Region
+from BaseClasses import Item, ItemClassification, Location, LocationProgressType, Region
 from rule_builder.field_resolvers import FromWorldAttr
 from rule_builder.rules import Has, HasAll, HasAny, Rule, True_
 
@@ -50,6 +50,12 @@ def location_included(world: MassEffectLE2World, loc: data.LocationData) -> bool
         return world.options.assignments.value >= world.options.assignments.option_n7
     if loc.category == "hub":
         return world.options.assignments.value == world.options.assignments.option_all
+    if loc.category == "research":
+        return bool(world.options.research)
+    if loc.category == "collectible":
+        return bool(world.options.collectibles)
+    if loc.category == "pickup":
+        return world.options.pickups.value != world.options.pickups.option_off
     return True
 
 
@@ -67,6 +73,9 @@ def create_regions(world: MassEffectLE2World) -> None:
     normandy = regions[R.NORMANDY]
     for target, rule in ENTRANCES.items():
         world.create_entrance(normandy, regions[target], rule, name=f"Galaxy Map -> {target.value}")
+    # D16: the late game waits for the Collector Ship and every loyalty mission that can happen before the IFF.
+    late = Has(data.EVENT_COLLECTOR_SHIP) & HasAll(*(data.loyalty_done(m) for m in squad(world) if m != "Legion"))
+    world.create_entrance(normandy, regions[R.LATE_GAME], late, name=f"Normandy -> {R.LATE_GAME.value}")
 
     for name, loc in data.LOCATIONS.items():
         if not location_included(world, loc):
@@ -74,6 +83,8 @@ def create_regions(world: MassEffectLE2World) -> None:
         location = MassEffectLE2Location(world.player, name, data.LOCATION_NAME_TO_ID[name], regions[loc.region])
         if loc.excluded:
             location.progress_type = LocationProgressType.EXCLUDED
+        elif loc.category == "pickup" and world.options.pickups == world.options.pickups.option_safe:
+            location.item_rule = _not_progression
         regions[loc.region].locations.append(location)
 
     # Events mirror the checks the logic depends on (rules.py gives them the same rule as their check).
@@ -87,6 +98,10 @@ def create_regions(world: MassEffectLE2World) -> None:
     _add_event(world, regions[R.COLLECTOR_SHIP], data.EVENT_COLLECTOR_SHIP)
     _add_event(world, regions[R.DERELICT_REAPER], data.EVENT_IFF)
     _add_event(world, regions[R.COLLECTOR_BASE], data.EVENT_VICTORY)
+
+
+def _not_progression(item: Item) -> bool:
+    return not item.advancement
 
 
 def _add_event(world: MassEffectLE2World, region: Region, name: str) -> None:

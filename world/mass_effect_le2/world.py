@@ -36,7 +36,10 @@ class MassEffectLE2World(World):
     intel_required: int
 
     def generate_early(self) -> None:
-        open_slots = sum(1 for loc in data.LOCATIONS.values() if regions.location_included(self, loc) and not loc.excluded)
+        # slots that can hold progression: not excluded, and not a pickup under pickups: safe
+        safe = self.options.pickups == self.options.pickups.option_safe
+        open_slots = sum(1 for loc in data.LOCATIONS.values() if regions.location_included(self, loc)
+                         and not loc.excluded and not (safe and loc.category == "pickup"))
         fixed = sum(1 for name, item in data.ITEMS.items() if item.count
                     and (name not in items.DLC_DOSSIERS or items.dlc_enabled(self, items.DLC_DOSSIERS[name])))
         room = open_slots - fixed - MIN_FILLER_SLOTS
@@ -67,7 +70,8 @@ class MassEffectLE2World(World):
 
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {
-            **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "assignments", "weapon_unlocks"),
+            **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "assignments",
+                                 "research", "collectibles", "pickups", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
             "slot_data_version": 1,
         }

@@ -58,6 +58,34 @@ class EnabledDLC(OptionSet):
     default = frozenset(DLC_KEYS)
 
 
+class Research(DefaultOnToggle):
+    """Buying a research project in the Normandy's tech lab is a check (44 projects; the three suicide-mission ship
+    upgrades are items instead). Logic places these after the Collector Ship with every loyalty mission done."""
+
+    display_name = "Research"
+
+
+class Collectibles(DefaultOnToggle):
+    """Captain's cabin purchases (models, fish, the space hamster) and base-game armor pieces are checks. Logic places
+    these after the Collector Ship with every loyalty mission done."""
+
+    display_name = "Collectibles"
+
+
+class Pickups(Choice):
+    """Credit caches, resource nodes and upgrade blueprints picked up in missions and hubs are checks (258 with every
+    DLC; weapon pickups are not). Most missions cannot be replayed, so a pickup you walk past is gone for good.
+
+    off: no pickups. safe: pickups hold no progression items, so a missed one never blocks the seed. any: pickups can
+    hold anything; sweep each mission before leaving it."""
+
+    display_name = "Pickups"
+    option_off = 0
+    option_safe = 1
+    option_any = 2
+    default = 1
+
+
 class WeaponUnlocks(DefaultOnToggle):
     """Shuffle weapon unlocks (Carnifex, Mattock, Viper, the heavy weapons...) into the pool as useful items. Receiving
     one unlocks that weapon early; the vanilla pickups and research still work as usual."""
@@ -72,17 +100,24 @@ class MassEffectLE2Options(PerGameCommonOptions):
     endgame_readiness: EndgameReadiness
     assignments: Assignments
     enabled_dlc: EnabledDLC
+    research: Research
+    collectibles: Collectibles
+    pickups: Pickups
     weapon_unlocks: WeaponUnlocks
 
 
 options_presets = {
     "Story Focus": {
         "assignments": "off",
+        "research": False,
+        "collectibles": False,
+        "pickups": "off",
         "intel_total": 3,
         "intel_required": 2,
     },
     "Completionist": {
         "assignments": "all",
+        "pickups": "any",
         "intel_total": 8,
         "intel_required": 6,
     },
@@ -90,6 +125,6 @@ options_presets = {
 
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
-    OptionGroup("Checks", [Assignments, EnabledDLC]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
 ]
