@@ -37,7 +37,7 @@ index (or the reverse).
 | `FLAG` | `<bool>` | set an AP bool | 21000-21999 |
 | `SHIP` | `<applied> <unlocked>` | set a ship upgrade's applied and research-unlocked bools | 237/5642, 236/5648, 238/5645 |
 | `WEAPON` | `<int>` | raise a weapon unlock int to at least 1 | the 17 weapon ints in `data.WEAPONS` |
-| `RES` | `<type> <amount>` | `ASFXInventoryManager.AdjustResource` | type 0-5, amount 1-1000000 |
+| `RES` | `<type> <amount>` | `ASFXInventoryManager.AdjustResource` | type 0 credits, 1 medi-gel, 4 eezo, 5 iridium, 6 palladium, 7 platinum, 8 probes (SDK EInventoryResourceTypes); amount 1-1000000 |
 
 Anything else is `ERR notallowed` / `ERR badrequest`: an unsupported item is never silently consumed.
 

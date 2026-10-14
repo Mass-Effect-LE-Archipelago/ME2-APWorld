@@ -21,6 +21,6 @@ The log is written next to the other LExASIs logs.
 
 ## Status
 
-Not yet compiled or run: the SDK member names used for the player inventory (`APlayerController::Pawn`,
-`APawn::InvManager`, `ASFXInventoryManager::AdjustResource`) follow the LE2 SDK headers but have not been built against
-them. The first runtime spike (docs/SCOPE.md, Stage 1) builds it and exercises every request.
+Compiles against LExSDKv2's LE2 target (Visual Studio 2026 Build Tools, 2026-10-14) with no SDK name changes; resource
+types follow the SDK enum `EInventoryResourceTypes` (PROTOCOL.md). Not yet run in game: the first runtime spike
+(docs/SCOPE.md, Stage 1) exercises every request.

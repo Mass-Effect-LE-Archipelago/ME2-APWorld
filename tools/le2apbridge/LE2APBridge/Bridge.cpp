@@ -34,8 +34,14 @@ namespace LE2APBridge
         // armory's weapon ints (me2_plot_db "research_upgrades"). Anything else is refused, never silently consumed.
         constexpr int ShipBools[][2] = { { 237, 5642 }, { 236, 5648 }, { 238, 5645 } };
         constexpr int WeaponInts[] = { 149, 854, 124, 725, 152, 852, 495, 88, 847, 853, 177, 855, 151, 460, 663, 461, 496 };
-        constexpr int ResourceTypeMax = 5;       // 0 credits .. 5 platinum (eInvResType order: D12, verify in game)
         constexpr int ResourceAmountMax = 1000000;
+
+        // SDK enum SFXGame.EInventoryResourceTypes (LExSDKv2 LE2 SFXGame_classes.hpp): 0 credits, 1 medigel, 2 salvage,
+        // 3 grenades, 4 eezo, 5 iridium, 6 palladium, 7 platinum, 8 probes, 9 fuel. Only the ME2 resources are granted.
+        bool IsResourceType(int const Type)
+        {
+            return Type == 0 || Type == 1 || (Type >= 4 && Type <= 8);
+        }
 
         bool IsShipPair(int const Applied, int const Unlocked)
         {
@@ -259,7 +265,7 @@ namespace LE2APBridge
                 if (TxnOp == "SHIP" && Args == 2) return IsShipPair(R.Args[0], R.Args[1]) ? "" : "ERR notallowed";
                 if (TxnOp == "WEAPON" && Args == 1) return IsWeaponInt(R.Args[0]) ? "" : "ERR notallowed";
                 if (TxnOp == "RES" && Args == 2)
-                    return (R.Args[0] >= 0 && R.Args[0] <= ResourceTypeMax && R.Args[1] >= 1 && R.Args[1] <= ResourceAmountMax)
+                    return (IsResourceType(R.Args[0]) && R.Args[1] >= 1 && R.Args[1] <= ResourceAmountMax)
                         ? "" : "ERR notallowed";
                 return "ERR badrequest";
             }

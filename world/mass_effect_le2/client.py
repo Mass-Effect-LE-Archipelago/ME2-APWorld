@@ -51,13 +51,13 @@ SHIP_UPGRADE_BOOLS = {
     "Multicore Shielding": (236, 5648),
     "Thanix Cannon": (238, 5645),
 }
-# Resource bundles: bridge RES type (ASFXInventoryManager eInvResType order, D12: verify in game) and amount.
+# Resource bundles: bridge RES type (SDK enum EInventoryResourceTypes, D12) and amount.
 RESOURCES = {
     "Credits": (0, 5000),
-    "Element Zero": (2, 500),
-    "Iridium": (3, 2500),
-    "Palladium": (4, 2500),
-    "Platinum": (5, 2500),
+    "Element Zero": (4, 500),
+    "Iridium": (5, 2500),
+    "Palladium": (6, 2500),
+    "Platinum": (7, 2500),
 }
 
 
