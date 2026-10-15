@@ -25,7 +25,9 @@ through the bridge alone. The mod (a `DLC_MOD_ArchipelagoME2` built with Legenda
 2. Gate the Derelict Reaper the same way on bool 21100.
 3. Decide what the vanilla ship-upgrade research does once the upgrades are items (hide it, or leave it additive).
 
-## Next: Stage 1 runtime spike (on the owner's PC, needs sign-off)
+## Stage 1 runtime spike (on the owner's PC)
+
+Done 2026-10-15 with the branch bridge (ME3Tweaks bink proxy plus `ASI\LE2APBridge.asi`): HELLO, VER, MAP, reads, the write guard, AP bool/int writes, one indexed RES TXN with retry skipped, and save persistence. Left: steps 2 (ID/IDSET), 4 and 5 below, and the credit amount seen in game.
 
 Needs an installed LE2 (only the backup was found) and ME3Tweaks Mod Manager's ASI loader.
 
