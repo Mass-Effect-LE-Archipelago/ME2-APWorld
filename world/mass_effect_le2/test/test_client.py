@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import dataclass
 
-from ..client import (DOSSIER_BOOL_BASE, IDENTITY_PLOT_INTS, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
+from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
                       notice_lines, parse_plot_predicate, seed_identity, sync_received_items)
 from ..data import DOSSIERS, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID
@@ -140,3 +140,32 @@ class TestPipe(unittest.TestCase):
 
     def test_notice_wrapping(self) -> None:
         self.assertTrue(all(len(line) <= 40 for line in notice_lines("Received Dossier: The Professor from Someone " * 3)))
+
+
+class TestBinding(unittest.TestCase):
+    class Bridge(FakeBridge):
+        def get_bool(self, index):
+            return self.bools.get(index, False)
+
+        def identity(self):
+            return tuple(self.ints.get(i, 0) for i in IDENTITY_PLOT_INTS)
+
+        def bind_identity(self, seed, slot):
+            self.ints.update(zip(IDENTITY_PLOT_INTS, (seed, slot)))
+
+    def context(self, bridge):
+        context = ME2Context.__new__(ME2Context)  # only the attributes _check_identity reads
+        context.bridge, context.identity, context._mismatch_reported, context.notices_enabled = bridge, (7, 9), False, False
+        return context
+
+    def test_fresh_save_binds(self) -> None:
+        bridge = self.Bridge()
+        self.context(bridge)._check_identity()
+        self.assertEqual(bridge.identity(), (7, 9))
+
+    def test_post_game_save_is_refused(self) -> None:
+        bridge = self.Bridge()
+        bridge.bools[GOAL_PLOT_BOOL] = True
+        with self.assertRaises(IdentityMismatchError):
+            self.context(bridge)._check_identity()
+        self.assertEqual(bridge.identity(), (0, 0))

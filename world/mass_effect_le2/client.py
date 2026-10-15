@@ -372,6 +372,13 @@ class ME2Context(CommonContext):
         if saved == self.identity:
             return
         if saved == (0, 0) and self.bridge.get_int(RECEIVED_INDEX_PLOT_INT) == 0:
+            if self.bridge.get_bool(GOAL_PLOT_BOOL):
+                # a post-game save would send the goal at once (seen live on 2026-10-15)
+                if not self._mismatch_reported:
+                    self._mismatch_reported = True
+                    logger.error("This save is past the ending, so it cannot start an Archipelago seed. "
+                                 "Load an earlier save, or start a new career.")
+                raise IdentityMismatchError("save is past the ending")
             self.bridge.bind_identity(*self.identity)
             logger.info("Save bound to this seed and slot")
             return
