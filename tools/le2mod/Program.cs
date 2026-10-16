@@ -3,6 +3,7 @@
 // Reads the runtime winner of BioP_Char.pcc (DLC_METR_Patch01 over the base game), and in its Main_Sequence:
 //   ShowCharacterCreation "Finished" -> PMExecuteTransition x N -> BlackScreen -> loading movie -> AreaTransition,
 //   with the AreaTransition retargeted from Biop_Procer to BioP_Nor / start_galaxyMap.
+// Unless --keep-prologue, also overrides EntryMenu.pcc so a new career skips the SR-1 prologue (see SkipPrologue).
 // Writes only under <staging dir>: a Mod Manager mod folder (moddesc.ini + DLC_MOD_ArchipelagoME2 with Mount.dlc,
 // BIOEngine.ini, the DLC TLK and the edited BioP_Char.pcc). Never writes under the game or backup folder.
 // Fails closed: the package is built in a temp folder, reopened and validated, then moved into place.
@@ -39,12 +40,80 @@ static class Program
     static string AreaName(ExportEntry area) =>
         area.GetProperty<NameProperty>("AreaName")?.Value.Instanced ?? area.GetProperty<StrProperty>("AreaName")?.Value ?? "";
 
+    // EntryMenu (runtime winner DLC_METR_Patch01) has two vanilla routes out of the main menu:
+    //   re_StartNewGame      -> InitLoadingMovies_1 -> AreaTransition_1 BioP_ProNor (the SR-1 prologue)
+    //   re_StartCharCreation -> InitLoadingMovies_0 -> SetBool 6022 -> 5356, 5355, 5342 (starter codices, as ProNor's
+    //                           Give_Starter_Codices) -> SetBool 6022 -> AreaTransition_0 Biop_Char
+    // Gender is chosen in the main menu before either (RequestStartNewGame sets DefaultPlayer.bIsFemale). Skipping the
+    // prologue points re_StartNewGame at the second route. Not fired: 5391 ProNor_Complete (achievement only).
+    const string EntryEvent = Seq + ".SeqEvent_RemoteEvent_1";
+    const string EntryProNorMovie = Seq + ".SFXSeqAct_InitLoadingMovies_1";
+    const string EntryCharMovie = Seq + ".SFXSeqAct_InitLoadingMovies_0";
+    static readonly int[] CharRouteTransitions = [5356, 5355, 5342];
+
+    static ExportEntry Next(ExportEntry node) => KismetHelper.GetOutputLinksOfNode(node).FirstOrDefault()?.FirstOrDefault()?.LinkedOp as ExportEntry;
+
+    // Follows the first output link from start to an AreaTransition; returns the transitions met and the area node.
+    static (List<int> ids, ExportEntry area) Walk(ExportEntry start)
+    {
+        var ids = new List<int>();
+        for (var node = start; node != null && ids.Count < 32; node = Next(node))
+        {
+            if (node.ClassName == "BioSeqAct_AreaTransition") return (ids, node);
+            if (node.ClassName == "BioSeqAct_PMExecuteTransition") ids.Add(node.GetProperty<IntProperty>("m_nIndex").Value);
+        }
+        return (ids, null);
+    }
+
+    static int SkipPrologue(string bioGame, string cooked)
+    {
+        var source = new[] { Path.Combine(bioGame, "DLC", "DLC_METR_Patch01", "CookedPCConsole", "EntryMenu.pcc"),
+                             Path.Combine(bioGame, "CookedPCConsole", "EntryMenu.pcc") }.FirstOrDefault(File.Exists);
+        if (source == null) { Console.Error.WriteLine("refusing: no EntryMenu.pcc under " + bioGame); return 1; }
+        var outPcc = Path.Combine(cooked, "EntryMenu.pcc");
+        using (var pcc = MEPackageHandler.OpenMEPackage(source, forceLoadFromDisk: true))
+        {
+            var ev = pcc.FindExport(EntryEvent);
+            var pronorMovie = pcc.FindExport(EntryProNorMovie);
+            var charMovie = pcc.FindExport(EntryCharMovie);
+            var (pronorIds, pronorArea) = pronorMovie == null ? (new List<int>(), null) : Walk(pronorMovie);
+            var (charIds, charArea) = charMovie == null ? (new List<int>(), null) : Walk(charMovie);
+            if (pcc.Game != MEGame.LE2 || ev == null || ev.GetProperty<NameProperty>("EventName")?.Value.Instanced != "re_StartNewGame"
+                || Next(ev) != pronorMovie || pronorIds.Count != 0 || pronorArea == null || AreaName(pronorArea) != "BioP_ProNor"
+                || !charIds.SequenceEqual(CharRouteTransitions) || charArea == null
+                || !AreaName(charArea).Equals("BioP_Char", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.Error.WriteLine("refusing: EntryMenu does not have the expected vanilla new-game routes");
+                return 1;
+            }
+            var links = KismetHelper.GetOutputLinksOfNode(ev);
+            links[0].Clear();
+            KismetHelper.WriteOutputLinksToNode(ev, links);
+            KismetHelper.CreateOutputLink(ev, "Out", charMovie);
+            pcc.Save(outPcc);
+        }
+        using (var check = MEPackageHandler.OpenMEPackage(outPcc, forceLoadFromDisk: true))
+        {
+            var ev = check.FindExport(EntryEvent);
+            var first = ev == null ? null : Next(ev);
+            var (ids, area) = first == null ? (new List<int>(), null) : Walk(first);
+            bool ok = first?.InstancedFullPath == EntryCharMovie && KismetHelper.GetOutputLinksOfNode(ev)[0].Count == 1
+                      && ids.SequenceEqual(CharRouteTransitions) && area != null && AreaName(area).Equals("BioP_Char", StringComparison.OrdinalIgnoreCase);
+            Console.WriteLine($"validate: re_StartNewGame -> {first?.ObjectName.Instanced} chain=[{string.Join(",", ids)}] -> {(area == null ? "?" : AreaName(area))}");
+            if (!ok) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+        }
+        Console.WriteLine($"prologue skipped (source {source})");
+        return 0;
+    }
+
     static int Main(string[] args)
     {
         var oodle = Environment.GetEnvironmentVariable("LE1PROBE_OODLE");
+        bool keepPrologue = args.Contains("--keep-prologue");
+        args = args.Where(a => a != "--keep-prologue").ToArray();
         if (args.Length is < 3 or > 4 || args[0] != "openstart" || string.IsNullOrEmpty(oodle))
         {
-            Console.Error.WriteLine("usage: le2mod openstart <LE2 BioGame dir> <staging dir> [transition,..]  (LE1PROBE_OODLE set)");
+            Console.Error.WriteLine("usage: le2mod openstart <LE2 BioGame dir> <staging dir> [transition,..] [--keep-prologue]  (LE1PROBE_OODLE set)");
             return 2;
         }
         var bioGame = Path.GetFullPath(args[1]);
@@ -141,6 +210,7 @@ static class Program
             Console.WriteLine($"validate: area={(area == null ? "?" : AreaName(area))}/{area?.GetProperty<NameProperty>("StartPoint")?.Value.Instanced} chain=[{string.Join(",", ids)}] -> {node?.ObjectName.Instanced}");
             if (!ok) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
         }
+        if (!keepPrologue && SkipPrologue(bioGame, cooked) != 0) return 1;
 
         // DLC metadata, as vanilla LE2 DLC folders lay it out.
         var mountFile = new MountFile(MEGame.LE2)
@@ -158,8 +228,8 @@ static class Program
             [new TLKStringRef(NameStrRef, "Archipelago ME2 (open start test)")]);
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
-            "moddesc = Test build: a new career goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.1\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
+            "modver = 0.0.2\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);
