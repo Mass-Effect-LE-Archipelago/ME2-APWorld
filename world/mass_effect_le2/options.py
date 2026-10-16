@@ -36,6 +36,14 @@ class EndgameReadiness(Choice):
     default = 0
 
 
+class StartOnNormandy(DefaultOnToggle):
+    """After the character creator, a new career skips Lazarus Station and Freedom's Progress and starts aboard the SR-2
+    at the galaxy map, with Miranda and Jacob in the squad and the story state those missions give. Their checks are
+    removed, and one first-wave dossier is given at the start instead."""
+
+    display_name = "Start on Normandy"
+
+
 class Assignments(Choice):
     """Which side assignments are checks.
 
@@ -98,6 +106,7 @@ class MassEffectLE2Options(PerGameCommonOptions):
     intel_total: IntelTotal
     intel_required: IntelRequired
     endgame_readiness: EndgameReadiness
+    start_on_normandy: StartOnNormandy
     assignments: Assignments
     enabled_dlc: EnabledDLC
     research: Research
@@ -125,6 +134,7 @@ options_presets = {
 
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
+    OptionGroup("Start", [StartOnNormandy]),
     OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
 ]

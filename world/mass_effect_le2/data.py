@@ -135,6 +135,7 @@ class LocationData:
     category: str = "story"  # story, recruitment, loyalty, n7, hub, dlc, endgame, research, collectible, pickup
     dlc: str | None = None  # enabled_dlc key that must be on
     excluded: bool = False  # filler only (point of no return, or the predicate can be skipped by a choice)
+    prologue: bool = False  # Lazarus Station / Freedom's Progress: removed when the seed starts on the Normandy
 
 
 # Events (locked items on event locations, no IDs). The logic counts what the player has done in game.
@@ -156,8 +157,8 @@ _L = 0x1000
 _H = (EVENT_HORIZON,)
 LOCATIONS: dict[str, LocationData] = {
     # Prologue and story (rewards bools 5794-5816 are each mission's completion reward state)
-    "Lazarus Station: Awakening": LocationData(_L + 0x00, Region.NORMANDY, "bool 5794"),
-    "Freedom's Progress: Complete": LocationData(_L + 0x01, Region.NORMANDY, "bool 5795"),
+    "Lazarus Station: Awakening": LocationData(_L + 0x00, Region.NORMANDY, "bool 5794", prologue=True),
+    "Freedom's Progress: Complete": LocationData(_L + 0x01, Region.NORMANDY, "bool 5795", prologue=True),
     "Horizon: Complete": LocationData(_L + 0x02, Region.HORIZON, "bool 5796"),
     "Collector Ship: Complete": LocationData(_L + 0x03, Region.COLLECTOR_SHIP, "bool 5797"),
     "Derelict Reaper: Acquire the IFF": LocationData(_L + 0x04, Region.DERELICT_REAPER, "bool 5816 or 1256"),
@@ -418,7 +419,8 @@ _CHECK_AREAS = {
 def _pickup(offset: int, plot: int, area: str) -> LocationData:
     if area in _STORY_AREAS:
         region, needs = _STORY_AREAS[area]
-        return LocationData(offset, region, f"bool {plot}", needs, category="pickup")
+        return LocationData(offset, region, f"bool {plot}", needs, category="pickup",
+                            prologue=area in ("lazarus", "freedom"))
     check = LOCATIONS[_CHECK_AREAS[area]]
     return LocationData(offset, check.region, f"bool {plot}", check.needs, check.any_of, "pickup", check.dlc,
                         check.excluded)

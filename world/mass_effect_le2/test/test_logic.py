@@ -9,6 +9,11 @@ from . import MassEffectLE2TestBase
 
 
 class LE2Helpers(MassEffectLE2TestBase):
+    # Logic tests use the vanilla opening: a random starting dossier would let state sweeps collect events early.
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        cls.options = {"start_on_normandy": False, **cls.__dict__.get("options", {})}
+
     def collect_event(self, name: str) -> None:
         self.collect(self.multiworld.get_location(name, self.player).item)
 
@@ -20,6 +25,8 @@ class LE2Helpers(MassEffectLE2TestBase):
 
 
 class TestDefaults(LE2Helpers):
+    options = {"start_on_normandy": False}  # the vanilla opening; TestStartOnNormandy covers the default skip
+
     def test_prologue_checks_are_open(self) -> None:
         self.assertTrue(self.can_reach_location("Lazarus Station: Awakening"))
         self.assertTrue(self.can_reach_location("Freedom's Progress: Complete"))
@@ -148,7 +155,7 @@ class TestNoDLC(LE2Helpers):
 
 
 class TestAssignmentsAll(LE2Helpers):
-    options = {"assignments": "all"}
+    options = {"assignments": "all", "start_on_normandy": False}  # no starting dossier to sweep events from
 
     def test_hub_assignments_follow_their_hub(self) -> None:
         self.assertTrue(self.can_reach_location("Omega: Packages for Ish"))
@@ -167,6 +174,7 @@ class TestAssignmentsAll(LE2Helpers):
 
 class TestMinimal(LE2Helpers):
     options = {"assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False,
+               "start_on_normandy": False,
                "intel_total": 10, "intel_required": 10}
 
     def test_intel_clamped_to_room(self) -> None:
@@ -249,3 +257,22 @@ class TestPickupsAny(LE2Helpers):
 
     def test_pickups_can_hold_progression(self) -> None:
         self.assertTrue(self.location("Horizon: Credits 1").item_rule(self.world.create_item(DOSSIERS["Jack"])))
+
+
+class TestStartOnNormandy(LE2Helpers):
+    options = {"start_on_normandy": True, "assignments": "off", "enabled_dlc": [], "research": False, "collectibles": False,
+               "intel_total": 10, "intel_required": 10}
+
+    def test_prologue_removed_and_one_dossier_given(self) -> None:
+        names = self.names()
+        self.assertFalse({"Lazarus Station: Awakening", "Freedom's Progress: Complete"} & names)
+        self.assertFalse(any(n.startswith(("Lazarus Station: ", "Freedom's Progress: ")) for n in names))
+        start = self.world.starting_dossier
+        self.assertIn(start, {DOSSIERS[name] for name in PHASE_1})
+        self.assertIn(start, {item.name for item in self.multiworld.precollected_items[self.player]})
+        self.assertEqual(self.get_items_by_name(start), [])
+        self.assertEqual(self.world.fill_slot_data()["starting_dossier"], start)
+
+    def test_intel_clamped_to_room(self) -> None:
+        # 25 locations - 4 excluded - 6 pooled dossiers - 3 upgrades - 4 reserved filler slots = 8
+        self.assertEqual(len(self.get_items_by_name(IFF_INTEL)), 8)

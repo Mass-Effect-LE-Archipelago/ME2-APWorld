@@ -46,6 +46,8 @@ ENTRANCES: dict[R, Rule] = {
 def location_included(world: MassEffectLE2World, loc: data.LocationData) -> bool:
     if not dlc_enabled(world, loc.dlc):
         return False
+    if loc.prologue and world.options.start_on_normandy:
+        return False
     if loc.category == "n7":
         return world.options.assignments.value >= world.options.assignments.option_n7
     if loc.category == "hub":

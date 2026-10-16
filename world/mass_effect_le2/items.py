@@ -30,7 +30,8 @@ def create_items(world: MassEffectLE2World) -> None:
     for name, item in data.ITEMS.items():
         if name in DLC_DOSSIERS and not dlc_enabled(world, DLC_DOSSIERS[name]):
             continue
-        pool += [create_item(world, name) for _ in range(item.count)]
+        count = item.count - (name == world.starting_dossier)
+        pool += [create_item(world, name) for _ in range(count)]
     pool += [create_item(world, data.IFF_INTEL) for _ in range(world.options.intel_total.value)]
 
     unfilled = world.multiworld.get_unfilled_locations(world.player)

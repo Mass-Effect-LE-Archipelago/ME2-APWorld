@@ -34,15 +34,21 @@ class MassEffectLE2World(World):
     location_name_groups = data.LOCATION_NAME_GROUPS
 
     intel_required: int
+    starting_dossier: str | None = None
 
     def generate_early(self) -> None:
+        # Skipping the prologue also skips its two checks, the only ones open at the start: one first-wave dossier is
+        # given at the start instead, so the seed always has somewhere to begin.
+        if self.options.start_on_normandy:
+            self.starting_dossier = data.DOSSIERS[self.random.choice(data.PHASE_1)]
+            self.multiworld.push_precollected(self.create_item(self.starting_dossier))
         # slots that can hold progression: not excluded, and not a pickup under pickups: safe
         safe = self.options.pickups == self.options.pickups.option_safe
         open_slots = sum(1 for loc in data.LOCATIONS.values() if regions.location_included(self, loc)
                          and not loc.excluded and not (safe and loc.category == "pickup"))
         fixed = sum(1 for name, item in data.ITEMS.items() if item.count
                     and (name not in items.DLC_DOSSIERS or items.dlc_enabled(self, items.DLC_DOSSIERS[name])))
-        room = open_slots - fixed - MIN_FILLER_SLOTS
+        room = open_slots - fixed + (self.starting_dossier is not None) - MIN_FILLER_SLOTS
         total = self.options.intel_total
         if total.value > room:
             logger.warning(f"{self.player_name}: intel_total {total.value} lowered to {room} (location count).")
@@ -70,8 +76,9 @@ class MassEffectLE2World(World):
 
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {
-            **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "assignments",
+            **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "start_on_normandy", "assignments",
                                  "research", "collectibles", "pickups", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
+            "starting_dossier": self.starting_dossier,
             "slot_data_version": 1,
         }
