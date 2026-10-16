@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 build/
 .pytest_cache/
+tools/le2mod/bin/
+tools/le2mod/obj/
+tools/le2mod/staging/
