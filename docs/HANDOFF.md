@@ -1,6 +1,6 @@
 # Handoff (read this first in a fresh session)
 
-Updated 2026-10-16. Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
+Updated 2026-10-16 (on hold at Austin's request). Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
 what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATALOG.md.
 
 ## Status
@@ -14,15 +14,21 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   0.0.2 (branch `claude/me2-skip-opening-pij7mi`) also skips the SR-1 prologue: an `EntryMenu.pcc` override points the
   main menu's `re_StartNewGame` at the vanilla `re_StartCharCreation` route (starter codex transitions 5356/5355/5342,
   then `BioP_Char`). Gender is picked in the main menu first; `BioP_Char` reads no plot state. `--keep-prologue` builds
-  the old behavior. Staged at `APWorldMaker\tools\le2mod\staging\ArchipelagoME2`; install pending Austin's OK.
+  the old behavior. Installed via Mod Manager (2026-10-16). Test FAILED: the intro movies, the SR-1 destruction and
+  Genesis (Liara's interactive comic, ME1 choices) still played, so the skip did not take. Cause not yet found.
 - Quick-start research (not built): the creator handler `BioSFHandler_NewCharacter` has `StartGameWithIconicCharacter`
   (fills `PlayerInfoEx` from defaults: class, origin, notoriety, name), and `StartNewGame` calls native
   `SFXEngine.CreateCareer(FirstName, srClass, Origin, Notoriety)`. No Kismet action sets class or appearance; a
   creator-free start would mean the ASI bridge filling `SFXEngine.NewPlayer`/`DefaultPlayer` and calling those.
 
-## Next
-1. New Career test: where Shepard lands, weapons on arrival, the Normandy first-arrival scene, the galaxy map.
-2. Then the real client against a local AP server on a fresh career (seed binding ID/IDSET, item delivery, checks).
+## Next (paused 2026-10-16)
+1. Find why 0.0.2 still runs the movies, SR-1 and Genesis (EntryMenu override not winning, another New Career route,
+   or Genesis triggered elsewhere); skip them all in le2mod 0.0.3.
+2. Austin's decision: MAJOR ME1 choices become AP YAML options (mirror his ME3 world in APWorldMaker: names and which
+   choices count as major); minor choices get the game's defaults, fired by the mod. Trace Genesis into
+   `tools/le2mod/research/genesis_choices.tsv` (choice, answer, transitions, effects, major/minor), show Austin the
+   major list, then add a guarded bridge op (allowlist of those plot ids, fresh career only) and the client step.
+3. Then the New Career test, then the real client against a local AP server.
 
 ## Open questions
 - Miranda and Jacob start in the squad (default; Austin hasn't objected).
