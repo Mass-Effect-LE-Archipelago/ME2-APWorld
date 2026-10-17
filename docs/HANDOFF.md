@@ -1,6 +1,6 @@
 # Handoff (read this first in a fresh session)
 
-Updated 2026-10-16 (on hold at Austin's request). Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
+Updated 2026-10-17. Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
 what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATALOG.md.
 
 ## Status
@@ -14,23 +14,28 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   0.0.2 (branch `claude/me2-skip-opening-pij7mi`) also skips the SR-1 prologue: an `EntryMenu.pcc` override points the
   main menu's `re_StartNewGame` at the vanilla `re_StartCharCreation` route (starter codex transitions 5356/5355/5342,
   then `BioP_Char`). Gender is picked in the main menu first; `BioP_Char` reads no plot state. `--keep-prologue` builds
-  the old behavior. Installed via Mod Manager (2026-10-16). Test FAILED: the intro movies, the SR-1 destruction and
-  Genesis (Liara's interactive comic, ME1 choices) still played, so the skip did not take. Cause not yet found.
+  the old behavior. 0.0.2 FAILED in game (movies, SR-1, Genesis still played): EntryMenu most likely loads before
+  custom DLC mount. 0.0.3 (2026-10-17) also overrides `BioP_ProNor` (runtime winner `DLC_UPD_Patch03`; sources are now
+  picked by mount priority): its BlackScreen_0 goes straight to 5356/5355/5342 and ActivateCharacterCreation, so the
+  opening, SR-1 and Genesis (`DHME1` in BioD_ProNor) are unreachable. Staged and validated; install queued in Mod
+  Manager (Austin clicks Install), in-game run pending. See tools/le2mod/README.md.
+- Genesis traced (`tools/le2mod/research/genesis_choices.tsv`): six questions, all major (virmire_survivor, romance,
+  rachni, wrex, council, human_councilor, as in the ME3 world), nothing else set, so no minor defaults exist. With 0.0.3
+  the ME1 majors are unset until the bridge op.
 - Quick-start research (not built): the creator handler `BioSFHandler_NewCharacter` has `StartGameWithIconicCharacter`
   (fills `PlayerInfoEx` from defaults: class, origin, notoriety, name), and `StartNewGame` calls native
   `SFXEngine.CreateCareer(FirstName, srClass, Origin, Notoriety)`. No Kismet action sets class or appearance; a
   creator-free start would mean the ASI bridge filling `SFXEngine.NewPlayer`/`DefaultPlayer` and calling those.
 
-## Next (paused 2026-10-16)
-1. Find why 0.0.2 still runs the movies, SR-1 and Genesis (EntryMenu override not winning, another New Career route,
-   or Genesis triggered elsewhere); skip them all in le2mod 0.0.3.
-2. Austin's decision: MAJOR ME1 choices become AP YAML options (mirror his ME3 world in APWorldMaker: names and which
-   choices count as major); minor choices get the game's defaults, fired by the mod. Trace Genesis into
-   `tools/le2mod/research/genesis_choices.tsv` (choice, answer, transitions, effects, major/minor), show Austin the
-   major list, then add a guarded bridge op (allowlist of those plot ids, fresh career only) and the client step.
-3. Then the New Career test, then the real client against a local AP server.
+## Next
+1. Austin: install 0.0.3 (Mod Manager panel) and test New Career: gender pick -> creator -> galaxy map.
+2. Austin reviews the major list (genesis_choices.tsv). Then: guarded bridge op (allowlist of those transitions, fresh
+   career only), YAML options with ME3 names/defaults, client step. Not started.
+3. Then the real client against a local AP server.
 
 ## Open questions
+- Major defaults until Austin decides: ME3 world's (ashley, wrex alive, rachni saved, council saved, anderson, no
+  romance)? Romance needs a matching survivor/gender (Ashley: male + Ashley survived; Kaidan: female + Kaidan).
 - Miranda and Jacob start in the squad (default; Austin hasn't objected).
 - Goal bool 1456 must be observed at a real ending.
 
