@@ -101,6 +101,63 @@ class WeaponUnlocks(DefaultOnToggle):
     display_name = "Weapon Unlocks"
 
 
+class ME1VirmireSurvivor(Choice):
+    """ME1 history (the Genesis comic is skipped): who survived Virmire."""
+
+    display_name = "ME1: Virmire Survivor"
+    option_ashley = 0
+    option_kaidan = 1
+    default = 0
+
+
+class ME1Romance(Choice):
+    """ME1 history: Shepard's romance. Ashley needs a male Shepard and Kaidan a female one, each as the Virmire
+    survivor; otherwise the client sets none."""
+
+    display_name = "ME1: Romance"
+    option_none = 0
+    option_ashley = 1
+    option_kaidan = 2
+    option_liara = 3
+    default = 0
+
+
+class ME1Rachni(Choice):
+    """ME1 history: the Rachni Queen's fate."""
+
+    display_name = "ME1: Rachni Queen"
+    option_saved = 0
+    option_killed = 1
+    default = 0
+
+
+class ME1Wrex(Choice):
+    """ME1 history: Wrex on Virmire."""
+
+    display_name = "ME1: Wrex"
+    option_alive = 0
+    option_dead = 1
+    default = 0
+
+
+class ME1Council(Choice):
+    """ME1 history: the Council at the Battle of the Citadel."""
+
+    display_name = "ME1: Council"
+    option_saved = 0
+    option_sacrificed = 1
+    default = 0
+
+
+class ME1HumanCouncilor(Choice):
+    """ME1 history: humanity's councilor."""
+
+    display_name = "ME1: Human Councilor"
+    option_anderson = 0
+    option_udina = 1
+    default = 0
+
+
 @dataclass
 class MassEffectLE2Options(PerGameCommonOptions):
     intel_total: IntelTotal
@@ -113,6 +170,12 @@ class MassEffectLE2Options(PerGameCommonOptions):
     collectibles: Collectibles
     pickups: Pickups
     weapon_unlocks: WeaponUnlocks
+    me1_virmire_survivor: ME1VirmireSurvivor
+    me1_romance: ME1Romance
+    me1_rachni: ME1Rachni
+    me1_wrex: ME1Wrex
+    me1_council: ME1Council
+    me1_human_councilor: ME1HumanCouncilor
 
 
 options_presets = {
@@ -137,4 +200,5 @@ option_groups = [
     OptionGroup("Start", [StartOnNormandy]),
     OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
+    OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

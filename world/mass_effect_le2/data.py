@@ -439,3 +439,31 @@ for _category, _group in (("recruitment", "Recruitment"), ("loyalty", "Loyalty M
                           ("collectible", "Collectibles"), ("pickup", "Pickups")):
     LOCATION_NAME_GROUPS[_group] = {name for name, data in LOCATIONS.items() if data.category == _category}
 LOCATION_NAME_GROUPS = {group: names for group, names in LOCATION_NAME_GROUPS.items() if names}
+
+
+# ME1 history (the Genesis comic's six choices; tools/le2mod/research/genesis_choices.tsv). Each answer is the plot bools
+# its Genesis transition sets; the other answers' bools are cleared. Option names follow the ME3 world's history keys.
+ME1_HISTORY: dict[str, dict[str, dict[int, bool]]] = {
+    "me1_virmire_survivor": {"ashley": {1541: True, 1540: False}, "kaidan": {1540: True, 1541: False}},
+    "me1_romance": {answer: {bool_id: bool_id == chosen for bool_id in (1926, 1528, 1529, 1530)}
+                    for answer, chosen in (("none", 1926), ("ashley", 1528), ("kaidan", 1529), ("liara", 1530))},
+    "me1_rachni": {"saved": {7447: True, 3151: True}, "killed": {7447: True, 3151: False}},
+    "me1_wrex": {"alive": {7448: True, 3752: False}, "dead": {7448: True, 3752: True}},
+    "me1_council": {"saved": {1554: True, 1553: False}, "sacrificed": {1553: True, 1554: False}},
+    "me1_human_councilor": {"anderson": {1556: True, 1555: False}, "udina": {1555: True, 1556: False}},
+}
+ME1_HISTORY_BOOLS = frozenset(b for answers in ME1_HISTORY.values() for bools in answers.values() for b in bools)
+FEMALE_PLOT_BOOL = 66  # Female_Player, set by the main menu's gender pick
+
+
+def me1_history_writes(choices: dict[str, str], female: bool) -> tuple[dict[int, bool], bool]:
+    """The plot bools for these choices, and whether the romance fell back to none: an ME1 romance needs a partner who
+    could romance this Shepard (Ashley: male; Kaidan: female) and, for Ashley or Kaidan, survived Virmire."""
+    romance = choices["me1_romance"]
+    if (romance == "ashley" and (female or choices["me1_virmire_survivor"] != "ashley")) or \
+            (romance == "kaidan" and (not female or choices["me1_virmire_survivor"] != "kaidan")):
+        choices = {**choices, "me1_romance": "none"}
+    writes: dict[int, bool] = {}
+    for key, answers in ME1_HISTORY.items():
+        writes.update(answers[choices[key]])
+    return writes, choices["me1_romance"] != romance

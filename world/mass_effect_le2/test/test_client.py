@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
                       notice_lines, parse_plot_predicate, seed_identity, sync_received_items)
-from ..data import DOSSIERS, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID
+from ..data import DOSSIERS, FEMALE_PLOT_BOOL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, ME1_HISTORY_BOOLS
 
 
 @dataclass
@@ -169,3 +169,52 @@ class TestBinding(unittest.TestCase):
         with self.assertRaises(IdentityMismatchError):
             self.context(bridge)._check_identity()
         self.assertEqual(bridge.identity(), (0, 0))
+
+
+class TestME1History(unittest.TestCase):
+    CHOICES = {"me1_virmire_survivor": "ashley", "me1_romance": "none", "me1_rachni": "saved", "me1_wrex": "alive",
+               "me1_council": "saved", "me1_human_councilor": "anderson"}
+
+    class Bridge(TestBinding.Bridge):
+        def set_history_bool(self, index, value):
+            # the bridge's guard (PROTOCOL.md HIST): allowlist, unbound save only
+            from ..data import ME1_HISTORY_BOOLS
+            assert index in ME1_HISTORY_BOOLS and self.identity() == (0, 0)
+            self.bools[index] = value
+
+    def bind(self, choices, female=False):
+        bridge = self.Bridge()
+        bridge.bools[FEMALE_PLOT_BOOL] = female
+        context = TestBinding.context(self, bridge)
+        context.me1_history = choices
+        context._check_identity()
+        self.assertEqual(bridge.identity(), (7, 9))
+        return bridge.bools
+
+    def test_defaults_written_before_binding(self) -> None:
+        bools = self.bind(self.CHOICES)
+        self.assertEqual({b: bools[b] for b in (1541, 1540, 1926, 7447, 3151, 7448, 3752, 1554, 1553, 1556, 1555)},
+                         {1541: True, 1540: False, 1926: True, 7447: True, 3151: True, 7448: True, 3752: False,
+                          1554: True, 1553: False, 1556: True, 1555: False})
+
+    def test_impossible_romance_falls_back_to_none(self) -> None:
+        bools = self.bind({**self.CHOICES, "me1_romance": "kaidan"})  # male Shepard, Ashley survived
+        self.assertTrue(bools[1926])
+        self.assertFalse(bools[1529])
+        bools = self.bind({**self.CHOICES, "me1_virmire_survivor": "kaidan", "me1_romance": "kaidan"}, female=True)
+        self.assertTrue(bools[1529])
+        self.assertFalse(bools[1926])
+
+    def test_old_seed_writes_nothing(self) -> None:
+        bools = self.bind(None)
+        self.assertFalse(any(b in ME1_HISTORY_BOOLS for b in bools))
+
+    def test_bridge_allowlist_matches_data(self) -> None:
+        import pathlib
+        import re
+        path = pathlib.Path(__file__).resolve().parents[3] / "tools" / "le2apbridge" / "LE2APBridge" / "Bridge.cpp"
+        if not path.exists():
+            self.skipTest("bridge source not beside this world (packaged .apworld)")
+        source = path.read_text()
+        listed = re.search(r"HistoryBools\[\] = \{([^}]*)\}", source).group(1)
+        self.assertEqual({int(n) for n in listed.split(",")}, ME1_HISTORY_BOOLS)

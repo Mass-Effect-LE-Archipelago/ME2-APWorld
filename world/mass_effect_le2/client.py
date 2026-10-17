@@ -27,13 +27,14 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, handle_url_arg, server_loop
 from NetUtils import ClientStatus
 
-from .data import DOSSIERS, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SHIP_UPGRADES, WEAPONS
+from .data import (DOSSIERS, FEMALE_PLOT_BOOL, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SHIP_UPGRADES,
+                   WEAPONS, me1_history_writes)
 from .world import MassEffectLE2World
 
 logger = logging.getLogger("ME2Client")
 
 PIPE_NAME = r"\\.\pipe\LE2APBridge"
-PROTOCOL_VERSION = 1
+PROTOCOL_VERSION = 2
 # AP-owned plot IDs (docs/DECISIONS.md D2, pending the collision audit): bools 21000-21999, ints 2100-2199.
 RECEIVED_INDEX_PLOT_INT = 2100  # read by the client; written only by the bridge inside TXN
 IDENTITY_PLOT_INTS = (2101, 2102)  # seed and slot identity of the save (0, 0 = not yet bound)
@@ -170,6 +171,10 @@ class BridgeConnection:
     def bind_identity(self, seed: int, slot: int) -> None:
         """Write the identity into a fresh save (the bridge refuses if one is already there)."""
         self.request(f"IDSET {seed} {slot}")
+
+    def set_history_bool(self, index: int, value: bool) -> None:
+        """Write one ME1-history plot bool (the bridge allows only those, and only on an unbound save)."""
+        self.request(f"HIST {index} {int(value)}")
 
     def transaction(self, index: int, op: str) -> bool:
         """Apply item `index` with `op` once. True if this call applied it, False if the save already had it."""
@@ -346,6 +351,7 @@ class ME2Context(CommonContext):
         if cmd == "Connected":
             slot_data = args.get("slot_data", {})
             self.intel_required = slot_data.get("intel_required")
+            self.me1_history = slot_data.get("me1_history")
             self.identity = seed_identity(self.seed_name or "", self.team or 0, self.slot or 0)
             self._mismatch_reported = False
 
@@ -379,6 +385,7 @@ class ME2Context(CommonContext):
                     logger.error("This save is past the ending, so it cannot start an Archipelago seed. "
                                  "Load an earlier save, or start a new career.")
                 raise IdentityMismatchError("save is past the ending")
+            self._write_me1_history()
             self.bridge.bind_identity(*self.identity)
             logger.info("Save bound to this seed and slot")
             return
@@ -390,6 +397,18 @@ class ME2Context(CommonContext):
                 if self.notices_enabled:
                     self.bridge.note("Archipelago: this save is from another seed")
         raise IdentityMismatchError(f"save identity {saved} != {self.identity}")
+
+    def _write_me1_history(self) -> None:
+        """Before binding a fresh save, write the slot's ME1 choices (the Genesis comic is skipped by the mod)."""
+        choices = getattr(self, "me1_history", None)
+        if not choices:
+            return  # a seed generated before these options: the game keeps whatever the career has
+        writes, fell_back = me1_history_writes(choices, self.bridge.get_bool(FEMALE_PLOT_BOOL))
+        for index, value in writes.items():
+            self.bridge.set_history_bool(index, value)
+        if fell_back:
+            logger.info("ME1 romance %s is not possible for this Shepard; set to none", choices["me1_romance"])
+        logger.info("ME1 history written")
 
     def _read_game_state(self, server_ready: bool) -> tuple[set[int], bool]:
         if not self._handshake_done:

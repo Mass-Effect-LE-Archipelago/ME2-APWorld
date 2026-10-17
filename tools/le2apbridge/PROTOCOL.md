@@ -1,4 +1,4 @@
-# LE2APBridge protocol (version 1)
+# LE2APBridge protocol (version 2)
 
 Named pipe `\\.\pipe\LE2APBridge`, message mode. One ASCII request per message, one reply per request.
 Replies are `OK`, `OK <value>` or `ERR <reason>`. The pipe thread validates; everything touching game state runs on the
@@ -16,6 +16,7 @@ still complete later; see TXN for why that is safe).
 | `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 only (derived state the client recomputes, e.g. 21100). |
 | `ID` | `OK <seed> <slot>` | Save identity, plot ints 2101/2102. `0 0` = not bound. |
 | `IDSET <seed> <slot>` | `OK` / `ERR bound` | Only when the save is unbound and its received index is 0. |
+| `HIST <n> <0/1>` | `OK` / `ERR bound` | Protocol 2. ME1-history bools only (the Genesis choices: 1528-1530, 1926, 1540, 1541, 1553-1556, 3151, 3752, 7447, 7448), only on an unbound save with received index 0; the client sends them just before `IDSET`. |
 | `TXN <index> <op> [args]` | `OK applied` / `OK done` / `ERR gap <current>` | See below. |
 | `NOTE <text>` | `ERR unsupported` (v1) | HUD notice; logged only until LE2's notifier call is verified. |
 | `MAP` | `OK <package>` | Persistent map package of the current world. |

@@ -80,5 +80,6 @@ class MassEffectLE2World(World):
                                  "research", "collectibles", "pickups", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
             "starting_dossier": self.starting_dossier,
+            "me1_history": {key: getattr(self.options, key).current_key for key in data.ME1_HISTORY},
             "slot_data_version": 1,
         }

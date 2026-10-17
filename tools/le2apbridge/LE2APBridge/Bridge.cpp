@@ -38,6 +38,17 @@ namespace LE2APBridge
 
         // SDK enum SFXGame.EInventoryResourceTypes (LExSDKv2 LE2 SFXGame_classes.hpp): 0 credits, 1 medigel, 2 salvage,
         // 3 grenades, 4 eezo, 5 iridium, 6 palladium, 7 platinum, 8 probes, 9 fuel. Only the ME2 resources are granted.
+        // ME1 history (protocol 2): the plot bools of the Genesis comic's six choices (tools/le2mod/research/
+        // genesis_choices.tsv), written by the client only before it binds a fresh save.
+        constexpr int HistoryBools[] = { 1528, 1529, 1530, 1926, 1540, 1541, 1553, 1554, 1555, 1556, 3151, 3752, 7447, 7448 };
+
+        bool IsHistoryBool(int const Index)
+        {
+            for (int const Allowed : HistoryBools)
+                if (Allowed == Index) return true;
+            return false;
+        }
+
         bool IsResourceType(int const Type)
         {
             return Type == 0 || Type == 1 || (Type >= 4 && Type <= 8);
@@ -217,6 +228,15 @@ namespace LE2APBridge
                 LEASI_INFO("IDSET {} {}", R.Index, R.Value);
                 return "OK";
             }
+            if (Op == "HIST")
+            {
+                // Same guard as IDSET: only an unbound save that has received nothing.
+                if (Vars->GetInt(IdentitySeedInt) != 0 || Vars->GetInt(IdentitySlotInt) != 0 || Vars->GetInt(ReceivedIndexInt) != 0)
+                    return "ERR bound";
+                Vars->SetBool(R.Index, R.Value != 0 ? 1 : 0, 0);
+                LEASI_INFO("HIST {} {}", R.Index, R.Value);
+                return "OK";
+            }
             if (Op == "SETB")
             {
                 Vars->SetBool(R.Index, R.Value != 0 ? 1 : 0, 0);
@@ -278,6 +298,7 @@ namespace LE2APBridge
             if (Fields == 1 && (Op == "MAP" || Op == "ID")) return "";
             if ((Op == "GETB" || Op == "GETI") && Fields == 2) return R.Index >= 0 ? "" : "ERR notallowed";
             if (Op == "IDSET" && Fields == 3) return (R.Index > 0 && R.Value > 0) ? "" : "ERR notallowed";
+            if (Op == "HIST" && Fields == 3) return (IsHistoryBool(R.Index) && (R.Value == 0 || R.Value == 1)) ? "" : "ERR notallowed";
             if (Op == "SETB" && Fields == 3)   // derived state the client recomputes each poll (e.g. 21100 IFF open)
                 return (R.Index >= BoolMin && R.Index <= BoolMax && (R.Value == 0 || R.Value == 1)) ? "" : "ERR notallowed";
             return "ERR badrequest";
