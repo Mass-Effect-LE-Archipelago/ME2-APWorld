@@ -29,9 +29,10 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   creator-free start would mean the ASI bridge filling `SFXEngine.NewPlayer`/`DefaultPlayer` and calling those.
 
 ## Next
-1. Austin: New Career test with 0.0.3 and bridge v2: gender pick -> creator -> galaxy map; then connect the client and
-   check the ME1 bools (GETB 1541 1926 3151 3752 1554 1556 etc.) were written before the save bound.
-2. Then the real client against a local AP server.
+1. Done 2026-10-20 (Austin: "This worked"): New Career with 0.0.3 + bridge v2 skips the opening and Genesis and lands
+   on the galaxy map; ME1 history writes on first connect.
+2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
+   into claude/me2-ap-world (PR #1).
 
 ## Open questions
 - Miranda and Jacob start in the squad (default; Austin hasn't objected).
