@@ -1,6 +1,6 @@
 # Handoff (read this first in a fresh session)
 
-Updated 2026-10-17. Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
+Updated 2026-10-20. Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
 what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATALOG.md.
 
 ## Status
@@ -33,6 +33,18 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
    on the galaxy map; ME1 history writes on first connect.
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
+
+## Roadmap to playable (proposed 2026-10-20, awaiting Austin's pick)
+1. End-to-end run: real client + local AP 0.6.8 server, fresh career; confirm item delivery, check sends, reconnect.
+2. Game-side gating (SCOPE Stage 2): the le2mod gates recruitment galaxy-map objects on dossier bools (21000+i) and
+   the Derelict Reaper on 21100, ANDed with vanilla conditionals; decide ship-upgrade research vs upgrade items.
+   Without this the logic's gates are honor-system only.
+3. Logic research that changes gating: R1 (Horizon / Collector Ship / IFF triggers), R5 (DLC unlock points),
+   R4 (Zaeed/Kasumi recruit bools), R2 (crew abduction penalty).
+4. More checks (R8): codex entries (up to 207, minus start-unlocked and Paragon/Renegade pairs), 9 weapon pickups,
+   cabin items, Mission_Landing_Open bools; pickups "any" already exists. Today: 387 default / 418 max.
+5. Polish: HUD notices (R6), goal bool 1456 seen at a real ending, plot-range collision audit (R7), release build.
+Recommended order: 1, 2, 3, 4, 5.
 
 ## Open questions
 - Miranda and Jacob start in the squad (default; Austin hasn't objected).
