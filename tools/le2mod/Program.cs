@@ -176,14 +176,109 @@ static class Program
         return 0;
     }
 
+    // Galaxy-map gating (research/galaxy_gating.md section 3). Our conditionals live in Startup_ArchipelagoME2_INT.pcc as
+    // PlotManagerDLC_ArchipelagoME2.BioAutoConditionals, registered the way vanilla DLCs do it (BIOEngine.ini
+    // StartupPackages, BIOGame.ini BioWorldInfo.ConditionalClasses). Each keeps the vanilla body and ANDs the AP bool.
+    // Vanilla conditional ids are 1..2050, so ours reuse the AP bool numbers (dossier 21000+i, Reaper 21100).
+    const string CondPackage = "PlotManagerDLC_ArchipelagoME2";
+    const string CondAutoPackage = "PlotManagerAutoDLC_ArchipelagoME2";
+    const string StartupName = "Startup_ArchipelagoME2";
+    const string CondTemplateDlc = "DLC_CON_Pack01";   // smallest vanilla startup package: 3 conditionals, empty-ish maps
+    // MapName -> (vanilla conditional, ours, AP bool, vanilla body)
+    static readonly (string map, int vanilla, int ours, string body)[] Gates =
+    [
+        ("BioP_PrsCvA", 177, 21002, "gv.GetBool(35) == FALSE && gv.GetBool(197) == FALSE"),               // Jack, Purgatory
+        ("BioP_JnkKgA", 182, 21003, "gv.GetBool(618) == FALSE"),                                          // Grunt, Korlus
+        ("BioP_SunTlA", 181, 21006, "gv.GetBool(312) == TRUE && gv.GetBool(40) == FALSE && gv.GetBool(202) == FALSE"), // Tali, Haestrom
+        ("BioP_RprGtA", 178, 21100, "gv.GetBool(313) == TRUE && gv.GetBool(1256) == FALSE"),              // Derelict Reaper
+    ];
+    const string GalaxyFile = "BioD_Nor_103aGalaxyMap.pcc";
+
+    static int Gating(string bioGame, string cooked)
+    {
+        // 1. Conditionals: clone the template DLC's startup package, rename its packages, recompile the class.
+        var template = Path.Combine(bioGame, "DLC", CondTemplateDlc, "CookedPCConsole", $"Startup_{CondTemplateDlc[4..]}_INT.pcc");
+        if (!File.Exists(template)) { Console.Error.WriteLine("refusing: no template " + template); return 1; }
+        var startupOut = Path.Combine(cooked, StartupName + "_INT.pcc");
+        var script = "Class BioAutoConditionals extends BioConditionals;\n\n" + string.Concat(Gates.Select(g =>
+            $"public function bool F{g.ours}(BioWorldInfo bioWorld, int Argument)\n{{\n    local BioGlobalVariableTable gv;\n    \n" +
+            $"    gv = bioWorld.GetGlobalVariables();\n    return {g.body} && gv.GetBool({g.ours}) == TRUE;\n}}\n"));
+        using (var pcc = MEPackageHandler.OpenMEPackage(template, forceLoadFromDisk: true))
+        {
+            var condPkg = pcc.Exports.FirstOrDefault(e => e.ClassName == "Package" && e.ObjectName.Name == "PlotManagerDLC_" + CondTemplateDlc[4..]);
+            var autoPkg = pcc.Exports.FirstOrDefault(e => e.ClassName == "Package" && e.ObjectName.Name == "PlotManagerAutoDLC_" + CondTemplateDlc[4..]);
+            if (pcc.Game != MEGame.LE2 || condPkg == null || autoPkg == null) { Console.Error.WriteLine("refusing: unexpected template layout"); return 1; }
+            condPkg.ObjectName = new NameReference(CondPackage);
+            autoPkg.ObjectName = new NameReference(CondAutoPackage);
+            // The template's plot maps stay but are never registered (no +Package line for the Auto package).
+            var cls = pcc.FindExport(CondPackage + ".BioAutoConditionals");
+            LE2Directory.DefaultGamePath = bioGame;   // the compiler resolves SFXGame and the other base classes from here
+            var lib = new LegendaryExplorerCore.UnrealScript.FileLib(pcc);
+            var usop = new LegendaryExplorerCore.UnrealScript.UnrealScriptOptionsPackage();
+            if (cls == null || !lib.Initialize(usop))
+            {
+                Console.Error.WriteLine("refusing: cannot load the script library\n" + string.Join("\n", lib.InitializationLog?.AllErrors ?? []));
+                return 1;
+            }
+            var (_, log) = LegendaryExplorerCore.UnrealScript.UnrealScriptCompiler.CompileClass(pcc, script, lib, usop, cls, condPkg);
+            if (log.HasErrors) { Console.Error.WriteLine("compile FAILED:\n" + string.Join("\n", log.AllErrors)); return 1; }
+            pcc.Save(startupOut);
+        }
+        using (var pcc = MEPackageHandler.OpenMEPackage(startupOut, forceLoadFromDisk: true))
+        {
+            var fns = pcc.Exports.Where(e => e.ClassName == "Function" && e.Parent?.InstancedFullPath == CondPackage + ".BioAutoConditionals")
+                .Select(e => e.ObjectName.Instanced).OrderBy(n => n).ToList();
+            var want = Gates.Select(g => "F" + g.ours).OrderBy(n => n).ToList();
+            bool stale = pcc.Exports.Any(e => e.InstancedFullPath.Contains(CondTemplateDlc[4..]) && e.ClassName != "ShaderCache");
+            Console.WriteLine($"validate: {StartupName}_INT functions [{string.Join(",", fns)}] template-names-left={stale}");
+            if (!fns.SequenceEqual(want) || stale) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+        }
+
+        // 2. Galaxy map: the runtime winner with the four planets' land/visible conditionals repointed.
+        var galaxy = Winner(bioGame, GalaxyFile);
+        if (galaxy == null) { Console.Error.WriteLine("refusing: no " + GalaxyFile); return 1; }
+        var galaxyOut = Path.Combine(cooked, GalaxyFile);
+        string[] condProps = ["PlanetLandCondition", "VisibleConditional", "UsableConditional"];
+        ExportEntry Planet(IMEPackage p, string map) => p.Exports.SingleOrDefault(e => e.ClassName == "BioPlanet"
+            && string.Equals(e.GetProperty<StrProperty>("MapName")?.Value, map, StringComparison.OrdinalIgnoreCase));
+        using (var pcc = MEPackageHandler.OpenMEPackage(galaxy, forceLoadFromDisk: true))
+        {
+            foreach (var g in Gates)
+            {
+                var planet = Planet(pcc, g.map);
+                if (planet == null || planet.GetProperty<IntProperty>("PlanetLandCondition")?.Value != g.vanilla)
+                {
+                    Console.Error.WriteLine($"refusing: {g.map} is missing or its land conditional is not {g.vanilla}");
+                    return 1;
+                }
+                foreach (var name in condProps)
+                    if (planet.GetProperty<IntProperty>(name)?.Value == g.vanilla) planet.WriteProperty(new IntProperty(g.ours, name));
+            }
+            pcc.Save(galaxyOut);
+        }
+        using (var pcc = MEPackageHandler.OpenMEPackage(galaxyOut, forceLoadFromDisk: true))
+        {
+            foreach (var g in Gates)
+            {
+                var planet = Planet(pcc, g.map);
+                var values = condProps.Select(n => planet?.GetProperty<IntProperty>(n)?.Value).ToList();
+                Console.WriteLine($"validate: {g.map} land/visible/usable = {string.Join("/", values.Select(v => v?.ToString() ?? "-"))}");
+                if (values[0] != g.ours || values.Any(v => v == g.vanilla)) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+            }
+        }
+        Console.WriteLine($"galaxy gating built (galaxy source {galaxy})");
+        return 0;
+    }
+
     static int Main(string[] args)
     {
         var oodle = Environment.GetEnvironmentVariable("LE1PROBE_OODLE");
         bool keepPrologue = args.Contains("--keep-prologue");
-        args = args.Where(a => a != "--keep-prologue").ToArray();
+        bool noGating = args.Contains("--no-gating");
+        args = args.Where(a => a != "--keep-prologue" && a != "--no-gating").ToArray();
         if (args.Length is < 3 or > 4 || args[0] != "openstart" || string.IsNullOrEmpty(oodle))
         {
-            Console.Error.WriteLine("usage: le2mod openstart <LE2 BioGame dir> <staging dir> [transition,..] [--keep-prologue]  (LE1PROBE_OODLE set)");
+            Console.Error.WriteLine("usage: le2mod openstart <LE2 BioGame dir> <staging dir> [transition,..] [--keep-prologue] [--no-gating]  (LE1PROBE_OODLE set)");
             return 2;
         }
         var bioGame = Path.GetFullPath(args[1]);
@@ -280,6 +375,7 @@ static class Program
             if (!ok) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
         }
         if (!keepPrologue && (SkipPrologue(bioGame, cooked) != 0 || SkipProNor(bioGame, cooked) != 0)) return 1;
+        if (!noGating && Gating(bioGame, cooked) != 0) return 1;
 
         // DLC metadata, as vanilla LE2 DLC folders lay it out.
         var mountFile = new MountFile(MEGame.LE2)
@@ -292,13 +388,16 @@ static class Program
         };
         mountFile.WriteMountFile(Path.Combine(cooked, "Mount.dlc"));
         File.WriteAllText(Path.Combine(cooked, "BIOEngine.ini"),
-            $"[Engine.DLCModules]\r\n{ModFolder}={ModuleNumber}\r\n\r\n[DLCInfo]\r\nVersion=0\r\nFlags=2\r\nName={NameStrRef}\r\n");
+            $"[Engine.DLCModules]\r\n{ModFolder}={ModuleNumber}\r\n\r\n[DLCInfo]\r\nVersion=0\r\nFlags=2\r\nName={NameStrRef}\r\n" +
+            (noGating ? "" : $"\r\n[Engine.StartupPackages]\r\n+DLCStartupPackage={StartupName}\r\n+Package={CondPackage}\r\n"));
+        if (!noGating)
+            File.WriteAllText(Path.Combine(cooked, "BIOGame.ini"), $"[SFXGame.BioWorldInfo]\r\n+ConditionalClasses={CondPackage}.BioAutoConditionals\r\n");
         HuffmanCompression.SaveToTlkFile(Path.Combine(cooked, $"DLC_{ModuleNumber}_INT.tlk"),
             [new TLKStringRef(NameStrRef, "Archipelago ME2 (open start test)")]);
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.3\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.4\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

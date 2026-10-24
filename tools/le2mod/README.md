@@ -59,4 +59,12 @@ Set `LE1PROBE_OODLE` to `oo2core_8_win64.dll` (from the game's `Binaries/Win64`)
 ## Status
 
 2026-10-16: 0.0.1 (creator to galaxy map) staged, reviewed (Codex, static) and installed. 0.0.2 adds the EntryMenu prologue skip
-(failed in game). 2026-10-17: 0.0.3 adds the BioP_ProNor skip; staged, validated, in-game run pending.
+(failed in game). 2026-10-17: 0.0.3 adds the BioP_ProNor skip; it passed in game on 2026-10-20.
+
+2026-10-24: 0.0.4 adds galaxy-map gating (skip it with `--no-gating`). `Startup_ArchipelagoME2_INT.pcc` is cloned from
+DLC_CON_Pack01's startup package, with the packages renamed and `PlotManagerDLC_ArchipelagoME2.BioAutoConditionals`
+recompiled to F21002 (Jack), F21003 (Grunt), F21006 (Tali) and F21100 (Reaper). Each is the vanilla body AND the AP
+bool. The class is registered in BIOEngine.ini (StartupPackages) and BIOGame.ini (`BioWorldInfo.ConditionalClasses`).
+`BioD_Nor_103aGalaxyMap.pcc` (winner DLC_METR_Patch01) gets those four planets' land/visible conditionals repointed.
+It is staged and validated (reopened, decompiled) but not installed: it closes these planets on any career whose
+dossier bools are unset. See research/galaxy_gating.md.
