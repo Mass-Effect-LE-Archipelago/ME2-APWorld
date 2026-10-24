@@ -66,5 +66,9 @@ DLC_CON_Pack01's startup package, with the packages renamed and `PlotManagerDLC_
 recompiled to F21002 (Jack), F21003 (Grunt), F21006 (Tali) and F21100 (Reaper). Each is the vanilla body AND the AP
 bool. The class is registered in BIOEngine.ini (StartupPackages) and BIOGame.ini (`BioWorldInfo.ConditionalClasses`).
 `BioD_Nor_103aGalaxyMap.pcc` (winner DLC_METR_Patch01) gets those four planets' land/visible conditionals repointed.
-It is staged and validated (reopened, decompiled) but not installed: it closes these planets on any career whose
-dossier bools are unset. See research/galaxy_gating.md.
+0.0.4 also gates the six hub recruits per dossier (research/galaxy_gating.md section 6). Mordin, Garrus and Thane each
+get a PMCheckState on 21000/21001/21004 in front of plot transition 399, which runs before the black screen and loading
+movie of their mission departure. Samara's cab menu conditional C376 becomes F21005, and her RE_HailCab black screen
+gets S21005. Zaeed's two C1495 spawn checks become F21007. Kasumi's recruit conversation gets S21008. All of it is
+staged and validated (reopened, links and conditionals checked) but not installed: it closes these missions on any
+career whose dossier bools are unset.

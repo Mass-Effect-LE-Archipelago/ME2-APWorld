@@ -192,6 +192,110 @@ static class Program
         ("BioP_SunTlA", 181, 21006, "gv.GetBool(312) == TRUE && gv.GetBool(40) == FALSE && gv.GetBool(202) == FALSE"), // Tali, Haestrom
         ("BioP_RprGtA", 178, 21100, "gv.GetBool(313) == TRUE && gv.GetBool(1256) == FALSE"),              // Derelict Reaper
     ];
+    // Hub conditionals (research/galaxy_gating.md section 6): same pattern, used by repointed PMCheckConditional nodes.
+    static readonly (int vanilla, int ours, string body)[] HubConditionals =
+    [
+        (376, 21005, "gv.GetBool(1542) == TRUE && gv.GetBool(43) == FALSE && gv.GetBool(205) == FALSE"),   // Samara, cab console
+        (1495, 21007, "gv.GetBool(2289) == TRUE && gv.GetBool(44) == FALSE && gv.GetBool(206) == FALSE"),  // Zaeed, Omega spawn
+    ];
+    const string MainSeq = "TheWorld.PersistentLevel.Main_Sequence.";
+    // Per-dossier hub gates. "insert": a PMCheckState on the AP bool goes in front of the node (every link into it is
+    // redirected through the check; False goes nowhere). "repoint": PMCheckConditional nodes move to our conditional.
+    // The mission departures are gated at plot transition 399, which runs before the black screen and loading movie
+    // (gating the AreaTransition itself would leave the player on a loading screen). Expect "" skips the target check.
+    static readonly (string file, string kind, string node, string expect, int vanilla, int ours)[] HubGates =
+    [
+        ("BioD_OmgHub_110ProfessorAcq.pcc", "insert", MainSeq + "BioSeqAct_PMExecuteTransition_0", "399", 0, 21000),                         // Mordin
+        ("BioD_OmgHub_100Dock.pcc", "insert", MainSeq + "Garrus_Acquisition_Blue_Suns_Driver.BioSeqAct_PMExecuteTransition_0", "399", 0, 21001), // Garrus
+        ("BioD_TwrHub_301CarPortHall.pcc", "insert", MainSeq + "Assassin_Acquisition.BioSeqAct_PMExecuteTransition_0", "399", 0, 21004),      // Thane
+        ("BioD_TwrHub_302CarPort.pcc", "repoint", MainSeq + "DLC_MODIFIED_Cab_Console", "", 376, 21005),                                    // Samara: cab menu
+        ("BioD_TwrHub_302CarPort.pcc", "insert", MainSeq + "DLC_MODIFIED_Cab_Console.BioSeqAct_BlackScreen_0", "", 0, 21005),              // Samara: RE_HailCab
+        ("BioD_OmgHub_DLC_Veteran.pcc", "repoint", MainSeq + "Initialization", "", 1495, 21007),                                           // Zaeed
+        ("BioD_CitHub_DLC_500Thief.pcc", "insert", MainSeq + "SFXSeqAct_StartConversation_0", "citmtl_kasumi_acq_d_dlg", 0, 21008),         // Kasumi
+    ];
+
+    static string NodeTarget(ExportEntry node) =>
+        node.GetProperty<NameProperty>("AreaName")?.Value.Instanced
+        ?? node.GetProperty<IntProperty>("m_nIndex")?.Value.ToString()
+        ?? (node.GetProperty<ObjectProperty>("Conv") is { } c ? node.FileRef.GetEntry(c.Value)?.ObjectName.Instanced : null) ?? "";
+
+    static IEnumerable<ExportEntry> SeqOps(IMEPackage pcc) =>
+        pcc.Exports.Where(e => e.GetProperty<ArrayProperty<StructProperty>>("OutputLinks") != null);
+
+    static int HubGating(string bioGame, string cooked)
+    {
+        foreach (var g in HubGates)
+        {
+            var outPcc = Path.Combine(cooked, g.file);
+            // A second gate in the same package builds on the first one's output.
+            var source = File.Exists(outPcc) ? outPcc : Winner(bioGame, g.file);
+            if (source == null) { Console.Error.WriteLine("refusing: no " + g.file); return 1; }
+            var tmpPcc = outPcc + ".tmp";
+            using (var pcc = MEPackageHandler.OpenMEPackage(source, forceLoadFromDisk: true))
+            {
+                var node = pcc.FindExport(g.node);
+                if (node == null) { Console.Error.WriteLine($"refusing: {g.file} has no {g.node}"); return 1; }
+                if (g.kind == "insert")
+                {
+                    if (g.expect != "" && !NodeTarget(node).Equals(g.expect, StringComparison.OrdinalIgnoreCase))
+                    {
+                        Console.Error.WriteLine($"refusing: {g.node} leads to {NodeTarget(node)}, not {g.expect}");
+                        return 1;
+                    }
+                    var feeders = SeqOps(pcc).Where(e => KismetHelper.GetOutputLinksOfNode(e).Any(l => l.Any(x => x.LinkedOp == node))).ToList();
+                    if (feeders.Count == 0) { Console.Error.WriteLine($"refusing: nothing leads into {g.node}"); return 1; }
+                    var gate = SequenceObjectCreator.CreateSequenceObject((ExportEntry)node.Parent, "BioSeqAct_PMCheckState");
+                    gate.WriteProperty(new IntProperty(g.ours, "m_nIndex"));
+                    foreach (var f in feeders)
+                    {
+                        var links = KismetHelper.GetOutputLinksOfNode(f);
+                        foreach (var l in links)
+                            for (int i = 0; i < l.Count; i++)
+                                if (l[i].LinkedOp == node) l[i] = new OutputLink { LinkedOp = gate, InputLinkIdx = 0 };
+                        KismetHelper.WriteOutputLinksToNode(f, links);
+                    }
+                    // The creator usually writes the class's True/False outputs; add them only when it did not.
+                    if (KismetHelper.GetOutputLinkNames(gate).Contains("True")) KismetHelper.CreateOutputLink(gate, "True", node);
+                    else { KismetHelper.CreateNewOutputLink(gate, "True", node); KismetHelper.CreateNewOutputLink(gate, "False", null); }
+                }
+                else
+                {
+                    var conds = pcc.Exports.Where(e => e.ClassName == "BioSeqAct_PMCheckConditional" && e.Parent == node
+                                                       && e.GetProperty<IntProperty>("m_nIndex")?.Value == g.vanilla).ToList();
+                    if (conds.Count == 0) { Console.Error.WriteLine($"refusing: no C{g.vanilla} in {g.node}"); return 1; }
+                    foreach (var c in conds) c.WriteProperty(new IntProperty(g.ours, "m_nIndex"));
+                }
+                pcc.Save(tmpPcc);
+            }
+            using (var pcc = MEPackageHandler.OpenMEPackage(tmpPcc, forceLoadFromDisk: true))
+            {
+                var node = pcc.FindExport(g.node);
+                bool ok;
+                if (g.kind == "insert")
+                {
+                    // Every path into the node now passes a PMCheckState on our bool, whose True leads to the node.
+                    var feeders = SeqOps(pcc).Where(e => KismetHelper.GetOutputLinksOfNode(e).Any(l => l.Any(x => x.LinkedOp == node))).ToList();
+                    ok = feeders.Count == 1 && feeders[0].ClassName == "BioSeqAct_PMCheckState"
+                         && feeders[0].GetProperty<IntProperty>("m_nIndex")?.Value == g.ours
+                         && KismetHelper.GetOutputLinkNames(feeders[0]).FirstOrDefault() == "True"
+                         && KismetHelper.GetOutputLinksOfNode(feeders[0])[0].Single().LinkedOp == node
+                         && SeqOps(pcc).Any(e => KismetHelper.GetOutputLinksOfNode(e).Any(l => l.Any(x => x.LinkedOp == feeders[0])));
+                    Console.WriteLine($"validate: {g.file} {g.node.Replace(MainSeq, "")} <- S{g.ours} ({NodeTarget(node)})");
+                }
+                else
+                {
+                    var values = pcc.Exports.Where(e => e.ClassName == "BioSeqAct_PMCheckConditional" && e.Parent == node)
+                        .Select(e => e.GetProperty<IntProperty>("m_nIndex")?.Value).ToList();
+                    ok = values.Contains(g.ours) && !values.Contains(g.vanilla);
+                    Console.WriteLine($"validate: {g.file} {g.node.Replace(MainSeq, "")} conditionals [{string.Join(",", values)}]");
+                }
+                if (!ok) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+            }
+            File.Move(tmpPcc, outPcc, true);
+        }
+        return 0;
+    }
+
     const string GalaxyFile = "BioD_Nor_103aGalaxyMap.pcc";
 
     static int Gating(string bioGame, string cooked)
@@ -200,7 +304,8 @@ static class Program
         var template = Path.Combine(bioGame, "DLC", CondTemplateDlc, "CookedPCConsole", $"Startup_{CondTemplateDlc[4..]}_INT.pcc");
         if (!File.Exists(template)) { Console.Error.WriteLine("refusing: no template " + template); return 1; }
         var startupOut = Path.Combine(cooked, StartupName + "_INT.pcc");
-        var script = "Class BioAutoConditionals extends BioConditionals;\n\n" + string.Concat(Gates.Select(g =>
+        var allConds = Gates.Select(g => (g.ours, g.body)).Concat(HubConditionals.Select(h => (h.ours, h.body))).ToList();
+        var script = "Class BioAutoConditionals extends BioConditionals;\n\n" + string.Concat(allConds.Select(g =>
             $"public function bool F{g.ours}(BioWorldInfo bioWorld, int Argument)\n{{\n    local BioGlobalVariableTable gv;\n    \n" +
             $"    gv = bioWorld.GetGlobalVariables();\n    return {g.body} && gv.GetBool({g.ours}) == TRUE;\n}}\n"));
         using (var pcc = MEPackageHandler.OpenMEPackage(template, forceLoadFromDisk: true))
@@ -228,7 +333,7 @@ static class Program
         {
             var fns = pcc.Exports.Where(e => e.ClassName == "Function" && e.Parent?.InstancedFullPath == CondPackage + ".BioAutoConditionals")
                 .Select(e => e.ObjectName.Instanced).OrderBy(n => n).ToList();
-            var want = Gates.Select(g => "F" + g.ours).OrderBy(n => n).ToList();
+            var want = allConds.Select(g => "F" + g.ours).OrderBy(n => n).ToList();
             bool stale = pcc.Exports.Any(e => e.InstancedFullPath.Contains(CondTemplateDlc[4..]) && e.ClassName != "ShaderCache");
             Console.WriteLine($"validate: {StartupName}_INT functions [{string.Join(",", fns)}] template-names-left={stale}");
             if (!fns.SequenceEqual(want) || stale) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
@@ -267,6 +372,8 @@ static class Program
             }
         }
         Console.WriteLine($"galaxy gating built (galaxy source {galaxy})");
+        if (HubGating(bioGame, cooked) != 0) return 1;
+        Console.WriteLine("hub recruit gating built");
         return 0;
     }
 

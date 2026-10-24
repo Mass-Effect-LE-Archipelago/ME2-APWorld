@@ -52,6 +52,13 @@ class TestDelivery(unittest.TestCase):
         self.assertEqual(item_op(ITEM_NAME_TO_ID[DOSSIERS["Mordin Solus"]]), f"FLAG {DOSSIER_BOOL_BASE}")
         self.assertEqual(item_op(ITEM_NAME_TO_ID["Thanix Cannon"]), "SHIP 238 5645")
 
+    def test_dossier_flags_match_the_mod_gates(self) -> None:
+        # le2mod 0.0.4 gates each recruitment on these bools (tools/le2mod/Program.cs Gates/HubGates)
+        expected = {"Mordin Solus": 21000, "Garrus Vakarian": 21001, "Jack": 21002, "Grunt": 21003, "Thane Krios": 21004,
+                    "Samara": 21005, "Tali'Zorah vas Neema": 21006, "Zaeed Massani": 21007, "Kasumi Goto": 21008}
+        for member, flag in expected.items():
+            self.assertEqual(item_op(ITEM_NAME_TO_ID[DOSSIERS[member]]), f"FLAG {flag}", member)
+
     def test_sync_applies_from_the_saved_index(self) -> None:
         bridge = FakeBridge()
         items = [Received(ITEM_NAME_TO_ID["Credits"]), Received(ITEM_NAME_TO_ID[DOSSIERS["Jack"]])]
