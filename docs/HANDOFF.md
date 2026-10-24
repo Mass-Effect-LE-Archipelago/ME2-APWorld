@@ -39,12 +39,13 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   `git bundle create <APWorldMaker>\backups\ME2-LE-Archipelago-<date>.bundle --all`.
 - E2E run on the AustinME2 seed (C:\ProgramData\Archipelago\output\ME2Test, server localhost:38281): checks send,
   items come back, saves keep plot ints 2100-2102. Main-menu early bind fixed in the bridge (aa0dad5; ASI built at
-  APWorldMaker\tools\le2apbridge\build\repo\Build\Release, NOT installed yet; install only with LE2 closed).
+  APWorldMaker\tools\le2apbridge\build\repo\Build\Release; installed 2026-10-24 16:2x, old v2 ASI in APWorldMaker\backups).
 - D21 (ship upgrades are items only): research trace in tools/le2mod/research/galaxy_gating.md section 4. Blocked on
   a before/after bridge read on a throwaway non-AP save (never AustinME2). Client bug: SHIP items set the research
   UnlockId bool.
 - le2mod 0.0.4 (747f0a4) stages galaxy gating for Jack/Grunt/Tali/Reaper (APWorldMaker\tools\le2mod\staging-0.0.4).
-  Not installed: it closes those planets on careers without the dossier bools.
+  Hub recruit gates added (664dcfa). Installed 2026-10-24 via Mod Manager --installmod (AutoTOC 16:24); 0.0.3 backed up in
+  APWorldMaker\backups\DLC_MOD_ArchipelagoME2-0.0.3. AustinME2 holds only Mordin's dossier (bool 21000). In-game check pending.
 - Hub recruits (Mordin, Garrus, Zaeed, Thane, Samara, Kasumi): gates traced (galaxy_gating.md section 6). Austin is
   choosing between per-mission gates and hub-access items.
 - World tests on the PC: `ME2 LE Randomizer\Archipelago-main` (0.6.9 source, worlds\mass_effect_le2 is a junction to
