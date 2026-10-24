@@ -200,12 +200,18 @@ namespace LE2APBridge
             return Text.empty() ? "ERR noname" : "OK " + Text;
         }
 
+        // Plot reads and writes wait for a loaded save. The main-menu and loading worlds have a blank plot table, and the
+        // client bound one before the real save loaded over it (seen live 2026-10-24). A player pawn with an inventory
+        // means a save or a new career is in play.
+        bool SaveLoaded() { return PlayerInventory() != nullptr; }
+
         std::string Execute(Request const& R)
         {
             std::string const Op{ R.Op };
-            if (Op == "TXN") return ExecuteTxn(R);
             if (Op == "NOTE") return ExecuteNote(R);
             if (Op == "MAP") return ExecuteMap();
+            if (!SaveLoaded()) return GlobalVariables() == nullptr ? "ERR noworld" : "ERR notready";
+            if (Op == "TXN") return ExecuteTxn(R);
             UBioGlobalVariableTable* const Vars = GlobalVariables();
             if (Vars == nullptr) return "ERR noworld";
             if (Op == "GETB") return std::string("OK ") + (Vars->GetBool(R.Index) ? "1" : "0");

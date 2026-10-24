@@ -21,7 +21,9 @@ still complete later; see TXN for why that is safe).
 | `NOTE <text>` | `ERR unsupported` (v1) | HUD notice; logged only until LE2's notifier call is verified. |
 | `MAP` | `OK <package>` | Persistent map package of the current world. |
 
-Not-ready replies: `ERR noworld` (no world or save loaded), `ERR noplayer` (no player pawn yet, for `RES`).
+Not-ready replies: `ERR noworld` (no world loaded), `ERR notready` (a world but no player pawn, e.g. the main menu
+or a loading screen: every plot read and write, `ID`, `IDSET`, `HIST` and `TXN` wait for a loaded save),
+`ERR noplayer` (no player pawn, for `RES`).
 
 ## TXN
 

@@ -123,9 +123,11 @@ class TestPipe(unittest.TestCase):
         self.assertEqual(pipe.sent[0], b"TXN 0 NONE")
 
     def test_not_ready_and_errors(self) -> None:
-        bridge, _ = self.bridge("ERR noworld", "ERR notallowed")
+        bridge, _ = self.bridge("ERR noworld", "ERR notready", "ERR notallowed")
         with self.assertRaises(GameNotReadyError):
             bridge.get_int(1)
+        with self.assertRaises(GameNotReadyError):
+            bridge.identity()
         with self.assertRaises(BridgeProtocolError):
             bridge.get_int(1)
 
@@ -162,6 +164,17 @@ class TestBinding(unittest.TestCase):
         bridge = self.Bridge()
         self.context(bridge)._check_identity()
         self.assertEqual(bridge.identity(), (7, 9))
+
+    def test_menu_world_is_not_bound(self) -> None:
+        # the bridge answers "ERR notready" until a save is loaded (no player pawn on the main menu)
+        class MenuBridge(self.Bridge):
+            def identity(self):
+                raise GameNotReadyError("ID: ERR notready")
+
+        bridge = MenuBridge()
+        with self.assertRaises(GameNotReadyError):
+            self.context(bridge)._check_identity()
+        self.assertEqual(bridge.ints, {})
 
     def test_post_game_save_is_refused(self) -> None:
         bridge = self.Bridge()
