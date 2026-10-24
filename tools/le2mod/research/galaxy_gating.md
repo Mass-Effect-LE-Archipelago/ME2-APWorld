@@ -118,6 +118,9 @@ the planet shows "cannot land" correctly when the AP bool is unset.
 
 ## 5. Austin's live run, for the record (2026-10-24)
 
-Reloading a mid-Grunt save made the client bind it again ("ME1 history written", "Save bound"). The save read back
-identity (0,0) and received index 0, so plot ints 2100-2102 may not survive a save/load. If confirmed, every reload
-re-grants all items. Being checked with Austin.
+After a game restart the client logs "ME1 history written" and "Save bound" about 14 s before "game loaded". A fresh
+save and reload showed the cause. Plot ints 2100-2102 do persist in the save. But the bridge (`CurrentBioWorld()`)
+answers as soon as any world exists, including the main-menu/loading world with a blank plot table, so the client
+binds that throwaway table. Then the first RES TXN gets `ERR noplayer` and the real save loads over it, with no
+rebind, no mismatch and no re-delivery. Fix (not done): the bridge answers `ERR notready` for ID/IDSET/HIST/GET* while
+there is no player pawn, or the client checks readiness before `_check_identity`.
