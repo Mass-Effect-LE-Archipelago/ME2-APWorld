@@ -124,3 +124,23 @@ answers as soon as any world exists, including the main-menu/loading world with 
 binds that throwaway table. Then the first RES TXN gets `ERR noplayer` and the real save loads over it, with no
 rebind, no mismatch and no re-delivery. Fix (not done): the bridge answers `ERR notready` for ID/IDSET/HIST/GET* while
 there is no player pawn, or the client checks readiness before `_check_identity`.
+
+## 6. Hub recruits: where each one starts (traced 2026-10-24, report only)
+
+Runtime winners by mount priority. "S" is a `BioSeqAct_PMCheckState` (plot bool), "C" a `BioSeqAct_PMCheckConditional`.
+
+| Recruit | Package (winner) | Start | Checks on that path | Smallest gate |
+|---|---|---|---|---|
+| Mordin | BioD_OmgHub_110ProfessorAcq (base) | `BioSeqAct_AreaTransition_1` -> BioP_OmgPrA | S1450, S2697, S1449 | insert S21000 before the transition |
+| Garrus | BioD_OmgHub_100Dock (METR_Patch01) | `Garrus_Acquisition_Blue_Suns_Driver.BioSeqAct_AreaTransition_1` -> BioP_OmgGrA | S1458, S2616 | insert S21001 before the transition |
+| Thane | BioD_TwrHub_301CarPortHall (base) | `Assassin_Acquisition.BioSeqAct_AreaTransition_1` -> Biop_Twrasa | S107, S1134, S5085 | insert S21004 before the transition |
+| Samara | BioD_TwrHub_302CarPort (EXP_Part01) | `Cab_Console.BioSeqAct_AreaTransition_1` -> BioP_TwrMwA | C376 = b1542 && !b43 && !b205 | repoint C376 to F21005 = F376 body && b21005 (same pattern as the galaxy gates) |
+| Zaeed | BioD_OmgHub_DLC_Veteran (METR_Patch01) | `Initialization`: two C1495 gate his spawn and recruit conversation | C1495 = b2289 && !b44 && !b206 | repoint both C1495 to F21007 = F1495 body && b21007 |
+| Kasumi | BioD_CitHub_DLC_500Thief (HEN_MT) | recruit conversation after S37 (Kasumi in squad), transitions 1356/457/492/95 | S37 | insert S21008 before the recruit conversation; the exact node needs one more pass |
+
+- Each gate is a one-package override in DLC_MOD_ArchipelagoME2, the same mechanism as 0.0.3/0.0.4. Samara and Zaeed
+  reuse the new-conditional route (Startup_ArchipelagoME2_INT); the others need one inserted PMCheckState each.
+- Gating a transition gives no in-game feedback: the door or driver just does nothing. A friendlier variant routes the
+  False link to the vanilla "not now" branch where one exists.
+- The alternative is hub-access items. Omega has no galaxy-map conditional; Illium is F491 (b312), the Citadel F197
+  (TRUE). That would gate the hub planets in the galaxy override instead: three planets, coarser, simpler.
