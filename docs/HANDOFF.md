@@ -34,6 +34,22 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
+## 2026-10-24 (PC session; GitHub is down, so this local clone is the source of truth)
+- Commit locally on claude/project-thread-5kre14 only, never push; after each commit run
+  `git bundle create <APWorldMaker>\backups\ME2-LE-Archipelago-<date>.bundle --all`.
+- E2E run on the AustinME2 seed (C:\ProgramData\Archipelago\output\ME2Test, server localhost:38281): checks send,
+  items come back, saves keep plot ints 2100-2102. Main-menu early bind fixed in the bridge (aa0dad5; ASI built at
+  APWorldMaker\tools\le2apbridge\build\repo\Build\Release, NOT installed yet; install only with LE2 closed).
+- D21 (ship upgrades are items only): research trace in tools/le2mod/research/galaxy_gating.md section 4. Blocked on
+  a before/after bridge read on a throwaway non-AP save (never AustinME2). Client bug: SHIP items set the research
+  UnlockId bool.
+- le2mod 0.0.4 (747f0a4) stages galaxy gating for Jack/Grunt/Tali/Reaper (APWorldMaker\tools\le2mod\staging-0.0.4).
+  Not installed: it closes those planets on careers without the dossier bools.
+- Hub recruits (Mordin, Garrus, Zaeed, Thane, Samara, Kasumi): gates traced (galaxy_gating.md section 6). Austin is
+  choosing between per-mission gates and hub-access items.
+- World tests on the PC: `ME2 LE Randomizer\Archipelago-main` (0.6.9 source, worlds\mass_effect_le2 is a junction to
+  this repo's world) with `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test`.
+
 ## Roadmap to playable (proposed 2026-10-20, awaiting Austin's pick)
 1. End-to-end run: real client + local AP 0.6.8 server, fresh career; confirm item delivery, check sends, reconnect.
 2. Game-side gating (SCOPE Stage 2): the le2mod gates recruitment galaxy-map objects on dossier bools (21000+i) and
