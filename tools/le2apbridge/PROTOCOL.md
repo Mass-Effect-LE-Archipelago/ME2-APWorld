@@ -1,4 +1,4 @@
-# LE2APBridge protocol (version 2)
+# LE2APBridge protocol (version 3)
 
 Named pipe `\\.\pipe\LE2APBridge`, message mode. One ASCII request per message, one reply per request.
 Replies are `OK`, `OK <value>` or `ERR <reason>`. The pipe thread validates; everything touching game state runs on the
@@ -13,7 +13,9 @@ still complete later; see TXN for why that is safe).
 | `GETB <n>` | `OK 0` / `OK 1` | Any plot bool. |
 | `GETI <n>` | `OK <value>` | Any plot int. |
 | `GETBS <n1> <n2> ...` | `OK <0/1 per index>` | Up to 64 indices, in order. |
-| `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 only (derived state the client recomputes, e.g. 21100). |
+| `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 (derived state the client recomputes, e.g. 21100), and (protocol 3) set-only the dossier journal bools 551, 548, 545, 552, 549, 553, 550 that TIM's transitions 2371/2372 set. |
+| `COND <id>` | `OK 0/1` | Protocol 3, diagnostic: `BioWorldInfo.CheckConditional(id, 0)`. |
+| `CONDCLS` | `OK <class> ...` | Protocol 3, diagnostic: `BioWorldInfo.ConditionalClasses` (the registered conditional classes). |
 | `ID` | `OK <seed> <slot>` | Save identity, plot ints 2101/2102. `0 0` = not bound. |
 | `IDSET <seed> <slot>` | `OK` / `ERR bound` | Only when the save is unbound and its received index is 0. |
 | `HIST <n> <0/1>` | `OK` / `ERR bound` | Protocol 2. ME1-history bools only (the Genesis choices: 1528-1530, 1926, 1540, 1541, 1553-1556, 3151, 3752, 7447, 7448), only on an unbound save with received index 0; the client sends them just before `IDSET`. |

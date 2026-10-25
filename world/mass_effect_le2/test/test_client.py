@@ -3,7 +3,8 @@ from dataclasses import dataclass
 
 from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
-                      notice_lines, parse_plot_predicate, seed_identity, sync_received_items)
+                      notice_lines, parse_plot_predicate, seed_identity, sync_received_items,
+                      DOSSIER_JOURNAL_BOOLS, sync_dossier_journals)
 from ..data import DOSSIERS, FEMALE_PLOT_BOOL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, ME1_HISTORY_BOOLS
 
 
@@ -51,6 +52,29 @@ class TestDelivery(unittest.TestCase):
     def test_dossier_sets_its_mod_flag(self) -> None:
         self.assertEqual(item_op(ITEM_NAME_TO_ID[DOSSIERS["Mordin Solus"]]), f"FLAG {DOSSIER_BOOL_BASE}")
         self.assertEqual(item_op(ITEM_NAME_TO_ID["Thanix Cannon"]), "SHIP 238 5645")
+
+    def test_dossier_journals_are_set_until_recruited(self) -> None:
+        # Mordin and Garrus received (AustinME2, 2026-10-25): journals 551/548 set; Grunt's dossier is ignored once
+        # recruited (bool 5812); Zaeed has no journal bool; a second poll writes nothing.
+        class Bridge(FakeBridge):
+            def set_bool(self, index, value):
+                self.bools[index] = value
+
+        bridge = Bridge()
+        bridge.bools[5812] = True
+        received = [Received(ITEM_NAME_TO_ID[DOSSIERS[m]]) for m in ("Mordin Solus", "Garrus Vakarian", "Grunt", "Zaeed Massani")]
+        self.assertEqual(sync_dossier_journals(bridge, received), [548, 551])
+        self.assertFalse(bridge.bools.get(552, False))
+        self.assertEqual(sync_dossier_journals(bridge, received), [])
+
+    def test_bridge_journal_allowlist_matches_client(self) -> None:
+        import pathlib
+        import re
+        path = pathlib.Path(__file__).resolve().parents[3] / "tools" / "le2apbridge" / "LE2APBridge" / "Bridge.cpp"
+        if not path.exists():
+            self.skipTest("bridge source not beside this world (packaged .apworld)")
+        listed = re.search(r"DossierJournalBools\[\] = \{([^}]*)\}", path.read_text()).group(1)
+        self.assertEqual({int(n) for n in listed.split(",")}, {j for j, _ in DOSSIER_JOURNAL_BOOLS.values()})
 
     def test_dossier_flags_match_the_mod_gates(self) -> None:
         # le2mod 0.0.4 gates each recruitment on these bools (tools/le2mod/Program.cs Gates/HubGates)

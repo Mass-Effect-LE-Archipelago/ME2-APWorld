@@ -196,7 +196,6 @@ static class Program
     static readonly (int vanilla, int ours, string body)[] HubConditionals =
     [
         (376, 21005, "gv.GetBool(1542) == TRUE && gv.GetBool(43) == FALSE && gv.GetBool(205) == FALSE"),   // Samara, cab console
-        (1495, 21007, "gv.GetBool(2289) == TRUE && gv.GetBool(44) == FALSE && gv.GetBool(206) == FALSE"),  // Zaeed, Omega spawn
     ];
     const string MainSeq = "TheWorld.PersistentLevel.Main_Sequence.";
     // Per-dossier hub gates. "insert": a PMCheckState on the AP bool goes in front of the node (every link into it is
@@ -210,7 +209,8 @@ static class Program
         ("BioD_TwrHub_301CarPortHall.pcc", "insert", MainSeq + "Assassin_Acquisition.BioSeqAct_PMExecuteTransition_0", "399", 0, 21004),      // Thane
         ("BioD_TwrHub_302CarPort.pcc", "repoint", MainSeq + "DLC_MODIFIED_Cab_Console", "", 376, 21005),                                    // Samara: cab menu
         ("BioD_TwrHub_302CarPort.pcc", "insert", MainSeq + "DLC_MODIFIED_Cab_Console.BioSeqAct_BlackScreen_0", "", 0, 21005),              // Samara: RE_HailCab
-        ("BioD_OmgHub_DLC_Veteran.pcc", "repoint", MainSeq + "Initialization", "", 1495, 21007),                                           // Zaeed
+        // Zaeed: his recruit conversation starts from OnPlayerActivate with no check (C1495 only runs after it, 2026-10-25).
+        ("BioD_OmgHub_DLC_Veteran.pcc", "insert", MainSeq + "Initialization.SFXSeqAct_StartConversation_1", "zyavtl_zaeed_acq_d_dlg", 0, 21007),
         ("BioD_CitHub_DLC_500Thief.pcc", "insert", MainSeq + "SFXSeqAct_StartConversation_0", "citmtl_kasumi_acq_d_dlg", 0, 21008),         // Kasumi
     ];
 
@@ -504,7 +504,7 @@ static class Program
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.4\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.5\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

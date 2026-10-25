@@ -42,6 +42,18 @@ namespace LE2APBridge
         // genesis_choices.tsv), written by the client only before it binds a fresh save.
         constexpr int HistoryBools[] = { 1528, 1529, 1530, 1926, 1540, 1541, 1553, 1554, 1555, 1556, 3151, 3752, 7447, 7448 };
 
+        // Dossier journal bools (protocol 3; me2_plot_db Journals.SquadMember_Acquisition.*): the state TIM's dossier
+        // transitions 2371/2372 set, which the hub recruit starts check. The client sets them (never clears) for each
+        // received dossier whose recruitment is not done.
+        constexpr int DossierJournalBools[] = { 551, 548, 545, 552, 549, 553, 550 };
+
+        bool IsDossierJournalBool(int const Index)
+        {
+            for (int const Allowed : DossierJournalBools)
+                if (Allowed == Index) return true;
+            return false;
+        }
+
         bool IsHistoryBool(int const Index)
         {
             for (int const Allowed : HistoryBools)
@@ -249,6 +261,27 @@ namespace LE2APBridge
                 LEASI_INFO("SETB {} {}", R.Index, R.Value);
                 return "OK";
             }
+            if (Op == "COND")
+            {
+                ABioWorldInfo* const BioWorld = CurrentBioWorld();
+                if (BioWorld == nullptr) return "ERR noworld";
+                bool const Result = BioWorld->CheckConditional(R.Index, 0);
+                LEASI_INFO("COND {} -> {}", R.Index, Result ? 1 : 0);
+                return std::string("OK ") + (Result ? "1" : "0");
+            }
+            if (Op == "CONDCLS")
+            {
+                ABioWorldInfo* const BioWorld = CurrentBioWorld();
+                if (BioWorld == nullptr) return "ERR noworld";
+                std::string Text = "OK";
+                for (decltype(BioWorld->ConditionalClasses.Count()) i = 0; i < BioWorld->ConditionalClasses.Count() && Text.size() < 3000; ++i)
+                {
+                    Text += ' ';
+                    for (wchar_t const* C = BioWorld->ConditionalClasses(i).Chars(); C != nullptr && *C != L'\0'; ++C)
+                        Text += (*C > 0x20 && *C < 0x7F) ? static_cast<char>(*C) : '?';
+                }
+                return Text;
+            }
             return "ERR badop";
         }
 
@@ -306,7 +339,11 @@ namespace LE2APBridge
             if (Op == "IDSET" && Fields == 3) return (R.Index > 0 && R.Value > 0) ? "" : "ERR notallowed";
             if (Op == "HIST" && Fields == 3) return (IsHistoryBool(R.Index) && (R.Value == 0 || R.Value == 1)) ? "" : "ERR notallowed";
             if (Op == "SETB" && Fields == 3)   // derived state the client recomputes each poll (e.g. 21100 IFF open)
-                return (R.Index >= BoolMin && R.Index <= BoolMax && (R.Value == 0 || R.Value == 1)) ? "" : "ERR notallowed";
+                return ((R.Index >= BoolMin && R.Index <= BoolMax && (R.Value == 0 || R.Value == 1))
+                        || (IsDossierJournalBool(R.Index) && R.Value == 1)) ? "" : "ERR notallowed";
+            // Diagnostics (read-only): evaluate a plot conditional, list the registered conditional classes.
+            if (Op == "COND" && Fields == 2) return R.Index >= 0 ? "" : "ERR notallowed";
+            if (Fields == 1 && Op == "CONDCLS") return "";
             return "ERR badrequest";
         }
 

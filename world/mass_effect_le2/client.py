@@ -34,7 +34,7 @@ from .world import MassEffectLE2World
 logger = logging.getLogger("ME2Client")
 
 PIPE_NAME = r"\\.\pipe\LE2APBridge"
-PROTOCOL_VERSION = 2
+PROTOCOL_VERSION = 3
 # AP-owned plot IDs (docs/DECISIONS.md D2, pending the collision audit): bools 21000-21999, ints 2100-2199.
 RECEIVED_INDEX_PLOT_INT = 2100  # read by the client; written only by the bridge inside TXN
 IDENTITY_PLOT_INTS = (2101, 2102)  # seed and slot identity of the save (0, 0 = not yet bound)
@@ -309,6 +309,29 @@ def sync_received_items(bridge: ItemBridge, received: Sequence[ReceivedItem], lo
     return applied
 
 
+# Vanilla "dossier received" state (me2_plot_db Journals.SquadMember_Acquisition.*, set by TIM's transitions 2371/2372),
+# which the hub recruit starts and the journal read, and each recruitment's done bool (the location rule). The open
+# start skips TIM's delivery, so the client sets the journal bool for every received dossier not yet recruited. The DLC
+# recruits (Zaeed, Kasumi) have no such state: their DLC flag is already set.
+DOSSIER_JOURNAL_BOOLS = {"Mordin Solus": (551, 5814), "Garrus Vakarian": (548, 5813), "Jack": (545, 5815),
+                         "Grunt": (552, 5812), "Thane Krios": (549, 5818), "Samara": (553, 5819),
+                         "Tali'Zorah vas Neema": (550, 5817)}
+DOSSIER_ITEM_JOURNAL = {ITEM_NAME_TO_ID[DOSSIERS[member]]: pair for member, pair in DOSSIER_JOURNAL_BOOLS.items()}
+
+
+def sync_dossier_journals(bridge: "BridgeConnection", received: Sequence[ReceivedItem], log: logging.Logger = logger) -> list[int]:
+    """Set the vanilla journal bool of each received dossier whose recruitment is not done; returns the bools set."""
+    pairs = {DOSSIER_ITEM_JOURNAL[item.item] for item in received if item.item in DOSSIER_ITEM_JOURNAL}
+    if not pairs:
+        return []
+    state = bridge.get_bools(sorted({b for pair in pairs for b in pair}))
+    written = [journal for journal, done in sorted(pairs) if not state[journal] and not state[done]]
+    for journal in written:
+        bridge.set_bool(journal, True)
+        log.info("Dossier journal entry %s set", journal)
+    return written
+
+
 def intel_count(received: Sequence[ReceivedItem]) -> int:
     return sum(1 for item in received if item.item == IFF_INTEL_ID)
 
@@ -421,6 +444,7 @@ class ME2Context(CommonContext):
         self._check_identity()
         received = tuple(self.items_received)
         sync_received_items(self.bridge, received)
+        sync_dossier_journals(self.bridge, received)
         if self.intel_required is not None and intel_count(received) >= self.intel_required:
             if not self.bridge.get_bool(IFF_OPEN_PLOT_BOOL):
                 self.bridge.set_bool(IFF_OPEN_PLOT_BOOL, True)

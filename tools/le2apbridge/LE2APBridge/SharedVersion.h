@@ -8,8 +8,8 @@
 #define ASI_NAME_W L"LE2 AP Bridge"
 #define ASI_NAME_NO_SPACE_A "LE2APBridge"
 #define ASI_NAME_NO_SPACE_W L"LE2APBridge"
-#define ASI_VERSION 2
-#define ASI_PROTOCOL 2
+#define ASI_VERSION 3
+#define ASI_PROTOCOL 3
 #define ASI_DESCRIPTION "Named-pipe bridge between LE2's plot table and the Archipelago client."
 
 #define ASI_GAME_ID_RC 5

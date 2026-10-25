@@ -69,6 +69,6 @@ bool. The class is registered in BIOEngine.ini (StartupPackages) and BIOGame.ini
 0.0.4 also gates the six hub recruits per dossier (research/galaxy_gating.md section 6). Mordin, Garrus and Thane each
 get a PMCheckState on 21000/21001/21004 in front of plot transition 399, which runs before the black screen and loading
 movie of their mission departure. Samara's cab menu conditional C376 becomes F21005, and her RE_HailCab black screen
-gets S21005. Zaeed's two C1495 spawn checks become F21007. Kasumi's recruit conversation gets S21008. All of it is
+gets S21005. Zaeed's recruit conversation gets S21007 (0.0.5, 2026-10-25; 0.0.4 repointed his C1495 checks instead, but those only run after the conversation, so he could still be recruited). Kasumi's recruit conversation gets S21008. All of it is
 staged and validated (reopened, links and conditionals checked) but not installed: it closes these missions on any
 career whose dossier bools are unset.
