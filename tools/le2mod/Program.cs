@@ -197,6 +197,19 @@ static class Program
     [
         (376, 21005, "gv.GetBool(1542) == TRUE && gv.GetBool(43) == FALSE && gv.GetBool(205) == FALSE"),   // Samara, cab console
     ];
+    // Galaxy-map recruit labels on the hub planets (SFXPlanetFeature FEATURE_LABEL, shown in the system tooltip): each
+    // gets a conditional 21200+i = its vanilla VisibleConditional body AND the dossier bool, so a locked recruit's name
+    // stays hidden (Austin, 2026-10-25). Planet labels (PlanetPlotLabelCondition) reuse the Gates conditionals.
+    // body is the full expression (the dossier bool is not the conditional's own number here).
+    static readonly (string map, int strref, int vanilla, int ours, string body)[] HubLabels =
+    [
+        ("BioP_OmgHub", 348619, 172, 21200, "gv.GetBool(41) == FALSE && gv.GetBool(203) == FALSE && gv.GetBool(21000) == TRUE"),   // Recruit The Professor
+        ("BioP_OmgHub", 348618, 173, 21201, "gv.GetBool(38) == FALSE && gv.GetBool(200) == FALSE && gv.GetBool(21001) == TRUE"),   // Recruit Archangel
+        ("BioP_TwrHub", 348626, 180, 21204, "gv.GetBool(312) == TRUE && gv.GetBool(39) == FALSE && gv.GetBool(201) == FALSE && gv.GetBool(21004) == TRUE"), // Recruit The Assassin
+        ("BioP_TwrHub", 348625, 183, 21205, "gv.GetBool(43) == FALSE && gv.GetBool(312) == TRUE && gv.GetBool(205) == FALSE && gv.GetBool(21005) == TRUE"), // Recruit The Justicar
+        ("BioP_OmgHub", 352029, 184, 21207, "gv.GetBool(44) == FALSE && gv.GetBool(206) == FALSE && gv.GetBool(2289) == TRUE && gv.GetBool(21007) == TRUE"), // Recruit The Veteran
+        ("BioP_CitHub", 358125, 179, 21208, "gv.GetBool(37) == FALSE && gv.GetBool(199) == FALSE && gv.GetBool(2288) == TRUE && gv.GetBool(21008) == TRUE"), // Recruit The Master Thief
+    ];
     const string MainSeq = "TheWorld.PersistentLevel.Main_Sequence.";
     // Per-dossier hub gates. "insert": a PMCheckState on the AP bool goes in front of the node (every link into it is
     // redirected through the check; False goes nowhere). "repoint": PMCheckConditional nodes move to our conditional.
@@ -304,10 +317,12 @@ static class Program
         var template = Path.Combine(bioGame, "DLC", CondTemplateDlc, "CookedPCConsole", $"Startup_{CondTemplateDlc[4..]}_INT.pcc");
         if (!File.Exists(template)) { Console.Error.WriteLine("refusing: no template " + template); return 1; }
         var startupOut = Path.Combine(cooked, StartupName + "_INT.pcc");
-        var allConds = Gates.Select(g => (g.ours, g.body)).Concat(HubConditionals.Select(h => (h.ours, h.body))).ToList();
+        var allConds = Gates.Select(g => (g.ours, body: $"{g.body} && gv.GetBool({g.ours}) == TRUE"))
+            .Concat(HubConditionals.Select(h => (h.ours, body: $"{h.body} && gv.GetBool({h.ours}) == TRUE")))
+            .Concat(HubLabels.Select(l => (l.ours, l.body))).ToList();
         var script = "Class BioAutoConditionals extends BioConditionals;\n\n" + string.Concat(allConds.Select(g =>
             $"public function bool F{g.ours}(BioWorldInfo bioWorld, int Argument)\n{{\n    local BioGlobalVariableTable gv;\n    \n" +
-            $"    gv = bioWorld.GetGlobalVariables();\n    return {g.body} && gv.GetBool({g.ours}) == TRUE;\n}}\n"));
+            $"    gv = bioWorld.GetGlobalVariables();\n    return {g.body};\n}}\n"));
         using (var pcc = MEPackageHandler.OpenMEPackage(template, forceLoadFromDisk: true))
         {
             var condPkg = pcc.Exports.FirstOrDefault(e => e.ClassName == "Package" && e.ObjectName.Name == "PlotManagerDLC_" + CondTemplateDlc[4..]);
@@ -343,7 +358,10 @@ static class Program
         var galaxy = Winner(bioGame, GalaxyFile);
         if (galaxy == null) { Console.Error.WriteLine("refusing: no " + GalaxyFile); return 1; }
         var galaxyOut = Path.Combine(cooked, GalaxyFile);
-        string[] condProps = ["PlanetLandCondition", "VisibleConditional", "UsableConditional"];
+        string[] condProps = ["PlanetLandCondition", "VisibleConditional", "UsableConditional", "PlanetPlotLabelCondition"];
+        ExportEntry Label(IMEPackage p, string map, int strref) => p.Exports.SingleOrDefault(e => e.ClassName == "SFXPlanetFeature"
+            && e.Parent is ExportEntry planet && string.Equals(planet.GetProperty<StrProperty>("MapName")?.Value, map, StringComparison.OrdinalIgnoreCase)
+            && e.GetProperty<StringRefProperty>("DisplayName")?.Value == strref);
         ExportEntry Planet(IMEPackage p, string map) => p.Exports.SingleOrDefault(e => e.ClassName == "BioPlanet"
             && string.Equals(e.GetProperty<StrProperty>("MapName")?.Value, map, StringComparison.OrdinalIgnoreCase));
         using (var pcc = MEPackageHandler.OpenMEPackage(galaxy, forceLoadFromDisk: true))
@@ -359,6 +377,16 @@ static class Program
                 foreach (var name in condProps)
                     if (planet.GetProperty<IntProperty>(name)?.Value == g.vanilla) planet.WriteProperty(new IntProperty(g.ours, name));
             }
+            foreach (var l in HubLabels)
+            {
+                var label = Label(pcc, l.map, l.strref);
+                if (label == null || label.GetProperty<IntProperty>("VisibleConditional")?.Value != l.vanilla)
+                {
+                    Console.Error.WriteLine($"refusing: {l.map} label ${l.strref} is missing or not on conditional {l.vanilla}");
+                    return 1;
+                }
+                label.WriteProperty(new IntProperty(l.ours, "VisibleConditional"));
+            }
             pcc.Save(galaxyOut);
         }
         using (var pcc = MEPackageHandler.OpenMEPackage(galaxyOut, forceLoadFromDisk: true))
@@ -367,8 +395,14 @@ static class Program
             {
                 var planet = Planet(pcc, g.map);
                 var values = condProps.Select(n => planet?.GetProperty<IntProperty>(n)?.Value).ToList();
-                Console.WriteLine($"validate: {g.map} land/visible/usable = {string.Join("/", values.Select(v => v?.ToString() ?? "-"))}");
-                if (values[0] != g.ours || values.Any(v => v == g.vanilla)) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+                Console.WriteLine($"validate: {g.map} land/visible/usable/label = {string.Join("/", values.Select(v => v?.ToString() ?? "-"))}");
+                if (values[0] != g.ours || values[3] != g.ours || values.Any(v => v == g.vanilla)) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+            }
+            foreach (var l in HubLabels)
+            {
+                var v = Label(pcc, l.map, l.strref)?.GetProperty<IntProperty>("VisibleConditional")?.Value;
+                Console.WriteLine($"validate: {l.map} label ${l.strref} visible = {v}");
+                if (v != l.ours) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
             }
         }
         Console.WriteLine($"galaxy gating built (galaxy source {galaxy})");
@@ -504,7 +538,7 @@ static class Program
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.5\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.6\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

@@ -72,3 +72,5 @@ movie of their mission departure. Samara's cab menu conditional C376 becomes F21
 gets S21005. Zaeed's recruit conversation gets S21007 (0.0.5, 2026-10-25; 0.0.4 repointed his C1495 checks instead, but those only run after the conversation, so he could still be recruited). Kasumi's recruit conversation gets S21008. All of it is
 staged and validated (reopened, links and conditionals checked) but not installed: it closes these missions on any
 career whose dossier bools are unset.
+
+0.0.6 (2026-10-25, staged only): galaxy-map recruit labels follow the locks. Planet labels (PlanetPlotLabelCondition) for Jack, Grunt, Tali and the Reaper use the gate conditionals. The hub FEATURE_LABELs 'Recruit The Professor/Archangel/Assassin/Justicar/Veteran/Master Thief' get F21200+i (vanilla body AND the dossier bool). 'Help X' loyalty labels and DLC labels (e.g. Overlord) are unchanged.
