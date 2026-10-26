@@ -192,6 +192,15 @@ static class Program
         ("BioP_JnkKgA", 182, 21003, "gv.GetBool(618) == FALSE"),                                          // Grunt, Korlus
         ("BioP_SunTlA", 181, 21006, "gv.GetBool(312) == TRUE && gv.GetBool(40) == FALSE && gv.GetBool(202) == FALSE"), // Tali, Haestrom
         ("BioP_RprGtA", 178, 21100, "gv.GetBool(313) == TRUE && gv.GetBool(1256) == FALSE"),              // Derelict Reaper
+        // DLC access (D25): Overlord, Arrival; Firewalker n = copy n of the progressive item (its vanilla Landing_Open bool is
+        // replaced, so the item order is the order the missions open)
+        ("BioP_Unc1Base1", 1864, 21101, "gv.GetBool(6512) == FALSE"),                                      // Project Overlord
+        ("BioP_ArvLvl1", 1973, 21103, "gv.GetBool(7449) == TRUE && gv.GetBool(7450) == TRUE && gv.GetBool(7451) == FALSE"), // Arrival
+        ("BioP_N7Geth1", 1559, 21111, "gv.GetBool(5187) == FALSE"),                                        // Firewalker 1: Geth Incursions
+        ("BioP_N7DriveBy", 1561, 21112, "gv.GetBool(3946) == FALSE"),                                      // Firewalker 2: Survey Sites
+        ("BioP_N7Ruins", 1563, 21113, "gv.GetBool(6206) == FALSE"),                                        // Firewalker 3: Prothean Site
+        ("BioP_N7Shipwreck", 1565, 21114, "gv.GetBool(4042) == FALSE"),                                    // Firewalker 4: Rosalie Lost
+        ("BioP_N7Mmnt8", 1567, 21115, "gv.GetBool(6219) == FALSE"),                                        // Firewalker 5: Volcano Station
     ];
     // Hub conditionals (research/galaxy_gating.md section 6): same pattern, used by repointed PMCheckConditional nodes.
     static readonly (int vanilla, int ours, string body)[] HubConditionals =
@@ -210,6 +219,8 @@ static class Program
         ("BioP_TwrHub", 348625, 183, 21205, "gv.GetBool(43) == FALSE && gv.GetBool(312) == TRUE && gv.GetBool(205) == FALSE && gv.GetBool(21005) == TRUE"), // Recruit The Justicar
         ("BioP_OmgHub", 352029, 184, 21207, "gv.GetBool(44) == FALSE && gv.GetBool(206) == FALSE && gv.GetBool(2289) == TRUE && gv.GetBool(21007) == TRUE"), // Recruit The Veteran
         ("BioP_CitHub", 358125, 179, 21208, "gv.GetBool(37) == FALSE && gv.GetBool(199) == FALSE && gv.GetBool(2288) == TRUE && gv.GetBool(21008) == TRUE"), // Recruit The Master Thief
+        ("BioP_TwrHub", 376969, 1987, 21210, "gv.GetInt(745) >= 2 && gv.GetBool(6844) == FALSE && gv.GetBool(21102) == TRUE"), // Give Liara Intel (Shadow Broker)
+        ("BioP_TwrHub", 365856, 1998, 21211, "gv.GetBool(6844) == TRUE && gv.GetBool(6815) == FALSE && gv.GetBool(21102) == TRUE"), // Take Cab to Liara's
     ];
     const string MainSeq = "TheWorld.PersistentLevel.Main_Sequence.";
     // Per-dossier hub gates. "insert": a PMCheckState on the AP bool goes in front of the node (every link into it is
@@ -226,6 +237,7 @@ static class Program
         // Zaeed: his recruit conversation starts from OnPlayerActivate with no check (C1495 only runs after it, 2026-10-25).
         ("BioD_OmgHub_DLC_Veteran.pcc", "insert", MainSeq + "Initialization.SFXSeqAct_StartConversation_1", "zyavtl_zaeed_acq_d_dlg", 0, 21007),
         ("BioD_CitHub_DLC_500Thief.pcc", "insert", MainSeq + "SFXSeqAct_StartConversation_0", "citmtl_kasumi_acq_d_dlg", 0, 21008),         // Kasumi
+        ("BioD_TwrHub_302CarPort.pcc", "insert", MainSeq + "DLC_MODIFIED_Cab_Console.SeqAct_ToggleInput_0", "", 0, 21102),                // Shadow Broker: cab to Liara's
     ];
 
     static string NodeTarget(ExportEntry node) =>
@@ -511,6 +523,8 @@ static class Program
                 }
                 foreach (var name in condProps)
                     if (planet.GetProperty<IntProperty>(name)?.Value == g.vanilla) planet.WriteProperty(new IntProperty(g.ours, name));
+                // the planet's tooltip label follows its gate (DLC planets label on their own conditionals)
+                if (planet.GetProperty<IntProperty>("PlanetPlotLabelCondition") != null) planet.WriteProperty(new IntProperty(g.ours, "PlanetPlotLabelCondition"));
             }
             foreach (var l in HubLabels)
             {
@@ -531,7 +545,7 @@ static class Program
                 var planet = Planet(pcc, g.map);
                 var values = condProps.Select(n => planet?.GetProperty<IntProperty>(n)?.Value).ToList();
                 Console.WriteLine($"validate: {g.map} land/visible/usable/label = {string.Join("/", values.Select(v => v?.ToString() ?? "-"))}");
-                if (values[0] != g.ours || values[3] != g.ours || values.Any(v => v == g.vanilla)) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
+                if (values[0] != g.ours || (values[3] != null && values[3] != g.ours) || values.Any(v => v == g.vanilla)) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
             }
             foreach (var l in HubLabels)
             {
@@ -699,7 +713,7 @@ static class Program
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.7\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.8\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

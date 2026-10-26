@@ -124,6 +124,16 @@ class TestDefaults(LE2Helpers):
             own = self.get_item_by_name(weapon)
             self.assertFalse(self.location(name).item_rule(own), name)
 
+    def test_dlc_access_items_gate_their_missions(self) -> None:
+        from ..data import FIREWALKER_ITEM
+        self.assertEqual(len(self.get_items_by_name(FIREWALKER_ITEM)), 5)
+        for item in ("David's Math Test", "Shadow Broker Toenail", "Batarian Genocide"):
+            self.assertEqual(len(self.get_items_by_name(item)), 1, item)
+        self.collect_all_but(["David's Math Test", FIREWALKER_ITEM])
+        self.assertFalse(self.can_reach_location("Project Overlord: Complete"))
+        self.collect(self.get_items_by_name(FIREWALKER_ITEM)[:4])
+        self.assertTrue(self.can_reach_location("Firewalker: Rosalie Lost"))
+        self.assertFalse(self.can_reach_location("Firewalker: Volcano Station"))
     def test_beatable_with_everything(self) -> None:
         self.collect_all_but([])
         self.assertBeatable(True)

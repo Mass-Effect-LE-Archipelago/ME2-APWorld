@@ -27,7 +27,8 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, handle_url_arg, server_loop
 from NetUtils import ClientStatus
 
-from .data import (DOSSIERS, FEMALE_PLOT_BOOL, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SALVAGE_MISSIONS,
+from .data import (DLC_ACCESS_BOOLS, DLC_ACCESS_ITEMS, DOSSIERS, FEMALE_PLOT_BOOL, FIREWALKER_BOOL_BASE, FIREWALKER_ITEM,
+                   FIREWALKER_MISSIONS, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SALVAGE_MISSIONS,
                    SALVAGE_PICKUPS, SALVAGE_PRICES, SHIP_UPGRADES,
                    WEAPONS, me1_history_writes)
 from .world import MassEffectLE2World
@@ -280,12 +281,18 @@ def evaluate_locations(bridge: PlotReader, locations: set[int] | None = None) ->
 
 DOSSIER_IDS = {ITEM_NAME_TO_ID[name]: i for i, name in enumerate(DOSSIERS.values())}
 IFF_INTEL_ID = ITEM_NAME_TO_ID[IFF_INTEL]
+DLC_ACCESS_FLAGS = {ITEM_NAME_TO_ID[item]: DLC_ACCESS_BOOLS[key] for key, item in DLC_ACCESS_ITEMS.items()}
+FIREWALKER_ID = ITEM_NAME_TO_ID[FIREWALKER_ITEM]
 
 
-def item_op(item_id: int) -> str:
+def item_op(item_id: int, copies_before: int = 0) -> str:
     """The TXN operation that delivers one item (the bridge validates every target against its allowlist)."""
     if item_id in DOSSIER_IDS:
         return f"FLAG {DOSSIER_BOOL_BASE + DOSSIER_IDS[item_id]}"
+    if item_id in DLC_ACCESS_FLAGS:
+        return f"FLAG {DLC_ACCESS_FLAGS[item_id]}"
+    if item_id == FIREWALKER_ID:  # progressive: the n-th copy opens the n-th Firewalker mission
+        return f"FLAG {FIREWALKER_BOOL_BASE + min(copies_before, len(FIREWALKER_MISSIONS) - 1) + 1}"
     name = next((n for n, data_id in ITEM_NAME_TO_ID.items() if data_id == item_id), None)
     if name in SHIP_UPGRADES:
         return f"SHIP {SHIP_UPGRADE_BOOLS[name]}"
@@ -326,7 +333,8 @@ def sync_received_items(bridge: ItemBridge, received: Sequence[ReceivedItem], lo
         return []
     applied: list[int] = []
     for index in range(start, len(received)):
-        if bridge.transaction(index, item_op(received[index].item)):
+        copies_before = sum(1 for earlier in received[:index] if earlier.item == received[index].item)
+        if bridge.transaction(index, item_op(received[index].item, copies_before)):
             applied.append(received[index].item)
     return applied
 

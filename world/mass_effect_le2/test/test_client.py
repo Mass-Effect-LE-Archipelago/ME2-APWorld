@@ -161,6 +161,11 @@ class TestDelivery(unittest.TestCase):
         self.assertEqual(int(cap[0]), SALVAGE_CAP_INT_BASE)
         self.assertGreaterEqual(int(cap[1]), SALVAGE_CAP_INT_BASE + len(SALVAGE_MISSIONS) - 1)
 
+    def test_dlc_access_items_set_their_flags(self) -> None:
+        from ..data import FIREWALKER_ITEM
+        self.assertEqual(item_op(ITEM_NAME_TO_ID["Batarian Genocide"]), "FLAG 21103")
+        firewalker = ITEM_NAME_TO_ID[FIREWALKER_ITEM]
+        self.assertEqual([item_op(firewalker, n) for n in range(5)], [f"FLAG {21111 + n}" for n in range(5)])
     def test_dossier_flags_match_the_mod_gates(self) -> None:
         # le2mod 0.0.4 gates each recruitment on these bools (tools/le2mod/Program.cs Gates/HubGates)
         expected = {"Mordin Solus": 21000, "Garrus Vakarian": 21001, "Jack": 21002, "Grunt": 21003, "Thane Krios": 21004,

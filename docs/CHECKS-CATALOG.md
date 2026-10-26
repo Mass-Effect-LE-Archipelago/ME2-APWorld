@@ -544,3 +544,7 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d32010e | M-451 Firestorm | useful | weapon |
 | 0x4d32010f | M-622 Avalanche | useful | weapon |
 | 0x4d320110 | M-920 Cain | useful | weapon |
+| 0x4d320050 | David's Math Test | progression | access |
+| 0x4d320051 | Shadow Broker Toenail | progression | access |
+| 0x4d320052 | Batarian Genocide | progression | access |
+| 0x4d320053 | I'm Sorry (Progressive Firewalker Mission) | progression | access |

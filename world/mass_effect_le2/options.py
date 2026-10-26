@@ -101,6 +101,14 @@ class Codex(DefaultOnToggle):
     display_name = "Codex"
 
 
+class DLCAccess(DefaultOnToggle):
+    """DLC missions need an item to open: Project Overlord ("David's Math Test"), Lair of the Shadow Broker ("Shadow
+    Broker Toenail", the Illium cab), Arrival ("Batarian Genocide") and Firewalker ("I'm Sorry (Progressive Firewalker
+    Mission)", five copies, one per mission in order). Only for DLC in enabled_dlc."""
+
+    display_name = "DLC Access Items"
+
+
 class Salvage(DefaultOnToggle):
     """Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers
     "<mission> Salvage". Each purchase sends one of that mission's pickup checks you left behind. Only matters with
@@ -197,6 +205,7 @@ class MassEffectLE2Options(PerGameCommonOptions):
     collectibles: Collectibles
     pickups: Pickups
     codex: Codex
+    dlc_access: DLCAccess
     salvage: Salvage
     salvage_price: SalvagePrice
     weapon_unlocks: WeaponUnlocks
@@ -228,7 +237,7 @@ options_presets = {
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
     OptionGroup("Start", [StartOnNormandy]),
-    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, Salvage, SalvagePrice, EnabledDLC]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, DLCAccess, Salvage, SalvagePrice, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
     OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

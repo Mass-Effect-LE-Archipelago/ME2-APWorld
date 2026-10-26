@@ -48,6 +48,7 @@ class MassEffectLE2World(World):
                          and not loc.excluded and not (safe and loc.category == "pickup") and loc.category != "codex")
         fixed = sum(1 for name, item in data.ITEMS.items() if item.count
                     and (name not in items.DLC_DOSSIERS or items.dlc_enabled(self, items.DLC_DOSSIERS[name])))
+        fixed += sum(count for _, count in items.dlc_access_items(self))
         room = open_slots - fixed + (self.starting_dossier is not None) - MIN_FILLER_SLOTS
         total = self.options.intel_total
         if total.value > room:
@@ -77,7 +78,7 @@ class MassEffectLE2World(World):
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {
             **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "start_on_normandy", "assignments",
-                                 "research", "collectibles", "pickups", "codex", "salvage", "salvage_price", "weapon_unlocks"),
+                                 "research", "collectibles", "pickups", "codex", "dlc_access", "salvage", "salvage_price", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
             "starting_dossier": self.starting_dossier,
             "me1_history": {key: getattr(self.options, key).current_key for key in data.ME1_HISTORY},

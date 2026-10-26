@@ -21,10 +21,26 @@ def check_rule(loc: data.LocationData) -> Rule | None:
     return rule
 
 
+def dlc_access_rule(world: MassEffectLE2World, name: str, loc: data.LocationData) -> Rule | None:
+    """D25: a DLC location also needs its DLC's access item (Firewalker: as many copies as its mission's place)."""
+    if not world.options.dlc_access or loc.dlc is None:
+        return None
+    if loc.dlc in data.DLC_ACCESS_ITEMS:
+        return Has(data.DLC_ACCESS_ITEMS[loc.dlc])
+    if loc.dlc == "Firewalker":
+        return Has(data.FIREWALKER_ITEM, data.firewalker_copies(name))
+    return None
+
+
 def set_rules(world: MassEffectLE2World) -> None:
     # Entrance rules are set when regions are created (regions.ENTRANCES).
     for name, loc in data.LOCATIONS.items():
-        if location_included(world, loc) and (rule := check_rule(loc)) is not None:
+        if not location_included(world, loc):
+            continue
+        rule = check_rule(loc)
+        if (access := dlc_access_rule(world, name, loc)) is not None:
+            rule = access if rule is None else rule & access
+        if rule is not None:
             world.set_rule(world.get_location(name), rule)
 
     # Events share their check's rule: an event is "the player did this", the check is "the client sent it".

@@ -117,7 +117,25 @@ ITEMS: dict[str, ItemData] = {
     # 0x100-0x1FF weapon unlocks (weapon_unlocks option)
     **{name: ItemData(0x100 + i, _U, count=0, groups=frozenset({"Weapons"}), grant="weapon")
        for i, name in enumerate(WEAPONS)},
+    # 0x50-0x5F DLC mission access (dlc_access option, D25; names chosen by Austin): counted by items.create_items
+    **{name: ItemData(0x50 + i, _P, count=0, groups=frozenset({"DLC Access"}), grant="access")
+       for i, name in enumerate(("David's Math Test", "Shadow Broker Toenail", "Batarian Genocide",
+                                 "I'm Sorry (Progressive Firewalker Mission)"))},
 }
+
+# DLC access (D25): each DLC mission's galaxy-map planet (or the Illium cab, for the Shadow Broker) opens only with its
+# item; the mod ANDs the AP bool into its conditional. Firewalker is progressive: copy n opens mission n in this order.
+DLC_ACCESS_ITEMS = {"Overlord": "David's Math Test", "Shadow Broker": "Shadow Broker Toenail", "Arrival": "Batarian Genocide"}
+DLC_ACCESS_BOOLS = {"Overlord": 21101, "Shadow Broker": 21102, "Arrival": 21103}
+FIREWALKER_ITEM = "I'm Sorry (Progressive Firewalker Mission)"
+FIREWALKER_BOOL_BASE = 21110  # + copy number (1-5)
+FIREWALKER_MISSIONS = ("Firewalker: Geth Incursions", "Firewalker: Survey Sites Located", "Firewalker: Prothean Site",
+                       "Firewalker: Rosalie Lost", "Firewalker: Volcano Station")
+
+
+def firewalker_copies(location: str) -> int:
+    """Copies of the Firewalker item a Firewalker location needs (its pickups and relic lie in the Prothean Site)."""
+    return FIREWALKER_MISSIONS.index(location) + 1 if location in FIREWALKER_MISSIONS else 3
 
 ITEM_NAME_TO_ID = {name: ID_BASE + data.offset for name, data in ITEMS.items()}
 ITEM_NAME_GROUPS = {
