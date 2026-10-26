@@ -34,6 +34,17 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
+## Release 0.2.0 (2026-10-26, latest)
+- Release folder: APWorldMaker\release\ME2LE-AP-0.2.0 (apworld, LE2APBridge.asi v4/protocol 4, mod 0.0.9 folder + zip,
+  install.ps1 / uninstall.ps1, README, documented YAML). Installed on Austin's PC with install.ps1 (2026-10-26 00:12;
+  backups in release\ME2LE-AP-0.2.0\backup plus APWorldMaker\backups). World 0.2.0: codex (D23), weapon pickups (D24),
+  DLC access items (D25), Progressive Loyalty (D26), salvage (D22), ship upgrades as items (D21), career marker.
+- Hosting: archipelago.gg (upload the AP_*.zip at archipelago.gg/uploads); the multidata embeds the data package, so
+  no server-side world is needed (checked 2026-10-26 with a stock 0.6.8 Generate, ME2 + Hollow Knight stand-in).
+- Pending: Austin's brother's YAML, then generate in C:\ProgramData\Archipelago\Players_ME2Test2 (AustinME2b.yaml is
+  there; remove Brother_HK_standin.yaml first) and upload. First in-game run of 0.0.9/v4 on a New Career.
+- Desktop .bat now starts only the ME2 client (no local server).
+
 ## Current state (2026-10-26, PC session; GitHub is down, so this local clone is the source of truth)
 - Commit locally on claude/project-thread-5kre14 only, never push; after each commit run
   `git bundle create <APWorldMaker>\backups\ME2-LE-Archipelago-<date>.bundle --all`.
