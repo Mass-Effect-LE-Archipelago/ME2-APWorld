@@ -1,0 +1,270 @@
+# Q. What is this file?
+# A. This file contains options which allow you to configure your multiworld experience while allowing
+#    others to play how they want as well.
+#
+# Q. How do I use it?
+# A. The options in this file are weighted. This means the higher number you assign to a value, the
+#    more chances you have for that option to be chosen. For example, an option like this:
+#
+#    map_shuffle:
+#      on: 5
+#      off: 15
+#
+#    Means you have 5 chances for map shuffle to occur, and 15 chances for map shuffle to be turned
+#    off.
+#
+# Q. I've never seen a file like this before. What characters am I allowed to use?
+# A. This is a .yaml file. You are allowed to use most characters.
+#    To test if your yaml is valid or not, you can use this website:
+#        http://www.yamllint.com/
+#    You can also verify that your Archipelago options are valid at this site:
+#        https://archipelago.gg/check
+
+# Your name in-game, limited to 16 characters.
+#     {player} will be replaced with the player's slot number.
+#     {PLAYER} will be replaced with the player's slot number, if that slot number is greater than 1.
+#     {number} will be replaced with the counter value of the name.
+#     {NUMBER} will be replaced with the counter value of the name, if the counter value is greater than 1.
+name: Player{number}
+
+# Used to describe your yaml. Useful if you have multiple files.
+description: Default Mass Effect Legendary Edition 2 Template
+
+game: Mass Effect Legendary Edition 2
+requires:
+  version: 0.6.8 # Version of Archipelago required for this yaml to work as expected.
+  game:
+    Mass Effect Legendary Edition 2: 0.2.0 # Version of the world required for this yaml to work as expected.
+
+Mass Effect Legendary Edition 2:
+  ################
+  # Game Options #
+  ################
+  progression_balancing:
+    # A system that can move progression earlier, to try and prevent the player from getting stuck and bored early.
+    # 
+    # A lower setting means more getting stuck. A higher setting means less getting stuck.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 0
+    # Maximum value is 99
+    random: 0
+    random-low: 0 # random value weighted towards lower values
+    random-high: 0 # random value weighted towards higher values
+    random-range-0-99: 0 # random value between 0 and 99
+    disabled: 0 # equivalent to 0
+    normal: 50 # equivalent to 50
+    extreme: 0 # equivalent to 99
+
+  accessibility:
+    # Set rules for reachability of your items/locations.
+    # 
+    # **Full:** ensure everything can be reached and acquired.
+    # 
+    # **Minimal:** ensure what is needed to reach your goal can be acquired.
+    full: 50
+    minimal: 0
+
+  ########
+  # Goal #
+  ########
+  intel_total:
+    # How many Reaper IFF Intel items are shuffled into the item pool.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 1
+    # Maximum value is 10
+    5: 50
+    random: 0
+    random-low: 0 # random value weighted towards lower values
+    random-high: 0 # random value weighted towards higher values
+    random-range-1-10: 0 # random value between 1 and 10
+
+  intel_required:
+    # How many Reaper IFF Intel items open the Derelict Reaper mission (after the Collector Ship). Lowered to the pool
+    # size if it is larger.
+    #
+    # You can define additional values between the minimum and maximum values.
+    # Minimum value is 1
+    # Maximum value is 10
+    3: 50
+    random: 0
+    random-low: 0 # random value weighted towards lower values
+    random-high: 0 # random value weighted towards higher values
+    random-range-1-10: 0 # random value between 1 and 10
+
+  endgame_readiness:
+    # What logic expects before the Omega 4 Relay, so a successful suicide mission is always possible.
+    # 
+    # all_loyal: the three Normandy upgrades, and every loyalty mission of every squadmate recruitable in this seed.
+    # ship_upgrades: the three Normandy upgrades only. Choosing specialists well is up to you.
+    all_loyal: 50
+    ship_upgrades: 0
+
+  #########
+  # Start #
+  #########
+  start_on_normandy:
+    # After the character creator, a new career skips Lazarus Station and Freedom's Progress and starts aboard the SR-2
+    # at the galaxy map, with Miranda and Jacob in the squad and the story state those missions give. Their checks are
+    # removed, and one first-wave dossier is given at the start instead.
+    'false': 0
+    'true': 50
+
+  ##########
+  # Checks #
+  ##########
+  assignments:
+    # Which side assignments are checks.
+    # 
+    # off: none. n7: the N7 assignments found by scanning planets. all: also hub assignments on Omega, the Citadel,
+    # Illium and Tuchanka, and the Normandy's own tasks.
+    'off': 0
+    n7: 50
+    all: 0
+
+  research:
+    # Buying a research project in the Normandy's tech lab is a check (44 projects; the three suicide-mission ship
+    # upgrades are items instead). Logic places these after the Collector Ship with every loyalty mission done.
+    'false': 0
+    'true': 50
+
+  collectibles:
+    # Captain's cabin purchases (models, fish, the space hamster) and base-game armor pieces are checks. Logic places
+    # these after the Collector Ship with every loyalty mission done.
+    'false': 0
+    'true': 50
+
+  pickups:
+    # Credit caches, resource nodes and upgrade blueprints picked up in missions and hubs are checks (258 with every
+    # DLC; weapon pickups are not). Most missions cannot be replayed, so a pickup you walk past is gone for good.
+    # 
+    # off: no pickups. safe: pickups hold no progression items, so a missed one never blocks the seed. any: pickups can
+    # hold anything; sweep each mission before leaving it.
+    'off': 0
+    safe: 50
+    any: 0
+
+  codex:
+    # Codex entries the game unlocks after the start are checks (73: the starting entries are left out, and each
+    # Paragon/Renegade pair is one check). Some come from optional conversations, so they never hold progression.
+    'false': 0
+    'true': 50
+
+  dlc_access:
+    # DLC missions need an item to open: Project Overlord ("David's Math Test"), Lair of the Shadow Broker ("Shadow
+    # Broker Toenail", the Illium cab), Arrival ("Batarian Genocide") and Firewalker ("I'm Sorry (Progressive Firewalker
+    # Mission)", five copies, one per mission in order). Only for DLC in enabled_dlc.
+    'false': 0
+    'true': 50
+
+  progressive_loyalty:
+    # Loyalty missions need a "Progressive Loyalty Mission" item (one copy per squadmate). Each copy opens the loyalty
+    # mission of the next squadmate, in a fixed order, who is recruited and not yet loyal. The logic expects every copy
+    # before any loyalty mission, since which mission a copy opens depends on your progress.
+    'false': 0
+    'true': 50
+
+  salvage:
+    # Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers
+    # "<mission> Salvage". Each purchase sends one of that mission's pickup checks you left behind. Only matters with
+    # pickups on.
+    'false': 0
+    'true': 50
+
+  salvage_price:
+    # Credits per salvaged check (each purchase at the research terminal sends one missed pickup).
+    free: 0
+    '500': 0
+    '1000': 50
+    '2500': 0
+    '5000': 0
+
+  enabled_dlc:
+    # DLC content that adds checks (and, for Kasumi and Zaeed, their dossiers and loyalty missions). Remove what you do
+    # not want to play; Legendary Edition includes all of it.
+    ['Arrival', 'Kasumi', 'Normandy Crash Site', 'Shadow Broker', 'Overlord', 'Firewalker', 'Zaeed']
+
+  #########
+  # Items #
+  #########
+  weapon_unlocks:
+    # Shuffle weapon unlocks (Carnifex, Mattock, Viper, the heavy weapons...) into the pool as useful items. Receiving
+    # one unlocks that weapon early; the vanilla pickups and research still work as usual.
+    'false': 0
+    'true': 50
+
+  ###############
+  # ME1 History #
+  ###############
+  me1_virmire_survivor:
+    # ME1 history (the Genesis comic is skipped): who survived Virmire.
+    ashley: 50
+    kaidan: 0
+
+  me1_romance:
+    # ME1 history: Shepard's romance. Ashley needs a male Shepard and Kaidan a female one, each as the Virmire
+    # survivor; otherwise the client sets none.
+    none: 50
+    ashley: 0
+    kaidan: 0
+    liara: 0
+
+  me1_rachni:
+    # ME1 history: the Rachni Queen's fate.
+    saved: 50
+    killed: 0
+
+  me1_wrex:
+    # ME1 history: Wrex on Virmire.
+    alive: 50
+    dead: 0
+
+  me1_council:
+    # ME1 history: the Council at the Battle of the Citadel.
+    saved: 50
+    sacrificed: 0
+
+  me1_human_councilor:
+    # ME1 history: humanity's councilor.
+    anderson: 50
+    udina: 0
+
+  ###########################
+  # Item & Location Options #
+  ###########################
+  local_items:
+    # Forces these items to be in their native world.
+    []
+
+  non_local_items:
+    # Forces these items to be outside their native world.
+    []
+
+  start_inventory:
+    # Start with the specified amount of these items. Example: {Bomb: 1, Arrow: 3}
+    {}
+
+  start_hints:
+    # Start with these item's locations prefilled into the ``!hint`` command.
+    []
+
+  start_location_hints:
+    # Start with these locations and their item prefilled into the ``!hint`` command.
+    []
+
+  exclude_locations:
+    # Prevent these locations from having an important item.
+    []
+
+  priority_locations:
+    # Prevent these locations from having an unimportant item.
+    []
+
+  item_links:
+    # Share part of your item pool with other players.
+    []
+
+  plando_items:
+    # Generic items plando.
+    []
