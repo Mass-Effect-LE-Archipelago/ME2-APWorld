@@ -34,6 +34,24 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
+## Now (2026-10-26, paused for the night)
+- Installed on Austin's PC: release 0.2.1 (apworld 0.2.1 in custom_worlds; game files as 0.2.0; Mod Manager's
+  LEBinkProxy is the ASI loader, restored after an aborted swap; backup in backups\loader-swap-2026-10-26).
+- Our ASI loader (approved by Austin, so Mod Manager is not needed): tools/asiloader builds bink2w64.dll ("AP ASI
+  Loader" 1.0.0). It forwards the 80 Bink exports by name to bink2w64_original.dll and loads ASI\*.asi. It implements
+  SPI v3 (GetVersion, GetBuildMode, GetHostGame, FindPattern, InstallHook, UninstallHook) with its own x64 detour
+  engine on hde64 (BSD; full MinHook was not on disk). Post-load plugins attach once the game window exists (the
+  exe's .text is encrypted on disk). Offline test: build with VS CMake (VS 18 CMake path), copy MassEffect2.exe +
+  bink2w64.dll to a folder with ASI\test.asi, run it: all 10 checks pass. It is not committed to the release yet.
+- The setup app (0.2.2, not published yet) installs ours only when no loader is present (renames the RAD DLL to
+  bink2w64_original.dll, backs it up), repairs ours, uninstalls ours, and leaves any other loader alone. It needs the
+  loader's bink2w64.dll next to the exe.
+- Next: (1) in-game loader test: with ME2 closed, back up LEBinkProxy, copy tools\asiloader\build\Release\bink2w64.dll
+  over Win64\bink2w64.dll, have Austin start ME2 to the main menu, check Win64\APAsiLoader.log (LE2APBridge attach
+  true) and scratchpad bridge_ping.py (`\\.\pipe\LE2APBridge` PING/VER), then restore LEBinkProxy. (2) Release 0.2.2:
+  publish the app, add bink2w64.dll and hde/MinHook license to the release, README. (3) Brother's YAML -> Generate ->
+  upload at archipelago.gg.
+
 ## Release 0.2.1 (2026-10-26, latest)
 - Release folder: APWorldMaker\release\ME2LE-AP-0.2.1 = 0.2.0 contents plus `ME2 AP Setup.exe` (tools/setup, WinForms
   net10.0, self-contained single file, ~135 MB): Folders (auto-detect), Install/Repair/Uninstall with backups (Mod

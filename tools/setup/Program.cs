@@ -161,8 +161,9 @@ sealed class MainForm : Form
         var page = new TabPage("2. Install");
         var flow = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.TopDown, Padding = new Padding(12) };
         flow.Controls.Add(new Label { AutoSize = true, MaximumSize = new Size(820, 0), Text =
-            "Close Mass Effect 2 and the Archipelago client first. Install (or Repair) copies the world into Archipelago, the bridge into ME2's ASI folder " +
-            "and has Mod Manager install the mod. Anything replaced is backed up and Uninstall puts it back." });
+            "Close Mass Effect 2 and the Archipelago client first. Install (or Repair) copies the world into Archipelago, adds the AP ASI Loader to ME2 " +
+            "(unless a loader such as Mod Manager's is already there), puts the bridge in ME2's ASI folder and installs the mod (through Mod Manager if " +
+            "ticked, otherwise directly). Mod Manager is not needed. Anything replaced is backed up and Uninstall puts it back." });
         flow.Controls.Add(_status);
         var buttons = new FlowLayoutPanel { AutoSize = true };
         flow.Controls.Add(_useModManager);
@@ -203,7 +204,7 @@ sealed class MainForm : Form
         bool game = File.Exists(Path.Combine(Win64, "MassEffect2.exe")), ap = File.Exists(Path.Combine(_apDir.Text, "ArchipelagoLauncher.exe"));
         lines.AppendLine($"Mass Effect 2 LE      : {(game ? "found" : "NOT FOUND - set the folder on page 1")}");
         lines.AppendLine($"Archipelago           : {(ap ? "found" : "NOT FOUND - set the folder on page 1")}");
-        lines.AppendLine($"ASI loader            : {(game && File.Exists(Path.Combine(Win64, "bink2w64_original.dll")) ? "installed" : "MISSING - install ME3Tweaks Mod Manager, pick LE2, Tools > Bink bypass (it is not ours to ship)")}");
+        lines.AppendLine($"ASI loader            : {(game ? LoaderState() : "-")}");
         lines.AppendLine($"Mod Manager           : {(File.Exists(_modManager.Text) ? "found" : "not found (install the mod zip by hand)")}");
         lines.AppendLine($"Archipelago world     : {(ap ? State(Path.Combine(_here, "mass_effect_le2.apworld"), WorldTarget) : "-")}");
         lines.AppendLine($"Game bridge (ASI)     : {(game ? State(Path.Combine(_here, "LE2APBridge.asi"), AsiTarget) : "-")}");
@@ -223,8 +224,7 @@ sealed class MainForm : Form
     {
         if (!File.Exists(Path.Combine(_apDir.Text, "ArchipelagoLauncher.exe"))) throw new InvalidOperationException("Set the Archipelago folder on page 1.");
         if (!File.Exists(Path.Combine(Win64, "MassEffect2.exe"))) throw new InvalidOperationException("Set the Mass Effect Legendary Edition folder on page 1.");
-        if (!File.Exists(Path.Combine(Win64, "bink2w64_original.dll")))
-            throw new InvalidOperationException("The ASI loader is missing. In ME3Tweaks Mod Manager pick the LE2 target and use Tools > ASI Mod Manager (installing any ASI adds the loader), then try again.");
+        InstallLoader();
         Directory.CreateDirectory(Path.GetDirectoryName(WorldTarget));
         BackupFile(WorldTarget, "mass_effect_le2.apworld");
         File.Copy(Path.Combine(_here, "mass_effect_le2.apworld"), WorldTarget, true);
@@ -261,10 +261,49 @@ sealed class MainForm : Form
         }
         if (File.Exists(Path.Combine(_apDir.Text, "ArchipelagoLauncher.exe"))) Restore(WorldTarget, "mass_effect_le2.apworld");
         if (Directory.Exists(Win64)) Restore(AsiTarget, "LE2APBridge.asi");
+        if (Directory.Exists(Win64)) UninstallLoader();
         if (Directory.Exists(ModTarget)) Directory.Delete(ModTarget, true);
         var savedMod = Path.Combine(Backup, "DLC_MOD_ArchipelagoME2");
         if (Directory.Exists(savedMod)) CopyDirectory(savedMod, ModTarget);
         MessageBox.Show(this, "Removed (earlier versions restored where a backup existed).", "ME2 AP Setup");
+    }
+
+    // ---------------------------------------------------------------- ASI loader
+    // Ours (tools/asiloader, "AP ASI Loader") and Mod Manager's LEBinkProxy both replace bink2w64.dll and keep the real
+    // RAD DLL as bink2w64_original.dll. We install ours only where no loader is present and never touch another one.
+    string BinkProxy => Path.Combine(Win64, "bink2w64.dll");
+    string BinkOriginal => Path.Combine(Win64, "bink2w64_original.dll");
+    string LoaderPayload => Path.Combine(_here, "bink2w64.dll");
+
+    static string Product(string path) => File.Exists(path) ? FileVersionInfo.GetVersionInfo(path).ProductName ?? "" : "";
+    bool OursInstalled => File.Exists(BinkOriginal) && Product(BinkProxy) == "AP ASI Loader";
+
+    string LoaderState()
+    {
+        if (!File.Exists(BinkOriginal)) return "not installed (Install adds the AP ASI Loader)";
+        if (OursInstalled) return "AP ASI Loader, " + (Hash(LoaderPayload) == Hash(BinkProxy) ? "this version" : "different version (Repair updates it)");
+        return $"{(Product(BinkProxy) is var p && p.Length > 0 ? p : "another loader")} (e.g. Mod Manager's); left as it is";
+    }
+
+    void InstallLoader()
+    {
+        if (File.Exists(BinkOriginal))
+        {
+            if (OursInstalled) File.Copy(LoaderPayload, BinkProxy, true);  // repair/update ours; leave any other loader alone
+            return;
+        }
+        if (!Product(BinkProxy).Contains("Bink"))
+            throw new InvalidOperationException("ME2's bink2w64.dll is not the game's own (RAD Bink) file, so the ASI loader was not installed. Verify the game files in Steam/EA and try again.");
+        BackupFile(BinkProxy, "bink2w64.dll");
+        File.Move(BinkProxy, BinkOriginal);
+        File.Copy(LoaderPayload, BinkProxy);
+    }
+
+    void UninstallLoader()
+    {
+        if (!OursInstalled) return;
+        File.Delete(BinkProxy);
+        File.Move(BinkOriginal, BinkProxy);
     }
 
     static void CopyDirectory(string from, string to)
