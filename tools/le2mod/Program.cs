@@ -37,6 +37,7 @@ static class Program
     // Left out on purpose: 2371 dossiers (AP items), 5672 Go_To_Citadel (hub access is AP logic), XP/mission-done bools
     // 5794/5795 (they are AP checks), 4253 ProCer achievement.
     static readonly int[] DefaultTransitions = [48, 46, 2398, 2210, 2225, 2401, 4813, 2403];
+    const int CareerMarkerBool = 21999;   // client: only unbound saves with this bool set may be bound (world client.py)
 
     static string AreaName(ExportEntry area) =>
         area.GetProperty<NameProperty>("AreaName")?.Value.Instanced ?? area.GetProperty<StrProperty>("AreaName")?.Value ?? "";
@@ -623,7 +624,25 @@ static class Program
             KismetHelper.CreateOutputLink(creator, "Finished", chain[0]);
             // New nodes carry no serialized OutputLinks (the class default "Out" applies), so write the "Out" link.
             for (int i = 0; i + 1 < chain.Count; i++) KismetHelper.CreateNewOutputLink(chain[i], "Out", chain[i + 1]);
-            KismetHelper.CreateNewOutputLink(chain[^1], "Out", black);
+            // Archipelago career marker (2026-10-26): plot bool CareerMarkerBool = TRUE, so the client binds only careers
+            // started with this mod (a vanilla save loaded by mistake was bound and its progress sent as checks).
+            var marker = SequenceObjectCreator.CreateSequenceObject(seq, "SeqAct_SetBool");
+            var markerVar = SequenceObjectCreator.CreateSequenceObject(seq, "BioSeqVar_StoryManagerBool");
+            markerVar.WriteProperty(new IntProperty(CareerMarkerBool, "m_nIndex"));
+            var trueVar = SequenceObjectCreator.CreateSequenceObject(seq, "SeqVar_Bool");
+            trueVar.WriteProperty(new IntProperty(1, "bValue"));
+            // New nodes carry no VariableLinks either (CreateVariableLink needs them), so write both links as vanilla
+            // SetBools have them (BioD_Nor_130TechLabs EDI_Tour_Lab.SeqAct_SetBool_0).
+            StructProperty VarLink(ExportEntry v, string desc, string prop, int min, bool writeable) => new("SeqVarLink",
+            [
+                new ArrayProperty<ObjectProperty>([new ObjectProperty(v)], "LinkedVariables"), new StrProperty(desc, "LinkDesc"),
+                new ObjectProperty(trueVar.Class, "ExpectedType"), new NameProperty("None", "LinkVar"), new NameProperty(prop, "PropertyName"),
+                new IntProperty(min, "MinVars"), new IntProperty(255, "MaxVars"), new BoolProperty(writeable, "bWriteable"),
+                new BoolProperty(false, "bModifiesLinkedObject"), new BoolProperty(false, "bAllowAnyType"),
+            ]);
+            marker.WriteProperty(new ArrayProperty<StructProperty>([VarLink(markerVar, "Target", "Target", 1, true), VarLink(trueVar, "Value", "None", 0, false)], "VariableLinks"));
+            KismetHelper.CreateNewOutputLink(chain[^1], "Out", marker);
+            KismetHelper.CreateNewOutputLink(marker, "Out", black);
 
             // Same property type as the vanilla value (NameProperty in LE2, StrProperty elsewhere).
             if (area.GetProperty<NameProperty>("AreaName") != null) area.WriteProperty(new NameProperty(TargetArea, "AreaName"));
@@ -646,7 +665,11 @@ static class Program
                 ids.Add(node.GetProperty<IntProperty>("m_nIndex").Value);
                 node = KismetHelper.GetOutputLinksOfNode(node)[0].FirstOrDefault()?.LinkedOp as ExportEntry;
             }
-            ok &= ids.SequenceEqual(transitions) && node?.InstancedFullPath == BlackNode;
+            // then the career marker SetBool, then the black screen
+            var markerOk = node?.ClassName == "SeqAct_SetBool"
+                && KismetHelper.GetVariableLinksOfNode(node).Any(l => l.LinkedNodes.Any(v => v is ExportEntry e && e.ClassName == "BioSeqVar_StoryManagerBool" && e.GetProperty<IntProperty>("m_nIndex")?.Value == CareerMarkerBool));
+            if (markerOk) node = KismetHelper.GetOutputLinksOfNode(node)[0].FirstOrDefault()?.LinkedOp as ExportEntry;
+            ok &= markerOk && ids.SequenceEqual(transitions) && node?.InstancedFullPath == BlackNode;
             Console.WriteLine($"validate: area={(area == null ? "?" : AreaName(area))}/{area?.GetProperty<NameProperty>("StartPoint")?.Value.Instanced} chain=[{string.Join(",", ids)}] -> {node?.ObjectName.Instanced}");
             if (!ok) { Console.Error.WriteLine("validation FAILED; staging left unchanged"); return 1; }
         }

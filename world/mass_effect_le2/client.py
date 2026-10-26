@@ -41,6 +41,8 @@ RECEIVED_INDEX_PLOT_INT = 2100  # read by the client; written only by the bridge
 IDENTITY_PLOT_INTS = (2101, 2102)  # seed and slot identity of the save (0, 0 = not yet bound)
 DOSSIER_BOOL_BASE = 21000  # + dossier index: the mod's galaxy-map conditional for that recruitment mission
 IFF_OPEN_PLOT_BOOL = 21100  # set by the client once enough Reaper IFF Intel arrived: opens the Derelict Reaper
+CAREER_MARKER_PLOT_BOOL = 21999  # set by le2mod's character-creator chain (0.0.7): only such saves may be bound
+BIND_MAX_TRUE_LOCATIONS = 5  # second guard: a fresh career has (almost) no locations done
 GOAL_PLOT_BOOL = 1456  # "Game done" (me2_plot_db); candidate until the ending is observed (D11)
 POLL_INTERVAL_SECONDS = 2.0
 BATCH_READ_MAX = 64  # GETBS indices per request
@@ -486,6 +488,15 @@ class ME2Context(CommonContext):
                     logger.error("This save is past the ending, so it cannot start an Archipelago seed. "
                                  "Load an earlier save, or start a new career.")
                 raise IdentityMismatchError("save is past the ending")
+            # Only a career started with the mod (marker set in the character creator), and only one with almost no
+            # progress: a vanilla save loaded by mistake was bound and sent 260 checks (2026-10-26).
+            if not self.bridge.get_bool(CAREER_MARKER_PLOT_BOOL):
+                self._refuse_bind("This save is not an Archipelago career. Start a New Career with the Archipelago mod "
+                                  "installed, or load the save for this slot.", "not an Archipelago career")
+            already = len(evaluate_locations(self.bridge))
+            if already > BIND_MAX_TRUE_LOCATIONS:
+                self._refuse_bind(f"This save already has {already} Archipelago locations done, so it is not a fresh "
+                                  "career. Start a New Career, or load the save for this slot.", "save has progress")
             self._write_me1_history()
             self.bridge.bind_identity(*self.identity)
             logger.info("Save bound to this seed and slot")
@@ -498,6 +509,12 @@ class ME2Context(CommonContext):
                 if self.notices_enabled:
                     self.bridge.note("Archipelago: this save is from another seed")
         raise IdentityMismatchError(f"save identity {saved} != {self.identity}")
+
+    def _refuse_bind(self, message: str, reason: str) -> None:
+        if not self._mismatch_reported:
+            self._mismatch_reported = True
+            logger.error(message)
+        raise IdentityMismatchError(reason)
 
     def _write_me1_history(self) -> None:
         """Before binding a fresh save, write the slot's ME1 choices (the Genesis comic is skipped by the mod)."""

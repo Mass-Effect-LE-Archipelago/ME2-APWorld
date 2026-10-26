@@ -1,7 +1,7 @@
 import unittest
 from dataclasses import dataclass
 
-from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
+from ..client import (CAREER_MARKER_PLOT_BOOL, DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
                       notice_lines, parse_plot_predicate, seed_identity, sync_received_items,
                       DOSSIER_JOURNAL_BOOLS, sync_dossier_journals, SALVAGE_AREA_IDS, SALVAGE_BOUGHT_INT_BASE,
@@ -262,6 +262,10 @@ class TestPipe(unittest.TestCase):
 
 class TestBinding(unittest.TestCase):
     class Bridge(FakeBridge):
+        def __init__(self) -> None:
+            super().__init__()
+            self.bools[CAREER_MARKER_PLOT_BOOL] = True  # a career started with the mod
+
         def get_bool(self, index):
             return self.bools.get(index, False)
 
@@ -291,6 +295,21 @@ class TestBinding(unittest.TestCase):
         with self.assertRaises(GameNotReadyError):
             self.context(bridge)._check_identity()
         self.assertEqual(bridge.ints, {})
+
+    def test_vanilla_save_is_not_bound(self) -> None:
+        bridge = self.Bridge()
+        bridge.bools[CAREER_MARKER_PLOT_BOOL] = False  # e.g. Vector's career, loaded by mistake (2026-10-26)
+        with self.assertRaises(IdentityMismatchError):
+            self.context(bridge)._check_identity()
+        self.assertEqual(bridge.identity(), (0, 0))
+
+    def test_save_with_progress_is_not_bound(self) -> None:
+        bridge = self.Bridge()
+        for plot in (5812, 5813, 5814, 5815, 5817, 5818):  # six recruitments done
+            bridge.bools[plot] = True
+        with self.assertRaises(IdentityMismatchError):
+            self.context(bridge)._check_identity()
+        self.assertEqual(bridge.identity(), (0, 0))
 
     def test_post_game_save_is_refused(self) -> None:
         bridge = self.Bridge()
