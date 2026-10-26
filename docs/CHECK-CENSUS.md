@@ -18,9 +18,9 @@ int). Today the world has **418 locations max** (387 default).
 | Research projects | 44 | treasure bools (Plot_Treasure_Treasure ids) | no | yes (`research`) | done; ship-upgrade research grants nothing (D21) |
 | Collectibles (cabin and armor) | 26 | cabin bools 3321-3338, 7200, 6206, armor bools | some store items | yes (`collectibles`) | done |
 | Pickups (credits, resources, upgrade blueprints) | 258 | treasure "found" bools | **yes** (mission areas) | yes (`pickups` safe) | done; salvage (D22) recovers missed ones |
-| Weapon pickups (Tre_Wpn_*) | 9 | treasure bools | yes | no | easy; left out so a weapon item can't hide its own pickup |
+| Weapon pickups (Tre_Wpn_*) | 9 | treasure bools | yes | yes (D24, `pickups`) | done; a weapon's item never sits on its own pickup |
 | Codex entries | up to 207 raw (fewer net of start-unlocked and Paragon/Renegade pairs) | codex bools (CodexMap) | mostly no | no | feasible; needs a pass to drop start-unlocked and paired entries |
-| Store purchases (credit rows) | 24 rows (Illium 8, Citadel 6, Omega 5, Tuchanka 5) | treasure bool = row id | no (credits) | partly (cabin and armor overlap) | easy; dedupe against collectibles |
+| Store purchases (credit rows) | 24 rows (Illium 8, Citadel 6, Omega 5, Tuchanka 5) | treasure bool = row id | no (credits) | **yes, already**: they are hub pickups (e.g. `Citadel: SMG Upgrade`) | nothing to add (found 2026-10-26) |
 | Cabin extras (helmet, crash-site items) | 1-2 | 6157 helmet | no | partly | easy |
 | Normandy Crash Site dog tags | ~20 (unverified) | not found in the editor DB | no | 1 location (site) | needs a trace for per-tag bools |
 | Firewalker survey artifacts / per site | 5 (in world) | see DLC row | no | yes | done at mission level; per-artifact needs a trace |
