@@ -144,3 +144,13 @@ Runtime winners by mount priority. "S" is a `BioSeqAct_PMCheckState` (plot bool)
   False link to the vanilla "not now" branch where one exists.
 - The alternative is hub-access items. Omega has no galaxy-map conditional; Illium is F491 (b312), the Citadel F197
   (TRUE). That would gate the hub planets in the galaxy override instead: three planets, coarser, simpler.
+
+## 7. D21 resolved (2026-10-26)
+
+Live read on a non-AP save (Vector's career, client closed): researching Heavy Ship Armor set treasure bool 1183 and
+tech int 114 only. Applied bool 237 stayed 0 after research, a galaxy-map jump, an elevator trip and a save/reload. The
+suicide mission reads only the applied bools: 237 armor (BioD_EndGm1_120Bridge intro), 236 shields (220Cutscenes
+Sheilds_Upgrade_Consiquence), 238 cannon (240Cutscenes Weapon_Upgrade_Consiquence). No normal-play setter was found
+(transitions 268/272/274/280-282 have only debug callers; no conversation, StoryManagerBool, AwardTechBonus case or
+config entry). So the SHIP item writes the applied bool, and the client keeps 236-238 equal to "item received" each
+poll (bridge SETB allowlist), so the vanilla research stays a check and grants nothing.

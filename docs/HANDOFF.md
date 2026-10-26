@@ -60,17 +60,14 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
     (build\mass_effect_le2.apworld). These three go in together, and salvage needs a new seed. Untested points:
     tools/le2mod/research/salvage_store.md. Needs Mordin (research terminal).
 - **Pending:**
-  - D21 (ship upgrades are items only): before/after bridge read when the Thanix Cannon becomes researchable on
-    AustinME2 (Garrus offers it after recruitment). Procedure: Austin saves, the client is closed, read bools
-    236/237/238, 1182/1183/1192, 5642/5645/5648 and ints 110/114/117 (and 573/575/578), he researches, read again, he
-    reloads without saving, restart the client. Then: items write the applied state and research grants nothing.
-    Client bug still open: SHIP items set the research UnlockId bool.
+  - D21 resolved (galaxy_gating.md section 7) and built into the protocol-4 bridge/client (not installed): the SHIP item
+    writes applied bool 236/237/238 and the client enforces it to the items each poll; research grants nothing.
   - The Zaeed lock fix (0.0.5) is untested in game, since he was already recruited on AustinME2.
   - DLC missions (Overlord, etc.) are not gated; they have no AP items.
   - Roadmap steps 3-5 below.
 - **Tests and builds on the PC:** world tests: `ME2 LE Randomizer\Archipelago-main` (0.6.9 source,
   worlds\mass_effect_le2 junctioned to this repo's world) with
-  `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test` (108 pass). Mod: le2mod openstart
+  `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test` (110 pass). Mod: le2mod openstart
   <BioGame> <staging> with LE1PROBE_OODLE set and -p:LexCoreProject=APWorldMaker\vendor\LegendaryExplorer\...\
   LegendaryExplorerCore.csproj. Bridge: cmake --build APWorldMaker\tools\le2apbridge\build\repo\Build --config Release
   --target LE2APBridge-LE2. salvage.json: python tools/export_salvage.py <Archipelago checkout>.

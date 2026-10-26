@@ -13,7 +13,7 @@ still complete later; see TXN for why that is safe).
 | `GETB <n>` | `OK 0` / `OK 1` | Any plot bool. |
 | `GETI <n>` | `OK <value>` | Any plot int. |
 | `GETBS <n1> <n2> ...` | `OK <0/1 per index>` | Up to 64 indices, in order. |
-| `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 (derived state the client recomputes, e.g. 21100), and (protocol 3) set-only the dossier journal bools 551, 548, 545, 552, 549, 553, 550 that TIM's transitions 2371/2372 set. |
+| `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 (derived state the client recomputes, e.g. 21100), and (protocol 3) set-only the dossier journal bools 551, 548, 545, 552, 549, 553, 550 that TIM's transitions 2371/2372 set, and (protocol 4) the ship-upgrade applied bools 236-238, both values. |
 | `GETIS <n1> <n2> ...` | `OK <v1> <v2> ...` | Protocol 4. Up to 64 plot ints, in order. |
 | `TAKEI <n>` | `OK <value>` | Protocol 4. Salvage purchase counters 2110-2149 only: returns the value and sets it to 0 in the same game-thread step. |
 | `SETI <n> <v>` | `OK` | Protocol 4. Salvage caps 2150-2199 only, 0-1000. |
@@ -43,7 +43,7 @@ index (or the reverse).
 |---|---|---|---|
 | `NONE` | | nothing (counter-only items: Reaper IFF Intel) | |
 | `FLAG` | `<bool>` | set an AP bool | 21000-21999 |
-| `SHIP` | `<applied> <unlocked>` | set a ship upgrade's applied and research-unlocked bools | 237/5642, 236/5648, 238/5645 |
+| `SHIP` | `<applied>` | protocol 4 (D21): set a ship upgrade's applied bool, the one the suicide mission reads; the client also enforces it with SETB | 237, 236, 238 |
 | `WEAPON` | `<int>` | raise a weapon unlock int to at least 1 | the 17 weapon ints in `data.WEAPONS` |
 | `RES` | `<type> <amount>` | `ASFXInventoryManager.AdjustResource` | type 0 credits, 1 medi-gel, 4 eezo, 5 iridium, 6 palladium, 7 platinum, 8 probes (SDK EInventoryResourceTypes); amount 1-1000000 |
 

@@ -5,7 +5,7 @@ from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, Ide
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
                       notice_lines, parse_plot_predicate, seed_identity, sync_received_items,
                       DOSSIER_JOURNAL_BOOLS, sync_dossier_journals, SALVAGE_AREA_IDS, SALVAGE_BOUGHT_INT_BASE,
-                      SALVAGE_CAP_INT_BASE, SALVAGE_TIER_DISABLE_BASE, sync_salvage)
+                      SALVAGE_CAP_INT_BASE, SALVAGE_TIER_DISABLE_BASE, sync_salvage, SHIP_UPGRADE_BOOLS, sync_ship_upgrades)
 from ..data import DOSSIERS, FEMALE_PLOT_BOOL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, ME1_HISTORY_BOOLS
 
 
@@ -52,7 +52,7 @@ class TestDelivery(unittest.TestCase):
 
     def test_dossier_sets_its_mod_flag(self) -> None:
         self.assertEqual(item_op(ITEM_NAME_TO_ID[DOSSIERS["Mordin Solus"]]), f"FLAG {DOSSIER_BOOL_BASE}")
-        self.assertEqual(item_op(ITEM_NAME_TO_ID["Thanix Cannon"]), "SHIP 238 5645")
+        self.assertEqual(item_op(ITEM_NAME_TO_ID["Thanix Cannon"]), "SHIP 238")
 
     def test_dossier_journals_are_set_until_recruited(self) -> None:
         # Mordin and Garrus received (AustinME2, 2026-10-25): journals 551/548 set; Grunt's dossier is ignored once
@@ -109,6 +109,24 @@ class TestDelivery(unittest.TestCase):
         self.assertEqual(bought, sorted(open_locations)[:2])
         self.assertEqual(bridge.ints[SALVAGE_BOUGHT_INT_BASE + korlus], 0)
         self.assertEqual(bridge.ints[SALVAGE_CAP_INT_BASE + korlus], 2)
+
+    def test_ship_upgrades_follow_items_not_research(self) -> None:
+        # D21: research set Thanix's applied bool without the item -> cleared; the armor item arrived -> set
+        bridge = self.SalvageBridge()
+        bridge.bools[238] = True
+        received = [Received(ITEM_NAME_TO_ID["Heavy Ship Armor"])]
+        self.assertEqual(sorted(sync_ship_upgrades(bridge, received)), [237, 238])
+        self.assertEqual((bridge.bools[237], bridge.bools[238], bridge.bools.get(236, False)), (True, False, False))
+        self.assertEqual(sync_ship_upgrades(bridge, received), [])
+
+    def test_bridge_ship_allowlist_matches_client(self) -> None:
+        import pathlib
+        import re
+        path = pathlib.Path(__file__).resolve().parents[3] / "tools" / "le2apbridge" / "LE2APBridge" / "Bridge.cpp"
+        if not path.exists():
+            self.skipTest("bridge source not beside this world (packaged .apworld)")
+        listed = re.search(r"ShipAppliedBools\[\] = \{([^}]*)\}", path.read_text()).group(1)
+        self.assertEqual({int(n) for n in listed.split(",")}, set(SHIP_UPGRADE_BOOLS.values()))
 
     def test_salvage_off_disables_every_tier(self) -> None:
         bridge = self.SalvageBridge()

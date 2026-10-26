@@ -32,7 +32,9 @@ namespace LE2APBridge
 
         // Vanilla targets a TXN may write (never cleared): ship upgrades (applied bool, research unlocked bool) and the
         // armory's weapon ints (me2_plot_db "research_upgrades"). Anything else is refused, never silently consumed.
-        constexpr int ShipBools[][2] = { { 237, 5642 }, { 236, 5648 }, { 238, 5645 } };
+        // Ship upgrades (D21): only the applied bools the suicide mission reads (me2_plot_db Normandy.Upgrades.Armor/Shield/
+        // Weapons). Research never sets them, so the client also enforces them to the AP items each poll (SETB).
+        constexpr int ShipAppliedBools[] = { 237, 236, 238 };
         constexpr int WeaponInts[] = { 149, 854, 124, 725, 152, 852, 495, 88, 847, 853, 177, 855, 151, 460, 663, 461, 496 };
         constexpr int ResourceAmountMax = 1000000;
 
@@ -71,10 +73,10 @@ namespace LE2APBridge
             return Type == 0 || Type == 1 || (Type >= 4 && Type <= 8);
         }
 
-        bool IsShipPair(int const Applied, int const Unlocked)
+        bool IsShipBool(int const Index)
         {
-            for (auto const& Pair : ShipBools)
-                if (Pair[0] == Applied && Pair[1] == Unlocked) return true;
+            for (int const Allowed : ShipAppliedBools)
+                if (Allowed == Index) return true;
             return false;
         }
 
@@ -162,7 +164,6 @@ namespace LE2APBridge
             if (Op == "SHIP")
             {
                 Vars->SetBool(R.Args[0], 1, 0);
-                Vars->SetBool(R.Args[1], 1, 0);
                 return "";
             }
             if (Op == "WEAPON")
@@ -358,7 +359,7 @@ namespace LE2APBridge
                 int const Args = Fields - 2;
                 if (TxnOp == "NONE" && Args == 0) return "";
                 if (TxnOp == "FLAG" && Args == 1) return (R.Args[0] >= BoolMin && R.Args[0] <= BoolMax) ? "" : "ERR notallowed";
-                if (TxnOp == "SHIP" && Args == 2) return IsShipPair(R.Args[0], R.Args[1]) ? "" : "ERR notallowed";
+                if (TxnOp == "SHIP" && Args == 1) return IsShipBool(R.Args[0]) ? "" : "ERR notallowed";
                 if (TxnOp == "WEAPON" && Args == 1) return IsWeaponInt(R.Args[0]) ? "" : "ERR notallowed";
                 if (TxnOp == "RES" && Args == 2)
                     return (IsResourceType(R.Args[0]) && R.Args[1] >= 1 && R.Args[1] <= ResourceAmountMax)
@@ -377,7 +378,8 @@ namespace LE2APBridge
             if (Op == "HIST" && Fields == 3) return (IsHistoryBool(R.Index) && (R.Value == 0 || R.Value == 1)) ? "" : "ERR notallowed";
             if (Op == "SETB" && Fields == 3)   // derived state the client recomputes each poll (e.g. 21100 IFF open)
                 return ((R.Index >= BoolMin && R.Index <= BoolMax && (R.Value == 0 || R.Value == 1))
-                        || (IsDossierJournalBool(R.Index) && R.Value == 1)) ? "" : "ERR notallowed";
+                        || (IsDossierJournalBool(R.Index) && R.Value == 1)
+                        || (IsShipBool(R.Index) && (R.Value == 0 || R.Value == 1))) ? "" : "ERR notallowed";
             if (Op == "TAKEI" && Fields == 2) return (R.Index >= SalvageBoughtMin && R.Index <= SalvageBoughtMax) ? "" : "ERR notallowed";
             if (Op == "SETI" && Fields == 3)
                 return (R.Index >= SalvageCapMin && R.Index <= SalvageCapMax && R.Value >= 0 && R.Value <= SalvageCapValueMax) ? "" : "ERR notallowed";

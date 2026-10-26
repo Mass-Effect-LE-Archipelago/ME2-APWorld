@@ -47,11 +47,13 @@ BATCH_READ_MAX = 64  # GETBS indices per request
 NOTICE_LINE_CHARS = 40
 NOTICES_PER_POLL = 3
 
-# Ship upgrades: the "applied" bool (what the suicide mission reads) and its research "unlocked" bool, both set once.
+# Ship upgrades (D21): the "applied" bool the suicide mission reads (me2_plot_db Normandy.Upgrades.*). Research never
+# sets it (live read 2026-10-26: only treasure bool 1183 and tech int 114 change), so the item writes it and the client
+# keeps it equal to "item received" each poll; the vanilla research stays a check and grants nothing.
 SHIP_UPGRADE_BOOLS = {
-    "Heavy Ship Armor": (237, 5642),
-    "Multicore Shielding": (236, 5648),
-    "Thanix Cannon": (238, 5645),
+    "Heavy Ship Armor": 237,
+    "Multicore Shielding": 236,
+    "Thanix Cannon": 238,
 }
 # Resource bundles: bridge RES type (SDK enum EInventoryResourceTypes, D12) and amount.
 RESOURCES = {
@@ -284,8 +286,7 @@ def item_op(item_id: int) -> str:
         return f"FLAG {DOSSIER_BOOL_BASE + DOSSIER_IDS[item_id]}"
     name = next((n for n, data_id in ITEM_NAME_TO_ID.items() if data_id == item_id), None)
     if name in SHIP_UPGRADES:
-        applied, unlocked = SHIP_UPGRADE_BOOLS[name]
-        return f"SHIP {applied} {unlocked}"
+        return f"SHIP {SHIP_UPGRADE_BOOLS[name]}"
     if name in WEAPONS:
         return f"WEAPON {WEAPONS[name]}"
     if name in RESOURCES:
@@ -390,6 +391,20 @@ def sync_salvage(bridge: "BridgeConnection", enabled: bool, tier: int, open_loca
         if ints[SALVAGE_CAP_INT_BASE + k] != cap:
             bridge.set_int(SALVAGE_CAP_INT_BASE + k, cap)
     return bought_now
+
+
+def sync_ship_upgrades(bridge: "BridgeConnection", received: Sequence[ReceivedItem], log: logging.Logger = logger) -> list[int]:
+    """Keep each upgrade's applied bool equal to whether its item arrived; returns the bools changed."""
+    have = {ITEM_NAME_TO_ID[name] for name in SHIP_UPGRADE_BOOLS} & {item.item for item in received}
+    current = bridge.get_bools(sorted(SHIP_UPGRADE_BOOLS.values()))
+    changed = []
+    for name, applied in SHIP_UPGRADE_BOOLS.items():
+        want = ITEM_NAME_TO_ID[name] in have
+        if current[applied] != want:
+            bridge.set_bool(applied, want)
+            changed.append(applied)
+            log.info("%s %s", name, "installed" if want else "removed (no item yet; research grants nothing)")
+    return changed
 
 
 def intel_count(received: Sequence[ReceivedItem]) -> int:
@@ -508,6 +523,7 @@ class ME2Context(CommonContext):
         received = tuple(self.items_received)
         sync_received_items(self.bridge, received)
         sync_dossier_journals(self.bridge, received)
+        sync_ship_upgrades(self.bridge, received)
         open_locations = set(self.missing_locations) - set(self.locations_checked)
         salvaged = sync_salvage(self.bridge, getattr(self, "salvage", False), getattr(self, "salvage_tier", 2),
                                 open_locations)
