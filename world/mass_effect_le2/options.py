@@ -94,6 +94,26 @@ class Pickups(Choice):
     default = 1
 
 
+class Salvage(DefaultOnToggle):
+    """Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers
+    "<mission> Salvage". Each purchase sends one of that mission's pickup checks you left behind. Only matters with
+    pickups on."""
+
+    display_name = "Salvage"
+
+
+class SalvagePrice(Choice):
+    """Credits per salvaged check (each purchase at the research terminal sends one missed pickup)."""
+
+    display_name = "Salvage Price per Check"
+    option_free = 0
+    option_500 = 1
+    option_1000 = 2
+    option_2500 = 3
+    option_5000 = 4
+    default = 2
+
+
 class WeaponUnlocks(DefaultOnToggle):
     """Shuffle weapon unlocks (Carnifex, Mattock, Viper, the heavy weapons...) into the pool as useful items. Receiving
     one unlocks that weapon early; the vanilla pickups and research still work as usual."""
@@ -169,6 +189,8 @@ class MassEffectLE2Options(PerGameCommonOptions):
     research: Research
     collectibles: Collectibles
     pickups: Pickups
+    salvage: Salvage
+    salvage_price: SalvagePrice
     weapon_unlocks: WeaponUnlocks
     me1_virmire_survivor: ME1VirmireSurvivor
     me1_romance: ME1Romance
@@ -198,7 +220,7 @@ options_presets = {
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
     OptionGroup("Start", [StartOnNormandy]),
-    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, EnabledDLC]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Salvage, SalvagePrice, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
     OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

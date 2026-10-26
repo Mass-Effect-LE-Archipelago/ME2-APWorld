@@ -47,6 +47,11 @@ namespace LE2APBridge
         // received dossier whose recruitment is not done.
         constexpr int DossierJournalBools[] = { 551, 548, 545, 552, 549, 553, 550 };
 
+        // Missed-checks salvage (protocol 4, D22): purchase counters the research terminal raises (the client takes them,
+        // read and zeroed at once) and the caps the client sets (le2mod 0.0.7 research entries show while counter < cap).
+        constexpr int SalvageBoughtMin = 2110, SalvageBoughtMax = 2149;
+        constexpr int SalvageCapMin = 2150, SalvageCapMax = 2199, SalvageCapValueMax = 1000;
+
         bool IsDossierJournalBool(int const Index)
         {
             for (int const Allowed : DossierJournalBools)
@@ -228,6 +233,25 @@ namespace LE2APBridge
             if (Vars == nullptr) return "ERR noworld";
             if (Op == "GETB") return std::string("OK ") + (Vars->GetBool(R.Index) ? "1" : "0");
             if (Op == "GETI") return "OK " + std::to_string(Vars->GetInt(R.Index));
+            if (Op == "GETIS")
+            {
+                std::string Ints = "OK";
+                for (int i = 0; i < R.Count; ++i) Ints += " " + std::to_string(Vars->GetInt(R.Many[i]));
+                return Ints;
+            }
+            if (Op == "TAKEI")
+            {
+                int const Value = Vars->GetInt(R.Index);
+                if (Value != 0) Vars->SetInt(R.Index, 0);
+                if (Value != 0) LEASI_INFO("TAKEI {} -> {}", R.Index, Value);
+                return "OK " + std::to_string(Value);
+            }
+            if (Op == "SETI")
+            {
+                Vars->SetInt(R.Index, R.Value);
+                LEASI_INFO("SETI {} {}", R.Index, R.Value);
+                return "OK";
+            }
             if (Op == "GETBS")
             {
                 std::string Bits = "OK ";
@@ -312,6 +336,19 @@ namespace LE2APBridge
                 }
                 return R.Count > 0 ? "" : "ERR badrequest";
             }
+            if (std::strncmp(Text, "GETIS ", 6) == 0)
+            {
+                std::strcpy(R.Op, "GETIS");
+                char const* Cursor = Text + 6;
+                int Value = 0, Consumed = 0;
+                while (std::sscanf(Cursor, "%d%n", &Value, &Consumed) == 1)
+                {
+                    if (R.Count >= GetBsMax || Value < 0) return "ERR notallowed";
+                    R.Many[R.Count++] = Value;
+                    Cursor += Consumed;
+                }
+                return R.Count > 0 ? "" : "ERR badrequest";
+            }
             if (std::strncmp(Text, "TXN ", 4) == 0)
             {
                 std::strcpy(R.Op, "TXN");
@@ -341,6 +378,9 @@ namespace LE2APBridge
             if (Op == "SETB" && Fields == 3)   // derived state the client recomputes each poll (e.g. 21100 IFF open)
                 return ((R.Index >= BoolMin && R.Index <= BoolMax && (R.Value == 0 || R.Value == 1))
                         || (IsDossierJournalBool(R.Index) && R.Value == 1)) ? "" : "ERR notallowed";
+            if (Op == "TAKEI" && Fields == 2) return (R.Index >= SalvageBoughtMin && R.Index <= SalvageBoughtMax) ? "" : "ERR notallowed";
+            if (Op == "SETI" && Fields == 3)
+                return (R.Index >= SalvageCapMin && R.Index <= SalvageCapMax && R.Value >= 0 && R.Value <= SalvageCapValueMax) ? "" : "ERR notallowed";
             // Diagnostics (read-only): evaluate a plot conditional, list the registered conditional classes.
             if (Op == "COND" && Fields == 2) return R.Index >= 0 ? "" : "ERR notallowed";
             if (Fields == 1 && Op == "CONDCLS") return "";

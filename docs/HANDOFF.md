@@ -52,12 +52,15 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   their dossier arrives (planet labels use the gate conditionals; hub labels F21200+i).
 - D21 (ship upgrades are items only): galaxy_gating.md section 4. Blocked on a before/after bridge read on a
   throwaway non-AP save (never AustinME2). Client bug still open: SHIP items set the research UnlockId bool.
-- Salvage store research (Austin's idea, missed mission pickups): tools/le2mod/research/salvage_store.md. Feasible,
-  smallest design given. Open: which Normandy object, free vs priced.
+- Salvage (D22) built, not installed: le2mod 0.0.7 (tools\le2mod\staging-0.0.7, stacked on 0.0.6) + bridge v4 (protocol 4:
+  GETIS/TAKEI/SETI; built at build\repo\Build\Release, installed bridge is still v3, copy in backups\LE2APBridge-v3-2026-10-25.asi)
+  + client/world (salvage, salvage_price options; build\mass_effect_le2.apworld NOT copied to custom_worlds). Bridge v4,
+  mod 0.0.7 and the new .apworld must go in together; a new seed is needed for the salvage options. Design and
+  untested points: tools/le2mod/research/salvage_store.md. Needs Mordin (research terminal).
 - Overlord and other DLC missions are not locked (no AP items for them).
 - World tests on the PC: `ME2 LE Randomizer\Archipelago-main` (0.6.9 source, worlds\mass_effect_le2 is a junction to
   this repo's world) with `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test`
-  (104 pass). Mod build: le2mod openstart <BioGame> <staging> with LE1PROBE_OODLE set and
+  (108 pass). Mod build: le2mod openstart <BioGame> <staging> with LE1PROBE_OODLE set and
   -p:LexCoreProject=APWorldMaker\vendor\LegendaryExplorer\...\LegendaryExplorerCore.csproj. Bridge build:
   cmake --build APWorldMaker\tools\le2apbridge\build\repo\Build --config Release --target LE2APBridge-LE2.
 

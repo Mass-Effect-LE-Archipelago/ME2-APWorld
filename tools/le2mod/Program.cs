@@ -309,6 +309,140 @@ static class Program
         return 0;
     }
 
+    // Missed-checks salvage (D22, research/salvage_store.md). Per mission k (tools/le2mod/salvage.json, exported from the
+    // world): a multi-level tech Tec_APSalvage_k whose level is plot int bought_int_base+k and whose cap is
+    // APSalvageCap_k = cap_int_base+k (both mapped in PlotManagerGameData), and one research entry per price tier t
+    // (treasure row 21500+5k+t, DisableId tier_disable_base+t) at the Normandy research terminal. The client sets the
+    // caps and the tier bools and takes the counters (bridge protocol 4).
+    const string SalvagePackage = "BIOG_2DA_ArchipelagoME2_PlotManager_X";
+    const string SalvageTemplateDlc = "DLC_HEN_VT";   // its startup package carries the three part tables we need
+    const int SalvageTreasureBase = 21500, SalvageTechRowBase = 41000;
+    const int SalvageTitleStrRef = 41000100, SalvageDescStrRef = 41000300, SalvageMessageStrRef = 41000301;
+
+    record SalvageMission(int index, string area, string label, int pickups);
+    record SalvageData(int bought_int_base, int cap_int_base, int tier_disable_base, int[] prices, SalvageMission[] missions);
+
+    static SalvageData _salvage;
+    static SalvageData LoadSalvage()
+    {
+        if (_salvage != null) return _salvage;
+        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
+        {
+            var path = Path.Combine(dir.FullName, "salvage.json");
+            if (File.Exists(path)) return _salvage = System.Text.Json.JsonSerializer.Deserialize<SalvageData>(File.ReadAllText(path));
+        }
+        throw new FileNotFoundException("salvage.json (tools/le2mod) not found above " + AppContext.BaseDirectory);
+    }
+
+    static int SalvageTreasureId(int k, int t) => SalvageTreasureBase + 5 * k + t;
+
+    static string SalvageResearchIni()
+    {
+        var s = LoadSalvage();
+        var lines = new List<string> { "[SFXGame.SFXGameChoiceGUIData_Research]" };
+        foreach (var m in s.missions)
+            for (int t = 0; t < s.prices.Length; t++)
+                lines.Add($"+Research=(PlotName=\"Tec_APSalvage_{m.index}\",TreasureId={SalvageTreasureId(m.index, t)},UnlockId=0," +
+                          $"DisableId={s.tier_disable_base + t},RMode=0,ChoiceEntry=(srChoiceTitle={SalvageTitleStrRef + m.index},oChoiceImage=none," +
+                          $"srChoiceImageTitle={SalvageTitleStrRef + m.index},srChoiceDescription={SalvageDescStrRef},ChoiceColor=3))");
+        return string.Join("\r\n", lines) + "\r\n";
+    }
+
+    static IEnumerable<TLKStringRef> SalvageStrings()
+    {
+        var s = LoadSalvage();
+        foreach (var m in s.missions) yield return new TLKStringRef(SalvageTitleStrRef + m.index, m.label + " Salvage");
+        yield return new TLKStringRef(SalvageDescStrRef,
+            "Recover one pickup you left behind on this mission. Each purchase sends one missed Archipelago check.");
+        yield return new TLKStringRef(SalvageMessageStrRef, "Salvage recovered: one missed check sent.");
+    }
+
+    static int Salvage(string bioGame, string cooked)
+    {
+        var s = LoadSalvage();
+        var startupOut = Path.Combine(cooked, StartupName + "_INT.pcc");
+        var template = Path.Combine(bioGame, "DLC", SalvageTemplateDlc, "CookedPCConsole", $"Startup_{SalvageTemplateDlc[4..]}_INT.pcc");
+        string srcPkg = $"BIOG_2DA_{SalvageTemplateDlc[4..]}_PlotManager_X";
+        using (var src = MEPackageHandler.OpenMEPackage(template, forceLoadFromDisk: true))
+        using (var pcc = MEPackageHandler.OpenMEPackage(startupOut, forceLoadFromDisk: true))
+        {
+            var pkg = src.Exports.FirstOrDefault(e => e.ClassName == "Package" && e.ObjectName.Name == srcPkg);
+            if (pkg == null) { Console.Error.WriteLine("refusing: no " + srcPkg + " in " + template); return 1; }
+            // Our package export, then each template table ported into it (the Resources table is not needed).
+            var ourPkg = pcc.CreatePackageExport(new NameReference(SalvagePackage));
+            ExportEntry Port(string name)
+            {
+                var table = src.Exports.Single(e => e.InstancedFullPath == $"{srcPkg}.{name}_part_100");
+                LegendaryExplorerCore.Packages.CloningImportingAndRelinking.EntryImporter.ImportAndRelinkEntries(
+                    LegendaryExplorerCore.Packages.CloningImportingAndRelinking.EntryImporter.PortingOption.CloneAllDependencies, table, pcc, ourPkg, true,
+                    new LegendaryExplorerCore.Packages.CloningImportingAndRelinking.RelinkerOptionsPackage(), out var ported);
+                var export = (ExportEntry)ported;
+                export.ObjectName = new NameReference(name + "_part_4100");
+                return export;
+            }
+            var treasure = Port("Plot_Treasure_Treasure");
+            var tech = Port("Plot_Treasure_Tech");
+            var gameData = Port("PlotManagerGameData");
+
+            LegendaryExplorerCore.Unreal.Classes.Bio2DACell Name(string v) => new(new NameReference(v), pcc);
+            LegendaryExplorerCore.Unreal.Classes.Bio2DACell Int(int v) => new(v);
+            LegendaryExplorerCore.Unreal.Classes.Bio2DA Fresh(ExportEntry e)
+            {
+                var old = new LegendaryExplorerCore.Unreal.Classes.Bio2DA(e);
+                var t = new LegendaryExplorerCore.Unreal.Classes.Bio2DA { IsIndexed = old.IsIndexed };
+                t.AddColumns(old.ColumnNames.ToArray());
+                return t;
+            }
+            void Row(LegendaryExplorerCore.Unreal.Classes.Bio2DA t, string row, params LegendaryExplorerCore.Unreal.Classes.Bio2DACell[] cells)
+            {
+                int r = t.AddRow(row);
+                for (int c = 0; c < cells.Length; c++) if (cells[c] != null) t[r, c] = cells[c];
+            }
+
+            var techT = Fresh(tech);      // nmTech nLevels nmResearch srTitle srName srMessage srDescription UnlockId sImage sLargeImage sBonusDescription
+            var treasureT = Fresh(treasure); // nmLevel nmTreasure nmTech nmResource nPrice nmRequiredTech nRequiredTechLevel nDiscoverTechLevel nNoAnimation nMultiLevel
+            var gameT = Fresh(gameData);  // Index
+            foreach (var m in s.missions)
+            {
+                Row(techT, (SalvageTechRowBase + m.index).ToString(), Name($"Tec_APSalvage_{m.index}"), Int(10), null, Int(SalvageTitleStrRef + m.index),
+                    Int(SalvageTitleStrRef + m.index), Int(SalvageMessageStrRef), Int(SalvageDescStrRef), Int(-1),
+                    Name("GUI_GlobalIcons.Notifications.NewTech_256"), Name("GUI_Codex_Images.ResearchProjectUpgrade_512"), null);
+                for (int t = 0; t < s.prices.Length; t++)
+                    Row(treasureT, SalvageTreasureId(m.index, t).ToString(), Name("Biop_Nor"), Name($"Tre_APSalvage_{m.index}_{t}"),
+                        Name($"Tec_APSalvage_{m.index}"), Name("Credits"), Int(s.prices[t]), Name($"APSalvageCap_{m.index}"), Int(1), Int(0), Int(1), Int(1));
+                Row(gameT, $"Tec_APSalvage_{m.index}", Int(s.bought_int_base + m.index));
+                Row(gameT, $"APSalvageCap_{m.index}", Int(s.cap_int_base + m.index));
+            }
+            Row(gameT, "LastLineDoesntWorkWTF", Int(0));   // the vanilla part tables end with this sentinel row
+            techT.Write2DAToExport(tech);
+            treasureT.Write2DAToExport(treasure);
+            gameT.Write2DAToExport(gameData);
+            pcc.Save(startupOut + ".tmp");
+        }
+        using (var pcc = MEPackageHandler.OpenMEPackage(startupOut + ".tmp", forceLoadFromDisk: true))
+        {
+            var tables = pcc.Exports.Where(e => e.Parent?.ObjectName.Name == SalvagePackage).ToDictionary(e => e.ObjectName.Name);
+            bool ok = tables.Count == 3 && !pcc.Exports.Any(e => e.InstancedFullPath.Contains(SalvageTemplateDlc[4..]) && e.ClassName != "ShaderCache");
+            var treasureT = ok ? new LegendaryExplorerCore.Unreal.Classes.Bio2DA(tables["Plot_Treasure_Treasure_part_4100"]) : null;
+            var techT = ok ? new LegendaryExplorerCore.Unreal.Classes.Bio2DA(tables["Plot_Treasure_Tech_part_4100"]) : null;
+            var gameT = ok ? new LegendaryExplorerCore.Unreal.Classes.Bio2DA(tables["PlotManagerGameData_part_4100"]) : null;
+            ok &= treasureT?.RowCount == s.missions.Length * s.prices.Length && techT?.RowCount == s.missions.Length
+                  && gameT?.RowCount == 2 * s.missions.Length + 1;
+            if (ok)
+            {
+                // spot check: Korlus at the 1000-credit tier
+                var korlus = s.missions.First(m => m.area == "grunt_acq");
+                var row = treasureT.RowNames.ToList().IndexOf(SalvageTreasureId(korlus.index, 2).ToString());
+                ok &= row >= 0 && treasureT[row, "nPrice"].IntValue == s.prices[2] && treasureT[row, "nmTech"].NameValue.Instanced == $"Tec_APSalvage_{korlus.index}";
+                Console.WriteLine($"validate: salvage tables treasure={treasureT.RowCount} tech={techT.RowCount} gamedata={gameT.RowCount}; " +
+                                  $"Korlus tier 2 = {treasureT[row, "nPrice"].IntValue} credits");
+            }
+            if (!ok) { Console.Error.WriteLine("salvage validation FAILED; staging left unchanged"); return 1; }
+        }
+        File.Move(startupOut + ".tmp", startupOut, true);
+        return 0;
+    }
+
     const string GalaxyFile = "BioD_Nor_103aGalaxyMap.pcc";
 
     static int Gating(string bioGame, string cooked)
@@ -408,6 +542,7 @@ static class Program
         Console.WriteLine($"galaxy gating built (galaxy source {galaxy})");
         if (HubGating(bioGame, cooked) != 0) return 1;
         Console.WriteLine("hub recruit gating built");
+        if (Salvage(bioGame, cooked) != 0) return 1;
         return 0;
     }
 
@@ -530,15 +665,18 @@ static class Program
         mountFile.WriteMountFile(Path.Combine(cooked, "Mount.dlc"));
         File.WriteAllText(Path.Combine(cooked, "BIOEngine.ini"),
             $"[Engine.DLCModules]\r\n{ModFolder}={ModuleNumber}\r\n\r\n[DLCInfo]\r\nVersion=0\r\nFlags=2\r\nName={NameStrRef}\r\n" +
-            (noGating ? "" : $"\r\n[Engine.StartupPackages]\r\n+DLCStartupPackage={StartupName}\r\n+Package={CondPackage}\r\n"));
+            (noGating ? "" : $"\r\n[Engine.StartupPackages]\r\n+DLCStartupPackage={StartupName}\r\n+Package={CondPackage}\r\n+Package={SalvagePackage}\r\n"));
         if (!noGating)
+        {
             File.WriteAllText(Path.Combine(cooked, "BIOGame.ini"), $"[SFXGame.BioWorldInfo]\r\n+ConditionalClasses={CondPackage}.BioAutoConditionals\r\n");
+            File.WriteAllText(Path.Combine(cooked, "BIOUI.ini"), SalvageResearchIni());
+        }
         HuffmanCompression.SaveToTlkFile(Path.Combine(cooked, $"DLC_{ModuleNumber}_INT.tlk"),
-            [new TLKStringRef(NameStrRef, "Archipelago ME2 (open start test)")]);
+            [new TLKStringRef(NameStrRef, "Archipelago ME2 (open start test)"), .. (noGating ? [] : SalvageStrings())]);
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.6\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.7\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

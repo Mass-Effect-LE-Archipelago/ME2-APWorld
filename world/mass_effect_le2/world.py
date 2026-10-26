@@ -77,7 +77,7 @@ class MassEffectLE2World(World):
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {
             **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "start_on_normandy", "assignments",
-                                 "research", "collectibles", "pickups", "weapon_unlocks"),
+                                 "research", "collectibles", "pickups", "salvage", "salvage_price", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
             "starting_dossier": self.starting_dossier,
             "me1_history": {key: getattr(self.options, key).current_key for key in data.ME1_HISTORY},

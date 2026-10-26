@@ -27,14 +27,15 @@ import Utils
 from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser, gui_enabled, handle_url_arg, server_loop
 from NetUtils import ClientStatus
 
-from .data import (DOSSIERS, FEMALE_PLOT_BOOL, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SHIP_UPGRADES,
+from .data import (DOSSIERS, FEMALE_PLOT_BOOL, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SALVAGE_MISSIONS,
+                   SALVAGE_PICKUPS, SALVAGE_PRICES, SHIP_UPGRADES,
                    WEAPONS, me1_history_writes)
 from .world import MassEffectLE2World
 
 logger = logging.getLogger("ME2Client")
 
 PIPE_NAME = r"\\.\pipe\LE2APBridge"
-PROTOCOL_VERSION = 3
+PROTOCOL_VERSION = 4
 # AP-owned plot IDs (docs/DECISIONS.md D2, pending the collision audit): bools 21000-21999, ints 2100-2199.
 RECEIVED_INDEX_PLOT_INT = 2100  # read by the client; written only by the bridge inside TXN
 IDENTITY_PLOT_INTS = (2101, 2102)  # seed and slot identity of the save (0, 0 = not yet bound)
@@ -161,6 +162,24 @@ class BridgeConnection:
 
     def set_bool(self, index: int, value: bool) -> None:
         self.request(f"SETB {index} {int(value)}")
+
+    def get_ints(self, indices: Sequence[int]) -> dict[int, int]:
+        """Many ints in few requests (protocol 4 GETIS: space-separated values, in order)."""
+        values: dict[int, int] = {}
+        for start in range(0, len(indices), BATCH_READ_MAX):
+            chunk = indices[start:start + BATCH_READ_MAX]
+            fields = self.request("GETIS " + " ".join(map(str, chunk))).split()
+            if len(fields) != len(chunk):
+                raise BridgeProtocolError(f"GETIS: invalid reply {fields!r}")
+            values.update(zip(chunk, map(int, fields)))
+        return values
+
+    def take_int(self, index: int) -> int:
+        """Read a salvage purchase counter and zero it in the same game-thread step (protocol 4 TAKEI)."""
+        return int(self.request(f"TAKEI {index}"))
+
+    def set_int(self, index: int, value: int) -> None:
+        self.request(f"SETI {index} {value}")
 
     def identity(self) -> tuple[int, int]:
         fields = self.request("ID").split()
@@ -332,6 +351,47 @@ def sync_dossier_journals(bridge: "BridgeConnection", received: Sequence[Receive
     return written
 
 
+# Missed-checks salvage (D22): mission k's research entry (le2mod 0.0.7) is a multi-level tech whose level lives in plot
+# int SALVAGE_BOUGHT_INT_BASE + k (each purchase adds 1) and whose cap is SALVAGE_CAP_INT_BASE + k (the entry shows
+# and can be bought while level < cap). Per price tier t, every entry carries DisableId SALVAGE_TIER_DISABLE_BASE + t.
+SALVAGE_BOUGHT_INT_BASE = 2110
+SALVAGE_CAP_INT_BASE = 2150
+SALVAGE_TIER_DISABLE_BASE = 21310
+SALVAGE_AREA_IDS = {area: [LOCATION_NAME_TO_ID[name] for name in SALVAGE_PICKUPS[area]] for area, _, _ in SALVAGE_MISSIONS}
+
+
+def sync_salvage(bridge: "BridgeConnection", enabled: bool, tier: int, open_locations: set[int],
+                 log: logging.Logger = logger) -> list[int]:
+    """Keep the salvage entries in step with the seed; returns the pickup locations bought since the last poll.
+
+    open_locations: this slot's locations not yet checked. A mission offers salvage once its completion location is
+    true, capped at its open pickups. A purchase is taken (read and zeroed at once, so none is lost or counted
+    twice) and pays for that many open pickups, lowest id first."""
+    disable = [SALVAGE_TIER_DISABLE_BASE + t for t in range(len(SALVAGE_PRICES))]
+    current = bridge.get_bools(disable)
+    for t, index in enumerate(disable):
+        want = not enabled or t != tier
+        if current[index] != want:
+            bridge.set_bool(index, want)
+    if not enabled:
+        return []
+    count = len(SALVAGE_MISSIONS)
+    ints = bridge.get_ints([SALVAGE_BOUGHT_INT_BASE + k for k in range(count)] + [SALVAGE_CAP_INT_BASE + k for k in range(count)])
+    done = evaluate_locations(bridge, {LOCATION_NAME_TO_ID[loc] for _, _, loc in SALVAGE_MISSIONS})
+    bought_now: list[int] = []
+    for k, (area, label, completion) in enumerate(SALVAGE_MISSIONS):
+        open_pickups = sorted(i for i in SALVAGE_AREA_IDS[area] if i in open_locations)
+        if ints[SALVAGE_BOUGHT_INT_BASE + k] > 0:
+            paid = bridge.take_int(SALVAGE_BOUGHT_INT_BASE + k)
+            bought_now += open_pickups[:paid]
+            open_pickups = open_pickups[paid:]
+            log.info("%s salvage: %s check(s) bought", label, paid)
+        cap = len(open_pickups) if LOCATION_NAME_TO_ID[completion] in done else 0
+        if ints[SALVAGE_CAP_INT_BASE + k] != cap:
+            bridge.set_int(SALVAGE_CAP_INT_BASE + k, cap)
+    return bought_now
+
+
 def intel_count(received: Sequence[ReceivedItem]) -> int:
     return sum(1 for item in received if item.item == IFF_INTEL_ID)
 
@@ -375,6 +435,9 @@ class ME2Context(CommonContext):
             slot_data = args.get("slot_data", {})
             self.intel_required = slot_data.get("intel_required")
             self.me1_history = slot_data.get("me1_history")
+            # seeds generated before the salvage options have no salvage entries
+            self.salvage = bool(slot_data.get("salvage", 0)) and slot_data.get("pickups", 0) != 0
+            self.salvage_tier = int(slot_data.get("salvage_price", 2))
             self.identity = seed_identity(self.seed_name or "", self.team or 0, self.slot or 0)
             self._mismatch_reported = False
 
@@ -445,13 +508,16 @@ class ME2Context(CommonContext):
         received = tuple(self.items_received)
         sync_received_items(self.bridge, received)
         sync_dossier_journals(self.bridge, received)
+        open_locations = set(self.missing_locations) - set(self.locations_checked)
+        salvaged = sync_salvage(self.bridge, getattr(self, "salvage", False), getattr(self, "salvage_tier", 2),
+                                open_locations)
         if self.intel_required is not None and intel_count(received) >= self.intel_required:
             if not self.bridge.get_bool(IFF_OPEN_PLOT_BOOL):
                 self.bridge.set_bool(IFF_OPEN_PLOT_BOOL, True)
                 logger.info("Reaper IFF Intel complete: the Derelict Reaper is open")
                 self.notify("The Derelict Reaper is open")
         missing = set(self.missing_locations) - set(self.locations_checked)
-        true_locations = evaluate_locations(self.bridge, missing)
+        true_locations = evaluate_locations(self.bridge, missing) | set(salvaged)
         goal = self.bridge.get_bool(GOAL_PLOT_BOOL)
         self._deliver_notices()
         return true_locations, goal

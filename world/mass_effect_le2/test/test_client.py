@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from ..client import (DOSSIER_BOOL_BASE, GOAL_PLOT_BOOL, IDENTITY_PLOT_INTS, IdentityMismatchError, ME2Context, LOCATION_PREDICATES, RECEIVED_INDEX_PLOT_INT,
                       BridgeConnection, BridgeProtocolError, GameNotReadyError, evaluate_locations, item_op,
                       notice_lines, parse_plot_predicate, seed_identity, sync_received_items,
-                      DOSSIER_JOURNAL_BOOLS, sync_dossier_journals)
+                      DOSSIER_JOURNAL_BOOLS, sync_dossier_journals, SALVAGE_AREA_IDS, SALVAGE_BOUGHT_INT_BASE,
+                      SALVAGE_CAP_INT_BASE, SALVAGE_TIER_DISABLE_BASE, sync_salvage)
 from ..data import DOSSIERS, FEMALE_PLOT_BOOL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, ME1_HISTORY_BOOLS
 
 
@@ -75,6 +76,72 @@ class TestDelivery(unittest.TestCase):
             self.skipTest("bridge source not beside this world (packaged .apworld)")
         listed = re.search(r"DossierJournalBools\[\] = \{([^}]*)\}", path.read_text()).group(1)
         self.assertEqual({int(n) for n in listed.split(",")}, {j for j, _ in DOSSIER_JOURNAL_BOOLS.values()})
+
+    class SalvageBridge(FakeBridge):
+        def set_bool(self, index, value):
+            self.bools[index] = value
+
+        def get_ints(self, indices):
+            return {i: self.ints.get(i, 0) for i in indices}
+
+        def take_int(self, index):
+            value = self.ints.get(index, 0)
+            self.ints[index] = 0
+            return value
+
+        def set_int(self, index, value):
+            self.ints[index] = value
+
+    def test_salvage_caps_follow_done_missions_and_open_pickups(self) -> None:
+        from ..data import SALVAGE_MISSIONS
+        bridge = self.SalvageBridge()
+        korlus = next(k for k, (area, _, _) in enumerate(SALVAGE_MISSIONS) if area == "grunt_acq")
+        ids = SALVAGE_AREA_IDS["grunt_acq"]
+        open_locations = set(ids[6:])  # 4 of Korlus's pickups still open
+        self.assertEqual(sync_salvage(bridge, True, 2, open_locations), [])
+        self.assertEqual(bridge.ints.get(SALVAGE_CAP_INT_BASE + korlus, 0), 0)  # Korlus not done yet
+        self.assertEqual([bridge.bools.get(SALVAGE_TIER_DISABLE_BASE + t, False) for t in range(5)], [True, True, False, True, True])
+        bridge.bools[5812] = True  # Korlus: Recruit Grunt
+        sync_salvage(bridge, True, 2, open_locations)
+        self.assertEqual(bridge.ints[SALVAGE_CAP_INT_BASE + korlus], 4)
+        bridge.ints[SALVAGE_BOUGHT_INT_BASE + korlus] = 2  # two purchases at the research terminal
+        bought = sync_salvage(bridge, True, 2, open_locations)
+        self.assertEqual(bought, sorted(open_locations)[:2])
+        self.assertEqual(bridge.ints[SALVAGE_BOUGHT_INT_BASE + korlus], 0)
+        self.assertEqual(bridge.ints[SALVAGE_CAP_INT_BASE + korlus], 2)
+
+    def test_salvage_off_disables_every_tier(self) -> None:
+        bridge = self.SalvageBridge()
+        self.assertEqual(sync_salvage(bridge, False, 2, set()), [])
+        self.assertTrue(all(bridge.bools[SALVAGE_TIER_DISABLE_BASE + t] for t in range(5)))
+
+    def test_salvage_json_matches_data(self) -> None:
+        import pathlib
+        import sys
+        tools = pathlib.Path(__file__).resolve().parents[3] / "tools"
+        if not (tools / "le2mod" / "salvage.json").exists():
+            self.skipTest("tools not beside this world (packaged .apworld)")
+        sys.path.insert(0, str(tools))
+        try:
+            from export_salvage import salvage_json
+        finally:
+            sys.path.remove(str(tools))
+        self.assertEqual((tools / "le2mod" / "salvage.json").read_text(), salvage_json())
+
+    def test_bridge_salvage_ranges_match_client(self) -> None:
+        import pathlib
+        import re
+        from ..data import SALVAGE_MISSIONS
+        path = pathlib.Path(__file__).resolve().parents[3] / "tools" / "le2apbridge" / "LE2APBridge" / "Bridge.cpp"
+        if not path.exists():
+            self.skipTest("bridge source not beside this world (packaged .apworld)")
+        source = path.read_text()
+        bought = re.search(r"SalvageBoughtMin = (\d+), SalvageBoughtMax = (\d+)", source).groups()
+        cap = re.search(r"SalvageCapMin = (\d+), SalvageCapMax = (\d+)", source).groups()
+        self.assertEqual(int(bought[0]), SALVAGE_BOUGHT_INT_BASE)
+        self.assertGreaterEqual(int(bought[1]), SALVAGE_BOUGHT_INT_BASE + len(SALVAGE_MISSIONS) - 1)
+        self.assertEqual(int(cap[0]), SALVAGE_CAP_INT_BASE)
+        self.assertGreaterEqual(int(cap[1]), SALVAGE_CAP_INT_BASE + len(SALVAGE_MISSIONS) - 1)
 
     def test_dossier_flags_match_the_mod_gates(self) -> None:
         # le2mod 0.0.4 gates each recruitment on these bools (tools/le2mod/Program.cs Gates/HubGates)

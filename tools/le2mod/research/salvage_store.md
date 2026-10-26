@@ -52,3 +52,33 @@ its done bool is set. Trivial, but there's no in-game choice or cost.
 
 Open items before building: choose the Normandy object, list the non-replayable missions (exclude hubs and the
 Normandy), and decide whether the entries are free or priced.
+
+## Built design (le2mod 0.0.7, 2026-10-26; Austin: priced per missed check, on a Normandy terminal)
+
+- **Where:** the Normandy research terminal (SFXSeqAct_ResearchChoiceGUI). Its list is config, not Kismet:
+  `[SFXGame.SFXGameChoiceGUIData_Research] Research=(PlotName, TreasureId, UnlockId, RMode, DisableId, ChoiceEntry)`
+  in BIOUI.ini. So the mod appends entries with `+Research=` in its own BIOUI.ini and needs no new Kismet. The
+  terminal's Kismet (BioD_Nor_130TechLabs) opens the GUI on Used with no plot check, but in vanilla the tech lab is
+  only reachable once Mordin is recruited. Salvage therefore needs Mordin. If that's a problem, the follow-up is to open
+  the lab early.
+- **Price per check, how:** a treasure row has one fixed price, so each mission k is one **multi-level** tech
+  (Tec_APSalvage_k, nLevels 10, plot int 2110+k) whose treasure rows are multi-level. Each purchase raises the level by
+  one and charges one check's price. The client **takes** the level each poll (bridge TAKEI reads it and sets it to 0
+  in one game-thread step), sends that many of the mission's open pickups, lowest id first, and sets the cap int
+  APSalvageCap_k (2150+k) to the open pickups left. The entry shows and qualifies only while level < cap, so you can
+  never buy more than what's missing, and since the level returns to 0 the 10-level cap never binds. This was chosen
+  over count tiers or a row per pickup: one row per mission per price, with no per-count rows and no per-pickup lines.
+- **Price option:** the row price is fixed when the mod is built, so the YAML `salvage_price` picks one of five tiers
+  (free, 500, 1000 default, 2500, 5000). Each mission has one treasure row per tier (ids 21500+5k+t). Every entry for
+  tier t carries DisableId 21310+t, and the client sets the other tiers' disable bools, so only the chosen price shows.
+  `salvage: false` (or pickups off) disables all tiers and keeps every cap at 0.
+- **Rows** (Startup_ArchipelagoME2_INT, package BIOG_2DA_ArchipelagoME2_PlotManager_X, registered with
+  `+Package=` in BIOEngine.ini, tables cloned from DLC_HEN_VT's _part_100): Plot_Treasure_Tech_part_4100 (28 techs,
+  rows 41000+k), Plot_Treasure_Treasure_part_4100 (140 rows: nmLevel Biop_Nor, Credits, the tier price, nmRequiredTech
+  APSalvageCap_k, multi-level), PlotManagerGameData_part_4100 (Tec_APSalvage_k -> 2110+k, APSalvageCap_k -> 2150+k,
+  plus the vanilla sentinel row). Strings in DLC_4100_INT.tlk: "<mission> Salvage" (41000100+k), a description and a
+  purchase message.
+- **Missions:** `data.SALVAGE_MISSIONS`, the 28 non-hub pickup areas, each with its completion location; it is
+  exported to tools/le2mod/salvage.json by tools/export_salvage.py, and a world test keeps the two in sync.
+- **Untested in game:** the entries' placement (RMode 0 = top level), DLC config merge of `+Research=`, and
+  multi-level research purchase flow for a modded tech. The tables and ini are validated statically.

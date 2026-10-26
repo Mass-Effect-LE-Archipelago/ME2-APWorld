@@ -1,4 +1,4 @@
-# LE2APBridge protocol (version 3)
+# LE2APBridge protocol (version 4)
 
 Named pipe `\\.\pipe\LE2APBridge`, message mode. One ASCII request per message, one reply per request.
 Replies are `OK`, `OK <value>` or `ERR <reason>`. The pipe thread validates; everything touching game state runs on the
@@ -14,6 +14,9 @@ still complete later; see TXN for why that is safe).
 | `GETI <n>` | `OK <value>` | Any plot int. |
 | `GETBS <n1> <n2> ...` | `OK <0/1 per index>` | Up to 64 indices, in order. |
 | `SETB <n> <0/1>` | `OK` | AP block bools 21000-21999 (derived state the client recomputes, e.g. 21100), and (protocol 3) set-only the dossier journal bools 551, 548, 545, 552, 549, 553, 550 that TIM's transitions 2371/2372 set. |
+| `GETIS <n1> <n2> ...` | `OK <v1> <v2> ...` | Protocol 4. Up to 64 plot ints, in order. |
+| `TAKEI <n>` | `OK <value>` | Protocol 4. Salvage purchase counters 2110-2149 only: returns the value and sets it to 0 in the same game-thread step. |
+| `SETI <n> <v>` | `OK` | Protocol 4. Salvage caps 2150-2199 only, 0-1000. |
 | `COND <id>` | `OK 0/1` | Protocol 3, diagnostic: `BioWorldInfo.CheckConditional(id, 0)`. |
 | `CONDCLS` | `OK <class> ...` | Protocol 3, diagnostic: `BioWorldInfo.ConditionalClasses` (the registered conditional classes). |
 | `ID` | `OK <seed> <slot>` | Save identity, plot ints 2101/2102. `0 0` = not bound. |

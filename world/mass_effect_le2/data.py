@@ -428,6 +428,43 @@ def _pickup(offset: int, plot: int, area: str) -> LocationData:
 
 LOCATIONS.update({name: _pickup(_L + 0x900 + i, plot, area) for i, (name, plot, area) in enumerate(PICKUPS)})
 
+# Missed-checks salvage (D22, salvage option): every pickup area that can't be revisited (hubs excluded) gets one entry
+# at the Normandy research terminal once the location naming its completion is true. The order is the index k that
+# fixes the mod's plot ints and treasure rows (tools/le2mod/salvage.json): append only.
+SALVAGE_MISSIONS: tuple[tuple[str, str, str], ...] = (  # (pickup area, terminal label, completion location)
+    ("lazarus", "Lazarus Station", "Lazarus Station: Awakening"),
+    ("freedom", "Freedom's Progress", "Freedom's Progress: Complete"),
+    ("horizon", "Horizon", "Horizon: Complete"),
+    ("collector_ship", "Collector Ship", "Collector Ship: Complete"),
+    ("reaper", "Derelict Reaper", "Derelict Reaper: Acquire the IFF"),
+    ("mordin_acq", "Mordin's Recruitment", _CHECK_AREAS["mordin_acq"]),
+    ("garrus_acq", "Garrus's Recruitment", _CHECK_AREAS["garrus_acq"]),
+    ("jack_acq", "Purgatory", _CHECK_AREAS["jack_acq"]),
+    ("grunt_acq", "Korlus", _CHECK_AREAS["grunt_acq"]),
+    ("thane_acq", "Dantius Towers", _CHECK_AREAS["thane_acq"]),
+    ("samara_acq", "Samara's Recruitment", _CHECK_AREAS["samara_acq"]),
+    ("tali_acq", "Haestrom", _CHECK_AREAS["tali_acq"]),
+    ("miranda_l", "Miranda's Loyalty", _CHECK_AREAS["miranda_l"]),
+    ("jacob_l", "Jacob's Loyalty", _CHECK_AREAS["jacob_l"]),
+    ("mordin_l", "Mordin's Loyalty", _CHECK_AREAS["mordin_l"]),
+    ("garrus_l", "Garrus's Loyalty", _CHECK_AREAS["garrus_l"]),
+    ("jack_l", "Jack's Loyalty", _CHECK_AREAS["jack_l"]),
+    ("grunt_l", "Grunt's Loyalty", _CHECK_AREAS["grunt_l"]),
+    ("thane_l", "Thane's Loyalty", _CHECK_AREAS["thane_l"]),
+    ("samara_l", "Samara's Loyalty", _CHECK_AREAS["samara_l"]),
+    ("tali_l", "Tali's Loyalty", _CHECK_AREAS["tali_l"]),
+    ("legion_l", "Legion's Loyalty", _CHECK_AREAS["legion_l"]),
+    ("zaeed_l", "Zaeed's Loyalty", _CHECK_AREAS["zaeed_l"]),
+    ("kasumi_l", "Kasumi's Loyalty", _CHECK_AREAS["kasumi_l"]),
+    ("lotsb", "Lair of the Shadow Broker", _CHECK_AREAS["lotsb"]),
+    ("arrival", "Arrival", _CHECK_AREAS["arrival"]),
+    ("overlord", "Project Overlord", _CHECK_AREAS["overlord"]),
+    ("firewalker", "Firewalker", _CHECK_AREAS["firewalker"]),
+)
+SALVAGE_PRICES = (0, 500, 1000, 2500, 5000)  # credits per check, by salvage_price option value
+SALVAGE_PICKUPS: dict[str, tuple[str, ...]] = {
+    area: tuple(name for name, _, a in PICKUPS if a == area) for area, _, _ in SALVAGE_MISSIONS}
+
 DLC_KEYS = ("Kasumi", "Zaeed", "Overlord", "Shadow Broker", "Arrival", "Firewalker", "Normandy Crash Site")
 
 LOCATION_NAME_TO_ID = {name: ID_BASE + data.offset for name, data in LOCATIONS.items()}

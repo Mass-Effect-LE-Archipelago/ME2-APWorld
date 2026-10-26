@@ -74,3 +74,5 @@ staged and validated (reopened, links and conditionals checked) but not installe
 career whose dossier bools are unset.
 
 0.0.6 (2026-10-25, staged only): galaxy-map recruit labels follow the locks. Planet labels (PlanetPlotLabelCondition) for Jack, Grunt, Tali and the Reaper use the gate conditionals. The hub FEATURE_LABELs 'Recruit The Professor/Archangel/Assassin/Justicar/Veteran/Master Thief' get F21200+i (vanilla body AND the dossier bool). 'Help X' loyalty labels and DLC labels (e.g. Overlord) are unchanged.
+
+0.0.7 (2026-10-26, staged only): missed-checks salvage at the Normandy research terminal (D22, research/salvage_store.md). Needs tools/le2mod/salvage.json (tools/export_salvage.py), bridge protocol 4 and the matching client.

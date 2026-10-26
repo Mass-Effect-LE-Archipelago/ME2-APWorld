@@ -1,0 +1,182 @@
+{
+ "bought_int_base": 2110,
+ "cap_int_base": 2150,
+ "tier_disable_base": 21310,
+ "prices": [
+  0,
+  500,
+  1000,
+  2500,
+  5000
+ ],
+ "missions": [
+  {
+   "index": 0,
+   "area": "lazarus",
+   "label": "Lazarus Station",
+   "pickups": 7
+  },
+  {
+   "index": 1,
+   "area": "freedom",
+   "label": "Freedom's Progress",
+   "pickups": 7
+  },
+  {
+   "index": 2,
+   "area": "horizon",
+   "label": "Horizon",
+   "pickups": 11
+  },
+  {
+   "index": 3,
+   "area": "collector_ship",
+   "label": "Collector Ship",
+   "pickups": 2
+  },
+  {
+   "index": 4,
+   "area": "reaper",
+   "label": "Derelict Reaper",
+   "pickups": 12
+  },
+  {
+   "index": 5,
+   "area": "mordin_acq",
+   "label": "Mordin's Recruitment",
+   "pickups": 12
+  },
+  {
+   "index": 6,
+   "area": "garrus_acq",
+   "label": "Garrus's Recruitment",
+   "pickups": 8
+  },
+  {
+   "index": 7,
+   "area": "jack_acq",
+   "label": "Purgatory",
+   "pickups": 7
+  },
+  {
+   "index": 8,
+   "area": "grunt_acq",
+   "label": "Korlus",
+   "pickups": 10
+  },
+  {
+   "index": 9,
+   "area": "thane_acq",
+   "label": "Dantius Towers",
+   "pickups": 6
+  },
+  {
+   "index": 10,
+   "area": "samara_acq",
+   "label": "Samara's Recruitment",
+   "pickups": 7
+  },
+  {
+   "index": 11,
+   "area": "tali_acq",
+   "label": "Haestrom",
+   "pickups": 9
+  },
+  {
+   "index": 12,
+   "area": "miranda_l",
+   "label": "Miranda's Loyalty",
+   "pickups": 8
+  },
+  {
+   "index": 13,
+   "area": "jacob_l",
+   "label": "Jacob's Loyalty",
+   "pickups": 9
+  },
+  {
+   "index": 14,
+   "area": "mordin_l",
+   "label": "Mordin's Loyalty",
+   "pickups": 7
+  },
+  {
+   "index": 15,
+   "area": "garrus_l",
+   "label": "Garrus's Loyalty",
+   "pickups": 10
+  },
+  {
+   "index": 16,
+   "area": "jack_l",
+   "label": "Jack's Loyalty",
+   "pickups": 9
+  },
+  {
+   "index": 17,
+   "area": "grunt_l",
+   "label": "Grunt's Loyalty",
+   "pickups": 13
+  },
+  {
+   "index": 18,
+   "area": "thane_l",
+   "label": "Thane's Loyalty",
+   "pickups": 1
+  },
+  {
+   "index": 19,
+   "area": "samara_l",
+   "label": "Samara's Loyalty",
+   "pickups": 1
+  },
+  {
+   "index": 20,
+   "area": "tali_l",
+   "label": "Tali's Loyalty",
+   "pickups": 14
+  },
+  {
+   "index": 21,
+   "area": "legion_l",
+   "label": "Legion's Loyalty",
+   "pickups": 6
+  },
+  {
+   "index": 22,
+   "area": "zaeed_l",
+   "label": "Zaeed's Loyalty",
+   "pickups": 3
+  },
+  {
+   "index": 23,
+   "area": "kasumi_l",
+   "label": "Kasumi's Loyalty",
+   "pickups": 10
+  },
+  {
+   "index": 24,
+   "area": "lotsb",
+   "label": "Lair of the Shadow Broker",
+   "pickups": 10
+  },
+  {
+   "index": 25,
+   "area": "arrival",
+   "label": "Arrival",
+   "pickups": 10
+  },
+  {
+   "index": 26,
+   "area": "overlord",
+   "label": "Project Overlord",
+   "pickups": 23
+  },
+  {
+   "index": 27,
+   "area": "firewalker",
+   "label": "Firewalker",
+   "pickups": 1
+  }
+ ]
+}
