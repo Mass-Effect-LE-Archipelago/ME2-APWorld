@@ -8,6 +8,10 @@ import sys
 
 sys.path.insert(0, os.getcwd())
 
+import ModuleUpdate  # noqa: E402
+
+ModuleUpdate.update_ran = True  # don't prompt to install other worlds' requirements
+
 from worlds.mass_effect_le2 import data
 
 STATUS = "V-DB"  # every predicate so far comes from the plot databases; set per row once observed in game

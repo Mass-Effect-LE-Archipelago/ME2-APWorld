@@ -58,6 +58,8 @@ def location_included(world: MassEffectLE2World, loc: data.LocationData) -> bool
         return bool(world.options.collectibles)
     if loc.category == "pickup":
         return world.options.pickups.value != world.options.pickups.option_off
+    if loc.category == "codex":
+        return bool(world.options.codex)
     return True
 
 
@@ -85,7 +87,8 @@ def create_regions(world: MassEffectLE2World) -> None:
         location = MassEffectLE2Location(world.player, name, data.LOCATION_NAME_TO_ID[name], regions[loc.region])
         if loc.excluded:
             location.progress_type = LocationProgressType.EXCLUDED
-        elif loc.category == "pickup" and world.options.pickups == world.options.pickups.option_safe:
+        elif (loc.category == "pickup" and world.options.pickups == world.options.pickups.option_safe) \
+                or loc.category == "codex":  # codex pages can come from optional conversations
             location.item_rule = _not_progression
         regions[loc.region].locations.append(location)
 

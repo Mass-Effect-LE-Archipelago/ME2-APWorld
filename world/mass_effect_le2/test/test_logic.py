@@ -108,6 +108,14 @@ class TestDefaults(LE2Helpers):
             indices = {int(n) for n in re.findall(r"\d+", LOCATIONS[name].plot)}
             self.assertFalse(indices & squad_state, name)
 
+    def test_codex_on_by_default_and_never_progression(self) -> None:
+        codex = [name for name in self.names() if name.startswith("Codex: ")]
+        self.assertGreater(len(codex), 60)  # 73 minus the prologue pages the open start skips
+        progression = next(item for item in self.multiworld.itempool if item.advancement)
+        for name in codex:  # excluded areas (e.g. Arrival) are filler-only through their progress type instead
+            location = self.location(name)
+            self.assertTrue(location.progress_type == LocationProgressType.EXCLUDED or not location.item_rule(progression), name)
+
     def test_beatable_with_everything(self) -> None:
         self.collect_all_but([])
         self.assertBeatable(True)
@@ -243,6 +251,13 @@ class TestPickups(LE2Helpers):
             for plot in map(int, re.findall(r"\d+", loc.plot)):
                 self.assertNotIn(plot, seen, f"{name} and {seen.get(plot)} read the same plot bool")
                 seen[plot] = name
+
+
+class TestCodexOff(LE2Helpers):
+    options = {"codex": False}
+
+    def test_no_codex_checks(self) -> None:
+        self.assertFalse([name for name in self.names() if name.startswith("Codex: ")])
 
 
 class TestPickupsOff(LE2Helpers):

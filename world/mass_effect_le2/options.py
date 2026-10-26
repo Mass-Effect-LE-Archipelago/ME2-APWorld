@@ -94,6 +94,13 @@ class Pickups(Choice):
     default = 1
 
 
+class Codex(DefaultOnToggle):
+    """Codex entries the game unlocks after the start are checks (73: the starting entries are left out, and each
+    Paragon/Renegade pair is one check). Some come from optional conversations, so they never hold progression."""
+
+    display_name = "Codex"
+
+
 class Salvage(DefaultOnToggle):
     """Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers
     "<mission> Salvage". Each purchase sends one of that mission's pickup checks you left behind. Only matters with
@@ -189,6 +196,7 @@ class MassEffectLE2Options(PerGameCommonOptions):
     research: Research
     collectibles: Collectibles
     pickups: Pickups
+    codex: Codex
     salvage: Salvage
     salvage_price: SalvagePrice
     weapon_unlocks: WeaponUnlocks
@@ -220,7 +228,7 @@ options_presets = {
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
     OptionGroup("Start", [StartOnNormandy]),
-    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Salvage, SalvagePrice, EnabledDLC]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, Salvage, SalvagePrice, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
     OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

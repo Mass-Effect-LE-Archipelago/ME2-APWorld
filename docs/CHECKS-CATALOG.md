@@ -422,6 +422,79 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d3219ff | Recruit Samara: Biotic Upgrade | Illium | pickup | `bool 1797` | Dossier: The Justicar |  |  | V-DB |
 | 0x4d321a00 | The Prodigal: SMG Upgrade | Loyalty Missions | pickup | `bool 1053` | Horizon Complete |  |  | V-DB |
 | 0x4d321a01 | The Prodigal: Medi-Gel Upgrade | Loyalty Missions | pickup | `bool 5682` | Horizon Complete |  |  | V-DB |
+| 0x4d321c00 | Codex: Reapers Indoctrination | Derelict Reaper | codex | `bool 2570` |  |  |  | V-DB |
+| 0x4d321c01 | Codex: Planet Rakhana | Normandy | codex | `bool 4882` |  |  |  | V-DB |
+| 0x4d321c02 | Codex: Planet Tuchanka | Normandy | codex | `bool 4883` |  |  |  | V-DB |
+| 0x4d321c03 | Codex: Husks Scions | Horizon | codex | `bool 4886` |  |  |  | V-DB |
+| 0x4d321c04 | Codex: Battle of the Citadel | Normandy | codex | `bool 4887 or 4888` |  |  |  | V-DB |
+| 0x4d321c05 | Codex: Collectors | Normandy | codex | `bool 4914` |  |  |  | V-DB |
+| 0x4d321c06 | Codex: Praetorians | Horizon | codex | `bool 4915` |  |  |  | V-DB |
+| 0x4d321c07 | Codex: Human Diplomatic Relations | Normandy | codex | `bool 4917 or 4919` |  |  |  | V-DB |
+| 0x4d321c08 | Codex: Rise of the Alliance | Normandy | codex | `bool 4918 or 4920` |  |  |  | V-DB |
+| 0x4d321c09 | Codex: Location The Perseus Veil | Normandy | codex | `bool 4922` |  |  |  | V-DB |
+| 0x4d321c0a | Codex: Planet Haestrom | Haestrom | codex | `bool 4925` |  |  |  | V-DB |
+| 0x4d321c0b | Codex: Planet Horizon | Horizon | codex | `bool 4926` |  |  |  | V-DB |
+| 0x4d321c0c | Codex: Planet Illium | Illium | codex | `bool 4927` |  |  |  | V-DB |
+| 0x4d321c0d | Codex: Planet Korlus | Normandy | codex | `bool 4928` |  |  |  | V-DB |
+| 0x4d321c0e | Codex: Planet Pragia | Loyalty Missions | codex | `bool 4930` | Horizon Complete, Jack Recruited |  |  | V-DB |
+| 0x4d321c0f | Codex: Location Omega | Omega | codex | `bool 4931` |  |  |  | V-DB |
+| 0x4d321c10 | Codex: Sovereign | Citadel | codex | `bool 4934` |  |  |  | V-DB |
+| 0x4d321c11 | Codex: Asari Ardat Yakshi | Normandy | codex | `bool 4936` |  |  |  | V-DB |
+| 0x4d321c12 | Codex: Asari Justicars | Normandy | codex | `bool 4937` |  |  |  | V-DB |
+| 0x4d321c13 | Codex: Drell Biology | Normandy | codex | `bool 4939` |  |  |  | V-DB |
+| 0x4d321c14 | Codex: Drell Culture | Normandy | codex | `bool 4940` |  |  |  | V-DB |
+| 0x4d321c15 | Codex: Frigates | Citadel | codex | `bool 4942` |  |  |  | V-DB |
+| 0x4d321c16 | Codex: Dreadnoughts | Citadel | codex | `bool 4943` |  |  |  | V-DB |
+| 0x4d321c17 | Codex: Mass Accelerators | Omega | codex | `bool 4944` |  |  |  | V-DB |
+| 0x4d321c18 | Codex: Disruptor Torpedoes | Normandy | codex | `bool 4945` |  |  |  | V-DB |
+| 0x4d321c19 | Codex: Javelin | Normandy | codex | `bool 4946` |  |  |  | V-DB |
+| 0x4d321c1a | Codex: Space Combat Pursuit Tactics | Normandy | codex | `bool 4947` |  |  |  | V-DB |
+| 0x4d321c1b | Codex: Geth Culture | Normandy | codex | `bool 4956` |  |  |  | V-DB |
+| 0x4d321c1c | Codex: Geth Technology | Normandy | codex | `bool 4957` |  |  |  | V-DB |
+| 0x4d321c1d | Codex: Geth Heretics | Normandy | codex | `bool 4958` |  |  |  | V-DB |
+| 0x4d321c1e | Codex: The Migrant Fleet | Normandy | codex | `bool 5109` |  |  |  | V-DB |
+| 0x4d321c1f | Codex: Purgatory | Purgatory | codex | `bool 5110` |  |  |  | V-DB |
+| 0x4d321c20 | Codex: A61 Mantis Gunship | Omega | codex | `bool 5115` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321c21 | Codex: Quarian Liveships | Loyalty Missions | codex | `bool 5118` | Tali'Zorah vas Neema Recruited |  |  | V-DB |
+| 0x4d321c22 | Codex: Normandy Fuel Upgrade | Normandy | codex | `bool 5119` |  |  |  | V-DB |
+| 0x4d321c23 | Codex: Computers Haptic Adaptive Interface | Normandy | codex | `bool 5123` |  |  |  | V-DB |
+| 0x4d321c24 | Codex: Security Mechs | Normandy | codex | `bool 5124` |  |  |  | V-DB |
+| 0x4d321c25 | Codex: Vorcha | Omega | codex | `bool 5312` |  |  |  | V-DB |
+| 0x4d321c26 | Codex: Cerberus | Normandy | codex | `bool 5313` |  |  |  | V-DB |
+| 0x4d321c27 | Codex: Mercenaries Blue Suns | Omega | codex | `bool 5314` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321c28 | Codex: Mercenaries Eclipse | Omega | codex | `bool 5315` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321c29 | Codex: Mercenaries The Blood Pack | Normandy | codex | `bool 5316` |  |  |  | V-DB |
+| 0x4d321c2a | Codex: Normandy Weapon Upgrade | Normandy | codex | `bool 5317` |  |  |  | V-DB |
+| 0x4d321c2b | Codex: Normandy Armor Upgrade | Normandy | codex | `bool 5318` |  |  |  | V-DB |
+| 0x4d321c2c | Codex: Equipment Thermal Clips | Normandy | codex | `bool 5319` |  |  |  | V-DB |
+| 0x4d321c2d | Codex: Heavy Weapons ERCS M100 Grenade Launcher | Normandy | codex | `bool 5320` |  |  |  | V-DB |
+| 0x4d321c2e | Codex: Heavy Weapons M622 Avalanche | Normandy | codex | `bool 5322` |  |  |  | V-DB |
+| 0x4d321c2f | Codex: Heavy Weapons M920 Cain | Normandy | codex | `bool 5323` |  |  |  | V-DB |
+| 0x4d321c30 | Codex: Heavy Weapons Collector Particle Beamer | Horizon | codex | `bool 5324` |  |  |  | V-DB |
+| 0x4d321c31 | Codex: Normandy Shield Upgrade | Normandy | codex | `bool 5325` |  |  |  | V-DB |
+| 0x4d321c32 | Codex: M44 Hammerhead IFV | Normandy | codex | `bool 5326` |  |  |  | V-DB |
+| 0x4d321c33 | Codex: Normandy SR2 | Normandy | codex | `bool 5328` |  |  |  | V-DB |
+| 0x4d321c34 | Codex: UT47A Cyclone Shuttle | Normandy | codex | `bool 5331` |  |  |  | V-DB |
+| 0x4d321c35 | Codex: Fornax | Omega | codex | `bool 5338` |  |  |  | V-DB |
+| 0x4d321c36 | Codex: Ascension | Citadel | codex | `bool 5339` |  |  |  | V-DB |
+| 0x4d321c37 | Codex: Revelation | Citadel | codex | `bool 5340` |  |  |  | V-DB |
+| 0x4d321c38 | Codex: Planet Scan Technology | Normandy | codex | `bool 5419` |  |  |  | V-DB |
+| 0x4d321c39 | Codex: Heavy Weapons M160 Missile Launcher | Normandy | codex | `bool 5420` |  |  |  | V-DB |
+| 0x4d321c3a | Codex: Krogan Blood Rage | Korlus | codex | `bool 5939` |  |  |  | V-DB |
+| 0x4d321c3b | Codex: Collectors Collector General | Horizon | codex | `bool 6129` |  |  |  | V-DB |
+| 0x4d321c3c | Codex: Planet Zorya | Omega | codex | `bool 6289` |  |  |  | V-DB |
+| 0x4d321c3d | Codex: Mercenaries Blue Suns Full History | Loyalty Missions | codex | `bool 6290` | Horizon Complete, Zaeed Massani Recruited | Zaeed |  | V-DB |
+| 0x4d321c3e | Codex: M451 Firestorm | Loyalty Missions | codex | `bool 6315` | Horizon Complete, Zaeed Massani Recruited | Zaeed |  | V-DB |
+| 0x4d321c3f | Codex: M44 Hammerhead | Uncharted Worlds | codex | `bool 6465` |  |  |  | V-DB |
+| 0x4d321c40 | Codex: Planet Bekenstein | Citadel | codex | `bool 6541` |  |  |  | V-DB |
+| 0x4d321c41 | Codex: Grayboxes | Citadel | codex | `bool 6542` |  |  |  | V-DB |
+| 0x4d321c42 | Codex: Statue of Liberty | Loyalty Missions | codex | `bool 6543` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321c43 | Codex: Kasumis Weapon | Loyalty Missions | codex | `bool 6554` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
+| 0x4d321c44 | Codex: Planet Aite | Normandy | codex | `bool 6624` |  |  |  | V-DB |
+| 0x4d321c45 | Codex: The Yahg | Illium | codex | `bool 7232` |  | Shadow Broker |  | V-DB |
+| 0x4d321c46 | Codex: Planet Aratoht | Normandy | codex | `bool 7510` |  |  |  | V-DB |
+| 0x4d321c47 | Codex: Reaper Artifact | DLC Missions | codex | `bool 7511` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321c48 | Codex: Alpha Relay | DLC Missions | codex | `bool 7512` | Reaper IFF Acquired | Arrival | yes | V-DB |
 
 ## Items
 

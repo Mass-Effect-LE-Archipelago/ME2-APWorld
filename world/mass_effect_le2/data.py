@@ -14,6 +14,7 @@ from enum import Enum
 
 from BaseClasses import ItemClassification
 
+from .codex import CODEX
 from .pickups import PICKUPS
 
 ID_BASE = 0x4D32_0000  # "M2": deliberately not LE1's 0x4D45_0000 (feasibility plan, "Runtime contract")
@@ -427,6 +428,22 @@ def _pickup(offset: int, plot: int, area: str) -> LocationData:
 
 
 LOCATIONS.update({name: _pickup(_L + 0x900 + i, plot, area) for i, (name, plot, area) in enumerate(PICKUPS)})
+
+
+def _codex(offset: int, predicate: str, area: str) -> LocationData:
+    """A codex page in the area of its most accessible source (codex.py); always non-progression (regions.py)."""
+    if area == "normandy":
+        return LocationData(offset, Region.NORMANDY, predicate, category="codex")
+    if area == "n7":
+        return LocationData(offset, Region.UNCHARTED, predicate, category="codex")
+    if area in _STORY_AREAS:
+        region, needs = _STORY_AREAS[area]
+        return LocationData(offset, region, predicate, needs, category="codex", prologue=area in ("lazarus", "freedom"))
+    check = LOCATIONS[_CHECK_AREAS[area]]
+    return LocationData(offset, check.region, predicate, check.needs, check.any_of, "codex", check.dlc, check.excluded)
+
+
+LOCATIONS.update({name: _codex(_L + 0xC00 + i, predicate, area) for i, (name, predicate, area) in enumerate(CODEX)})
 
 # Missed-checks salvage (D22, salvage option): every pickup area that can't be revisited (hubs excluded) gets one entry
 # at the Normandy research terminal once the location naming its completion is true. The order is the index k that
