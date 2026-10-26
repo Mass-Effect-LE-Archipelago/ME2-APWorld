@@ -90,6 +90,8 @@ def create_regions(world: MassEffectLE2World) -> None:
         elif (loc.category == "pickup" and world.options.pickups == world.options.pickups.option_safe) \
                 or loc.category == "codex":  # codex pages can come from optional conversations
             location.item_rule = _not_progression
+        if name in data.WEAPON_PICKUP_ITEM:  # a weapon unlock never sits on its own pickup
+            location.item_rule = _not_weapon(location.item_rule, data.WEAPON_PICKUP_ITEM[name], world.player)
         regions[loc.region].locations.append(location)
 
     # Events mirror the checks the logic depends on (rules.py gives them the same rule as their check).
@@ -107,6 +109,11 @@ def create_regions(world: MassEffectLE2World) -> None:
 
 def _not_progression(item: Item) -> bool:
     return not item.advancement
+
+
+def _not_weapon(base, weapon: str, player: int):
+    """The location's rule, and never this slot's own `weapon` unlock item."""
+    return lambda item: base(item) and not (item.player == player and item.name == weapon)
 
 
 def _add_event(world: MassEffectLE2World, region: Region, name: str) -> None:

@@ -116,6 +116,14 @@ class TestDefaults(LE2Helpers):
             location = self.location(name)
             self.assertTrue(location.progress_type == LocationProgressType.EXCLUDED or not location.item_rule(progression), name)
 
+    def test_weapon_pickup_never_holds_its_own_weapon(self) -> None:
+        from ..data import WEAPON_PICKUP_ITEM
+        for name, weapon in WEAPON_PICKUP_ITEM.items():
+            if name not in self.names():
+                continue
+            own = self.get_item_by_name(weapon)
+            self.assertFalse(self.location(name).item_rule(own), name)
+
     def test_beatable_with_everything(self) -> None:
         self.collect_all_but([])
         self.assertBeatable(True)

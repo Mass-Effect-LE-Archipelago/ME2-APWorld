@@ -445,6 +445,24 @@ def _codex(offset: int, predicate: str, area: str) -> LocationData:
 
 LOCATIONS.update({name: _codex(_L + 0xC00 + i, predicate, area) for i, (name, predicate, area) in enumerate(CODEX)})
 
+# Weapon pickups (D17 follow-up, pickups option): the Tre_Wpn_* treasure "found" bools of the missions. Each follows its
+# mission like any pickup; the weapon's own unlock item never goes on it (regions.py), so receiving the item can't hide
+# the pickup. Left out: the Collector Ship's Bonus/Super weapon choice (one of several) and the research Tre_Wpn rows.
+# Order is the ID order (block 0xB00): append only.
+WEAPON_PICKUPS: tuple[tuple[str, int, str, str | None], ...] = (  # (location, plot, area, weapon item or None)
+    ("Lazarus Station: M-100 Grenade Launcher", 1191, "lazarus", "M-100 Grenade Launcher"),
+    ("Horizon: Collector Particle Beam", 912, "horizon", None),
+    ("Recruit Garrus: M-15 Vindicator", 898, "garrus_acq", "M-15 Vindicator"),
+    ("Recruit Mordin: M-6 Carnifex", 1798, "mordin_acq", "M-6 Carnifex"),
+    ("Recruit Tali: M-9 Tempest", 690, "tali_acq", "M-9 Tempest"),
+    ("Recruit Tali: Geth Pulse Rifle", 5239, "tali_acq", "Geth Pulse Rifle"),
+    ("Recruit Thane: M-97 Viper", 916, "thane_acq", "M-97 Viper"),
+    ("Recruit Samara: M-27 Scimitar", 889, "samara_acq", "M-27 Scimitar"),
+    ("Stealing Memory: M-12 Locust", 6710, "kasumi_l", "M-12 Locust"),
+)
+WEAPON_PICKUP_ITEM = {name: weapon for name, _, _, weapon in WEAPON_PICKUPS if weapon}
+LOCATIONS.update({name: _pickup(_L + 0xB00 + i, plot, area) for i, (name, plot, area, _) in enumerate(WEAPON_PICKUPS)})
+
 # Missed-checks salvage (D22, salvage option): every pickup area that can't be revisited (hubs excluded) gets one entry
 # at the Normandy research terminal once the location naming its completion is true. The order is the index k that
 # fixes the mod's plot ints and treasure rows (tools/le2mod/salvage.json): append only.
@@ -480,7 +498,8 @@ SALVAGE_MISSIONS: tuple[tuple[str, str, str], ...] = (  # (pickup area, terminal
 )
 SALVAGE_PRICES = (0, 500, 1000, 2500, 5000)  # credits per check, by salvage_price option value
 SALVAGE_PICKUPS: dict[str, tuple[str, ...]] = {
-    area: tuple(name for name, _, a in PICKUPS if a == area) for area, _, _ in SALVAGE_MISSIONS}
+    area: tuple(name for name, _, a in PICKUPS if a == area) + tuple(name for name, _, a, _ in WEAPON_PICKUPS if a == area)
+    for area, _, _ in SALVAGE_MISSIONS}
 
 DLC_KEYS = ("Kasumi", "Zaeed", "Overlord", "Shadow Broker", "Arrival", "Firewalker", "Normandy Crash Site")
 

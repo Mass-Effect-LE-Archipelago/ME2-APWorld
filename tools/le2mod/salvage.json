@@ -14,7 +14,7 @@
    "index": 0,
    "area": "lazarus",
    "label": "Lazarus Station",
-   "pickups": 7
+   "pickups": 8
   },
   {
    "index": 1,
@@ -26,7 +26,7 @@
    "index": 2,
    "area": "horizon",
    "label": "Horizon",
-   "pickups": 11
+   "pickups": 12
   },
   {
    "index": 3,
@@ -44,13 +44,13 @@
    "index": 5,
    "area": "mordin_acq",
    "label": "Mordin's Recruitment",
-   "pickups": 12
+   "pickups": 13
   },
   {
    "index": 6,
    "area": "garrus_acq",
    "label": "Garrus's Recruitment",
-   "pickups": 8
+   "pickups": 9
   },
   {
    "index": 7,
@@ -68,19 +68,19 @@
    "index": 9,
    "area": "thane_acq",
    "label": "Dantius Towers",
-   "pickups": 6
+   "pickups": 7
   },
   {
    "index": 10,
    "area": "samara_acq",
    "label": "Samara's Recruitment",
-   "pickups": 7
+   "pickups": 8
   },
   {
    "index": 11,
    "area": "tali_acq",
    "label": "Haestrom",
-   "pickups": 9
+   "pickups": 11
   },
   {
    "index": 12,
@@ -152,7 +152,7 @@
    "index": 23,
    "area": "kasumi_l",
    "label": "Kasumi's Loyalty",
-   "pickups": 10
+   "pickups": 11
   },
   {
    "index": 24,

@@ -495,6 +495,15 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d321c46 | Codex: Planet Aratoht | Normandy | codex | `bool 7510` |  |  |  | V-DB |
 | 0x4d321c47 | Codex: Reaper Artifact | DLC Missions | codex | `bool 7511` | Reaper IFF Acquired | Arrival | yes | V-DB |
 | 0x4d321c48 | Codex: Alpha Relay | DLC Missions | codex | `bool 7512` | Reaper IFF Acquired | Arrival | yes | V-DB |
+| 0x4d321b00 | Lazarus Station: M-100 Grenade Launcher | Normandy | pickup | `bool 1191` |  |  |  | V-DB |
+| 0x4d321b01 | Horizon: Collector Particle Beam | Horizon | pickup | `bool 912` |  |  |  | V-DB |
+| 0x4d321b02 | Recruit Garrus: M-15 Vindicator | Omega | pickup | `bool 898` | Dossier: Archangel |  |  | V-DB |
+| 0x4d321b03 | Recruit Mordin: M-6 Carnifex | Omega | pickup | `bool 1798` | Dossier: The Professor |  |  | V-DB |
+| 0x4d321b04 | Recruit Tali: M-9 Tempest | Haestrom | pickup | `bool 690` |  |  |  | V-DB |
+| 0x4d321b05 | Recruit Tali: Geth Pulse Rifle | Haestrom | pickup | `bool 5239` |  |  |  | V-DB |
+| 0x4d321b06 | Recruit Thane: M-97 Viper | Illium | pickup | `bool 916` | Dossier: The Assassin |  |  | V-DB |
+| 0x4d321b07 | Recruit Samara: M-27 Scimitar | Illium | pickup | `bool 889` | Dossier: The Justicar |  |  | V-DB |
+| 0x4d321b08 | Stealing Memory: M-12 Locust | Loyalty Missions | pickup | `bool 6710` | Horizon Complete, Kasumi Goto Recruited | Kasumi |  | V-DB |
 
 ## Items
 
