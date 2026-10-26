@@ -34,22 +34,32 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
-## 2026-10-24 (PC session; GitHub is down, so this local clone is the source of truth)
+## Current state (2026-10-25, PC session; GitHub is down, so this local clone is the source of truth)
 - Commit locally on claude/project-thread-5kre14 only, never push; after each commit run
   `git bundle create <APWorldMaker>\backups\ME2-LE-Archipelago-<date>.bundle --all`.
-- E2E run on the AustinME2 seed (C:\ProgramData\Archipelago\output\ME2Test, server localhost:38281): checks send,
-  items come back, saves keep plot ints 2100-2102. Main-menu early bind fixed in the bridge (aa0dad5; ASI built at
-  APWorldMaker\tools\le2apbridge\build\repo\Build\Release; installed 2026-10-24 16:2x, old v2 ASI in APWorldMaker\backups).
-- D21 (ship upgrades are items only): research trace in tools/le2mod/research/galaxy_gating.md section 4. Blocked on
-  a before/after bridge read on a throwaway non-AP save (never AustinME2). Client bug: SHIP items set the research
-  UnlockId bool.
-- le2mod 0.0.4 (747f0a4) stages galaxy gating for Jack/Grunt/Tali/Reaper (APWorldMaker\tools\le2mod\staging-0.0.4).
-  Hub recruit gates added (664dcfa). Installed 2026-10-24 via Mod Manager --installmod (AutoTOC 16:24); 0.0.3 backed up in
-  APWorldMaker\backups\DLC_MOD_ArchipelagoME2-0.0.3. AustinME2 holds only Mordin's dossier (bool 21000). In-game check pending.
-- Hub recruits (Mordin, Garrus, Zaeed, Thane, Samara, Kasumi): gates traced (galaxy_gating.md section 6). Austin is
-  choosing between per-mission gates and hub-access items.
+- Test seed: AustinME2 (C:\ProgramData\Archipelago\output\ME2Test\AP_52207553016037918111.zip), server
+  localhost:38281, client from C:\ProgramData\Archipelago (.apworld in custom_worlds). Checks send, items arrive, saves
+  keep plot ints 2100-2102. AustinME2 holds dossiers Mordin (21000) and Garrus (21001); Grunt and Zaeed recruited.
+- Installed in LE2 (2026-10-25 01:33, LE2 closed): bridge v3 (protocol 3: plot ops wait for a loaded save; SETB
+  allows the 7 dossier journal bools; COND/CONDCLS diagnostics), mod 0.0.5 (galaxy locks for Jack/Grunt/Tali/Reaper, hub
+  recruit locks: Mordin/Garrus/Thane at transition 399, Samara cab C376->F21005 + RE_HailCab, Zaeed and Kasumi recruit
+  conversations), and the client that sets vanilla dossier journal bools (545/548/549/550/551/552/553) for received,
+  not-yet-recruited dossiers. Galaxy locks confirmed in game. **Awaiting Austin's in-game check** of journal entries
+  548/551 and the Omega recruits (Garrus driver, Mordin checkpoint), and of the Zaeed lock.
+- Backups in APWorldMaker\backups: ASIs (v2 2026-10-17, v2b 2026-10-24), mod folders 0.0.3 and 0.0.4. Install
+  method: ME3TweaksModManager.exe --installmod <staging>\ArchipelagoME2\moddesc.ini --game LE2 (AutoTOC runs).
+- Built, not installed: mod 0.0.6 (a163c15, tools\le2mod\staging-0.0.6): galaxy-map recruit labels hidden until
+  their dossier arrives (planet labels use the gate conditionals; hub labels F21200+i).
+- D21 (ship upgrades are items only): galaxy_gating.md section 4. Blocked on a before/after bridge read on a
+  throwaway non-AP save (never AustinME2). Client bug still open: SHIP items set the research UnlockId bool.
+- Salvage store research (Austin's idea, missed mission pickups): tools/le2mod/research/salvage_store.md. Feasible,
+  smallest design given. Open: which Normandy object, free vs priced.
+- Overlord and other DLC missions are not locked (no AP items for them).
 - World tests on the PC: `ME2 LE Randomizer\Archipelago-main` (0.6.9 source, worlds\mass_effect_le2 is a junction to
-  this repo's world) with `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test`.
+  this repo's world) with `vendor\Archipelago\.venv\Scripts\python.exe -m pytest -q worlds/mass_effect_le2/test`
+  (104 pass). Mod build: le2mod openstart <BioGame> <staging> with LE1PROBE_OODLE set and
+  -p:LexCoreProject=APWorldMaker\vendor\LegendaryExplorer\...\LegendaryExplorerCore.csproj. Bridge build:
+  cmake --build APWorldMaker\tools\le2apbridge\build\repo\Build --config Release --target LE2APBridge-LE2.
 
 ## Roadmap to playable (proposed 2026-10-20, awaiting Austin's pick)
 1. End-to-end run: real client + local AP 0.6.8 server, fresh career; confirm item delivery, check sends, reconnect.
