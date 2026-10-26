@@ -34,7 +34,19 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
-## Release 0.2.0 (2026-10-26, latest)
+## Release 0.2.1 (2026-10-26, latest)
+- Release folder: APWorldMaker\release\ME2LE-AP-0.2.1 = 0.2.0 contents plus `ME2 AP Setup.exe` (tools/setup, WinForms
+  net10.0, self-contained single file, ~135 MB): Folders (auto-detect), Install/Repair/Uninstall with backups (Mod
+  Manager optional: copies DLC_MOD and writes the TOC via LEC), Options (built from tools/setup/options.json, exported
+  by tools/export_options.py and kept in sync by a world test; presets Story Focus/Completionist/Everything), Save to
+  Players / Save As / Save + Generate, Launch ME2 (+ client). Check mode: `"ME2 AP Setup.exe" --write-yaml <file>
+  [slot] [preset]`. The ASI loader is not shipped (LEBinkProxy has no license); users get it from Mod Manager.
+- World 0.2.1 (options regrouped, Everything preset). tools/build_apworld.py now injects `version`/`compatible_version`
+  (7) into the apworld manifest: without them AP 0.6.8 reads the world as 0.0.0 and rejects YAMLs that require 0.2.1.
+- Verified 2026-10-26: the app's YAMLs (Everything preset + Brother) generate with stock 0.6.8 Generate; 122 tests pass.
+  0.2.1 apworld is installed in C:\ProgramData\Archipelago\custom_worlds; game files unchanged from 0.2.0.
+
+## Release 0.2.0 (2026-10-26)
 - Release folder: APWorldMaker\release\ME2LE-AP-0.2.0 (apworld, LE2APBridge.asi v4/protocol 4, mod 0.0.9 folder + zip,
   install.ps1 / uninstall.ps1, README, documented YAML). Installed on Austin's PC with install.ps1 (2026-10-26 00:12;
   backups in release\ME2LE-AP-0.2.0\backup plus APWorldMaker\backups). World 0.2.0: codex (D23), weapon pickups (D24),

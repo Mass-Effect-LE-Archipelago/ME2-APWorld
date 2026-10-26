@@ -1,0 +1,288 @@
+{
+ "game": "Mass Effect Legendary Edition 2",
+ "world_version": "0.2.1",
+ "minimum_ap_version": "0.6.8",
+ "groups": [
+  {
+   "name": "Goal",
+   "options": [
+    {
+     "key": "intel_total",
+     "display": "Reaper IFF Intel in Pool",
+     "doc": "How many Reaper IFF Intel items are shuffled into the item pool.",
+     "type": "range",
+     "default": 5,
+     "min": 1,
+     "max": 10
+    },
+    {
+     "key": "intel_required",
+     "display": "Reaper IFF Intel Required",
+     "doc": "How many Reaper IFF Intel items open the Derelict Reaper mission (after the Collector Ship). Lowered to the pool\nsize if it is larger.",
+     "type": "range",
+     "default": 3,
+     "min": 1,
+     "max": 10
+    },
+    {
+     "key": "endgame_readiness",
+     "display": "Endgame Readiness",
+     "doc": "What logic expects before the Omega 4 Relay, so a successful suicide mission is always possible.\n\nall_loyal: the three Normandy upgrades, and every loyalty mission of every squadmate recruitable in this seed.\nship_upgrades: the three Normandy upgrades only. Choosing specialists well is up to you.",
+     "type": "choice",
+     "default": "all_loyal",
+     "choices": [
+      "all_loyal",
+      "ship_upgrades"
+     ]
+    },
+    {
+     "key": "start_on_normandy",
+     "display": "Start on Normandy",
+     "doc": "After the character creator, a new career skips Lazarus Station and Freedom's Progress and starts aboard the SR-2\nat the galaxy map, with Miranda and Jacob in the squad and the story state those missions give. Their checks are\nremoved, and one first-wave dossier is given at the start instead.",
+     "type": "toggle",
+     "default": true
+    }
+   ]
+  },
+  {
+   "name": "Checks",
+   "options": [
+    {
+     "key": "assignments",
+     "display": "Assignments",
+     "doc": "Which side assignments are checks.\n\noff: none. n7: the N7 assignments found by scanning planets. all: also hub assignments on Omega, the Citadel,\nIllium and Tuchanka, and the Normandy's own tasks.",
+     "type": "choice",
+     "default": "n7",
+     "choices": [
+      "off",
+      "n7",
+      "all"
+     ]
+    },
+    {
+     "key": "research",
+     "display": "Research",
+     "doc": "Buying a research project in the Normandy's tech lab is a check (44 projects; the three suicide-mission ship\nupgrades are items instead). Logic places these after the Collector Ship with every loyalty mission done.",
+     "type": "toggle",
+     "default": true
+    },
+    {
+     "key": "collectibles",
+     "display": "Collectibles",
+     "doc": "Captain's cabin purchases (models, fish, the space hamster) and base-game armor pieces are checks. Logic places\nthese after the Collector Ship with every loyalty mission done.",
+     "type": "toggle",
+     "default": true
+    },
+    {
+     "key": "pickups",
+     "display": "Pickups",
+     "doc": "Credit caches, resource nodes and upgrade blueprints picked up in missions and hubs are checks (258 with every\nDLC; weapon pickups are not). Most missions cannot be replayed, so a pickup you walk past is gone for good.\n\noff: no pickups. safe: pickups hold no progression items, so a missed one never blocks the seed. any: pickups can\nhold anything; sweep each mission before leaving it.",
+     "type": "choice",
+     "default": "safe",
+     "choices": [
+      "off",
+      "safe",
+      "any"
+     ]
+    },
+    {
+     "key": "codex",
+     "display": "Codex",
+     "doc": "Codex entries the game unlocks after the start are checks (73: the starting entries are left out, and each\nParagon/Renegade pair is one check). Some come from optional conversations, so they never hold progression.",
+     "type": "toggle",
+     "default": true
+    }
+   ]
+  },
+  {
+   "name": "Items",
+   "options": [
+    {
+     "key": "dlc_access",
+     "display": "DLC Access Items",
+     "doc": "DLC missions need an item to open: Project Overlord (\"David's Math Test\"), Lair of the Shadow Broker (\"Shadow\nBroker Toenail\", the Illium cab), Arrival (\"Batarian Genocide\") and Firewalker (\"I'm Sorry (Progressive Firewalker\nMission)\", five copies, one per mission in order). Only for DLC in enabled_dlc.",
+     "type": "toggle",
+     "default": true
+    },
+    {
+     "key": "progressive_loyalty",
+     "display": "Progressive Loyalty Missions",
+     "doc": "Loyalty missions need a \"Progressive Loyalty Mission\" item (one copy per squadmate). Each copy opens the loyalty\nmission of the next squadmate, in a fixed order, who is recruited and not yet loyal. The logic expects every copy\nbefore any loyalty mission, since which mission a copy opens depends on your progress.",
+     "type": "toggle",
+     "default": true
+    },
+    {
+     "key": "weapon_unlocks",
+     "display": "Weapon Unlocks",
+     "doc": "Shuffle weapon unlocks (Carnifex, Mattock, Viper, the heavy weapons...) into the pool as useful items. Receiving\none unlocks that weapon early; the vanilla pickups and research still work as usual.",
+     "type": "toggle",
+     "default": true
+    }
+   ]
+  },
+  {
+   "name": "Salvage",
+   "options": [
+    {
+     "key": "salvage",
+     "display": "Salvage",
+     "doc": "Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers\n\"<mission> Salvage\". Each purchase sends one of that mission's pickup checks you left behind. Only matters with\npickups on.",
+     "type": "toggle",
+     "default": true
+    },
+    {
+     "key": "salvage_price",
+     "display": "Salvage Price per Check",
+     "doc": "Credits per salvaged check (each purchase at the research terminal sends one missed pickup).",
+     "type": "choice",
+     "default": "1000",
+     "choices": [
+      "free",
+      "500",
+      "1000",
+      "2500",
+      "5000"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "DLC",
+   "options": [
+    {
+     "key": "enabled_dlc",
+     "display": "Enabled DLC",
+     "doc": "DLC content that adds checks (and, for Kasumi and Zaeed, their dossiers and loyalty missions). Remove what you do\nnot want to play; Legendary Edition includes all of it.",
+     "type": "set",
+     "default": [
+      "Arrival",
+      "Firewalker",
+      "Kasumi",
+      "Normandy Crash Site",
+      "Overlord",
+      "Shadow Broker",
+      "Zaeed"
+     ],
+     "choices": [
+      "Arrival",
+      "Firewalker",
+      "Kasumi",
+      "Normandy Crash Site",
+      "Overlord",
+      "Shadow Broker",
+      "Zaeed"
+     ]
+    }
+   ]
+  },
+  {
+   "name": "ME1 History",
+   "options": [
+    {
+     "key": "me1_virmire_survivor",
+     "display": "ME1: Virmire Survivor",
+     "doc": "ME1 history (the Genesis comic is skipped): who survived Virmire.",
+     "type": "choice",
+     "default": "ashley",
+     "choices": [
+      "ashley",
+      "kaidan"
+     ]
+    },
+    {
+     "key": "me1_romance",
+     "display": "ME1: Romance",
+     "doc": "ME1 history: Shepard's romance. Ashley needs a male Shepard and Kaidan a female one, each as the Virmire\nsurvivor; otherwise the client sets none.",
+     "type": "choice",
+     "default": "none",
+     "choices": [
+      "none",
+      "ashley",
+      "kaidan",
+      "liara"
+     ]
+    },
+    {
+     "key": "me1_rachni",
+     "display": "ME1: Rachni Queen",
+     "doc": "ME1 history: the Rachni Queen's fate.",
+     "type": "choice",
+     "default": "saved",
+     "choices": [
+      "saved",
+      "killed"
+     ]
+    },
+    {
+     "key": "me1_wrex",
+     "display": "ME1: Wrex",
+     "doc": "ME1 history: Wrex on Virmire.",
+     "type": "choice",
+     "default": "alive",
+     "choices": [
+      "alive",
+      "dead"
+     ]
+    },
+    {
+     "key": "me1_council",
+     "display": "ME1: Council",
+     "doc": "ME1 history: the Council at the Battle of the Citadel.",
+     "type": "choice",
+     "default": "saved",
+     "choices": [
+      "saved",
+      "sacrificed"
+     ]
+    },
+    {
+     "key": "me1_human_councilor",
+     "display": "ME1: Human Councilor",
+     "doc": "ME1 history: humanity's councilor.",
+     "type": "choice",
+     "default": "anderson",
+     "choices": [
+      "anderson",
+      "udina"
+     ]
+    }
+   ]
+  }
+ ],
+ "presets": {
+  "Story Focus": {
+   "assignments": "off",
+   "research": false,
+   "collectibles": false,
+   "pickups": "off",
+   "intel_total": 3,
+   "intel_required": 2
+  },
+  "Completionist": {
+   "assignments": "all",
+   "pickups": "any",
+   "intel_total": 8,
+   "intel_required": 6
+  },
+  "Everything": {
+   "assignments": "all",
+   "research": true,
+   "collectibles": true,
+   "pickups": "safe",
+   "codex": true,
+   "dlc_access": true,
+   "progressive_loyalty": true,
+   "weapon_unlocks": true,
+   "salvage": true,
+   "enabled_dlc": [
+    "Kasumi",
+    "Zaeed",
+    "Overlord",
+    "Shadow Broker",
+    "Arrival",
+    "Firewalker",
+    "Normandy Crash Site"
+   ]
+  }
+ }
+}

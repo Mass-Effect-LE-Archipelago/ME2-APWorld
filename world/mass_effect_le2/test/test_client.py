@@ -146,6 +146,18 @@ class TestDelivery(unittest.TestCase):
             sys.path.remove(str(tools))
         self.assertEqual((tools / "le2mod" / "salvage.json").read_text(), salvage_json())
 
+    def test_setup_options_json_matches_world(self) -> None:
+        import pathlib
+        import sys
+        tools = pathlib.Path(__file__).resolve().parents[3] / "tools"
+        if not (tools / "setup" / "options.json").exists():
+            self.skipTest("tools not beside this world (packaged .apworld)")
+        sys.path.insert(0, str(tools))
+        try:
+            from export_options import options_json
+        finally:
+            sys.path.remove(str(tools))
+        self.assertEqual((tools / "setup" / "options.json").read_text(), options_json())
     def test_bridge_salvage_ranges_match_client(self) -> None:
         import pathlib
         import re

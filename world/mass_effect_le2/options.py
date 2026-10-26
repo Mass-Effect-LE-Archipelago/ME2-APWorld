@@ -241,12 +241,25 @@ options_presets = {
         "intel_total": 8,
         "intel_required": 6,
     },
+    "Everything": {  # every check family and every item feature on, all DLC
+        "assignments": "all",
+        "research": True,
+        "collectibles": True,
+        "pickups": "safe",
+        "codex": True,
+        "dlc_access": True,
+        "progressive_loyalty": True,
+        "weapon_unlocks": True,
+        "salvage": True,
+        "enabled_dlc": ["Kasumi", "Zaeed", "Overlord", "Shadow Broker", "Arrival", "Firewalker", "Normandy Crash Site"],
+    },
 }
 
 option_groups = [
-    OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
-    OptionGroup("Start", [StartOnNormandy]),
-    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, DLCAccess, ProgressiveLoyalty, Salvage, SalvagePrice, EnabledDLC]),
-    OptionGroup("Items", [WeaponUnlocks]),
+    OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness, StartOnNormandy]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex]),
+    OptionGroup("Items", [DLCAccess, ProgressiveLoyalty, WeaponUnlocks]),
+    OptionGroup("Salvage", [Salvage, SalvagePrice]),
+    OptionGroup("DLC", [EnabledDLC]),
     OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

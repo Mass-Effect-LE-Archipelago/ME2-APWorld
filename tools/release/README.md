@@ -10,7 +10,21 @@ and loyalty missions scattered across the multiworld.
 - [ME3Tweaks Mod Manager](https://me3tweaks.com/modmanager/), with the LE2 target set and its ASI loader installed
   (Tools > ASI Mod Manager; installing any ASI from there adds the loader).
 
-## Install
+## Easiest: ME2 AP Setup.exe
+
+Close Mass Effect 2 and the Archipelago client and run `ME2 AP Setup.exe` from this folder.
+
+1. **Folders** finds Mass Effect LE, Archipelago and Mod Manager; Browse if one is wrong.
+2. **Install** installs, repairs or uninstalls the world, the bridge and the mod, backing up anything it replaces
+   (in `backup\`). Mod Manager is optional: without it the mod is copied into the game and its file table rebuilt.
+   You still need an ASI loader; Mod Manager's ASI Mod Manager (or its Bink bypass) provides one.
+3. **Options** has every option with an explanation, grouped, plus presets (Story Focus, Completionist, Everything)
+   and your slot name. Save writes your YAML to Archipelago's Players folder (or Save As anywhere); "Save + Generate"
+   also runs Archipelago's Generate and opens the output folder. No ME1 save is needed: ME1 choices are options.
+
+"Launch ME2" starts the game (and, ticked, the ME2 client too).
+
+## Install by script
 
 Close Mass Effect 2 and the Archipelago client, then in this folder run:
 

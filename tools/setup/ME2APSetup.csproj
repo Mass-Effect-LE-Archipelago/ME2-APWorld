@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ME2 AP Setup</AssemblyName>
+    <RootNamespace>ME2APSetup</RootNamespace>
+    <Version>0.2.1</Version>
+    <ApplicationHighDpiMode>SystemAware</ApplicationHighDpiMode>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- Path to LegendaryExplorerCore.csproj (TOC writing); override with -p:LexCoreProject=... -->
+    <LexCoreProject Condition="'$(LexCoreProject)' == ''">..\..\..\vendor\LegendaryExplorer\LegendaryExplorer\LegendaryExplorerCore\LegendaryExplorerCore.csproj</LexCoreProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(LexCoreProject)" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- exported from the world by tools/export_options.py; a world test keeps it in sync -->
+    <EmbeddedResource Include="options.json" LogicalName="options.json" />
+  </ItemGroup>
+</Project>
