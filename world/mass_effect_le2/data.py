@@ -121,6 +121,8 @@ ITEMS: dict[str, ItemData] = {
     **{name: ItemData(0x50 + i, _P, count=0, groups=frozenset({"DLC Access"}), grant="access")
        for i, name in enumerate(("David's Math Test", "Shadow Broker Toenail", "Batarian Genocide",
                                  "I'm Sorry (Progressive Firewalker Mission)"))},
+    # 0x58 Progressive Loyalty Mission (progressive_loyalty option, D26): one copy per squadmate, counted by items.py
+    "Progressive Loyalty Mission": ItemData(0x58, _P, count=0, groups=frozenset({"Loyalty"})),  # counted by the client
 }
 
 # DLC access (D25): each DLC mission's galaxy-map planet (or the Illium cab, for the Shadow Broker) opens only with its
@@ -131,6 +133,13 @@ FIREWALKER_ITEM = "I'm Sorry (Progressive Firewalker Mission)"
 FIREWALKER_BOOL_BASE = 21110  # + copy number (1-5)
 FIREWALKER_MISSIONS = ("Firewalker: Geth Incursions", "Firewalker: Survey Sites Located", "Firewalker: Prothean Site",
                        "Firewalker: Rosalie Lost", "Firewalker: Volcano Station")
+
+
+# Progressive Loyalty (D26): each copy opens one loyalty mission (mod bool LOYALTY_BOOL_BASE + index in LOYALTY_LOCATION
+# order). The client gives the next copy to the first squadmate, in that order, who is recruited, not yet loyal and
+# not already opened; so the logic can only promise a given mission once every copy has arrived.
+PROGRESSIVE_LOYALTY = "Progressive Loyalty Mission"
+LOYALTY_BOOL_BASE = 21130
 
 
 def firewalker_copies(location: str) -> int:

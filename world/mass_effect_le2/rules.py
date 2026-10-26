@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from rule_builder.rules import Has, HasAll, HasAny, Rule
 
-from . import data
+from . import data, items
 from .regions import location_included, squad
 
 if TYPE_CHECKING:
@@ -32,6 +32,12 @@ def dlc_access_rule(world: MassEffectLE2World, name: str, loc: data.LocationData
     return None
 
 
+def loyalty_rule(world: MassEffectLE2World) -> Rule | None:
+    """D26: a loyalty mission (and everything inside it) needs every Progressive Loyalty Mission copy."""
+    copies = items.loyalty_copies(world)
+    return Has(data.PROGRESSIVE_LOYALTY, copies) if copies else None
+
+
 def set_rules(world: MassEffectLE2World) -> None:
     # Entrance rules are set when regions are created (regions.ENTRANCES).
     for name, loc in data.LOCATIONS.items():
@@ -40,6 +46,8 @@ def set_rules(world: MassEffectLE2World) -> None:
         rule = check_rule(loc)
         if (access := dlc_access_rule(world, name, loc)) is not None:
             rule = access if rule is None else rule & access
+        if loc.region is data.Region.LOYALTY and (loyal := loyalty_rule(world)) is not None:
+            rule = loyal if rule is None else rule & loyal
         if rule is not None:
             world.set_rule(world.get_location(name), rule)
 
@@ -48,7 +56,10 @@ def set_rules(world: MassEffectLE2World) -> None:
         if member in data.RECRUIT_LOCATION and (
                 rule := check_rule(data.LOCATIONS[data.RECRUIT_LOCATION[member]])) is not None:
             world.set_rule(world.get_location(data.recruited(member)), rule)
-        if (rule := check_rule(data.LOCATIONS[data.LOYALTY_LOCATION[member]])) is not None:
+        rule = check_rule(data.LOCATIONS[data.LOYALTY_LOCATION[member]])
+        if (loyal := loyalty_rule(world)) is not None:
+            rule = loyal if rule is None else rule & loyal
+        if rule is not None:
             world.set_rule(world.get_location(data.loyalty_done(member)), rule)
 
     if world.options.endgame_readiness == world.options.endgame_readiness.option_all_loyal:

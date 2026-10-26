@@ -35,6 +35,12 @@ def dlc_access_items(world: MassEffectLE2World) -> list[tuple[str, int]]:
     return result
 
 
+def loyalty_copies(world: MassEffectLE2World) -> int:
+    """Progressive Loyalty Mission copies: one per squadmate with a loyalty mission in this seed (0 when off)."""
+    from .regions import squad  # regions imports this module
+    return len(squad(world)) if world.options.progressive_loyalty else 0
+
+
 def create_items(world: MassEffectLE2World) -> None:
     pool: list[MassEffectLE2Item] = []
     for name, item in data.ITEMS.items():
@@ -44,6 +50,7 @@ def create_items(world: MassEffectLE2World) -> None:
         pool += [create_item(world, name) for _ in range(count)]
     pool += [create_item(world, data.IFF_INTEL) for _ in range(world.options.intel_total.value)]
     pool += [create_item(world, name) for name, copies in dlc_access_items(world) for _ in range(copies)]
+    pool += [create_item(world, data.PROGRESSIVE_LOYALTY) for _ in range(loyalty_copies(world))]
 
     unfilled = world.multiworld.get_unfilled_locations(world.player)
     if len(pool) > len(unfilled):

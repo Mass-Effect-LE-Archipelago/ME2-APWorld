@@ -166,6 +166,21 @@ class TestDelivery(unittest.TestCase):
         self.assertEqual(item_op(ITEM_NAME_TO_ID["Batarian Genocide"]), "FLAG 21103")
         firewalker = ITEM_NAME_TO_ID[FIREWALKER_ITEM]
         self.assertEqual([item_op(firewalker, n) for n in range(5)], [f"FLAG {21111 + n}" for n in range(5)])
+    def test_loyalty_tokens_go_to_recruited_not_loyal_squadmates(self) -> None:
+        from ..client import LOYALTY_BOOL_BASE, sync_loyalty_tokens, sync_open_gates
+        from ..data import LOYALTY_LOCATION, PROGRESSIVE_LOYALTY
+        bridge = self.SalvageBridge()
+        bridge.bools[5810] = True  # Miranda already loyal
+        token = Received(ITEM_NAME_TO_ID[PROGRESSIVE_LOYALTY])
+        members = tuple(LOYALTY_LOCATION)
+        # two copies: Miranda is loyal, Jacob is next; Mordin isn't recruited, Garrus is (bool 5813)
+        bridge.bools[5813] = True
+        self.assertEqual(sync_loyalty_tokens(bridge, [token, token], members), ["Jacob Taylor", "Garrus Vakarian"])
+        self.assertTrue(bridge.bools[LOYALTY_BOOL_BASE + 1] and bridge.bools[LOYALTY_BOOL_BASE + 3])
+        self.assertEqual(sync_loyalty_tokens(bridge, [token, token], members), [])  # both copies spent
+        # option off: every gate opens
+        bridge = self.SalvageBridge()
+        self.assertEqual(len(sync_open_gates(bridge, False, False, members, ("Overlord", "Firewalker"))), 12 + 1 + 5)
     def test_dossier_flags_match_the_mod_gates(self) -> None:
         # le2mod 0.0.4 gates each recruitment on these bools (tools/le2mod/Program.cs Gates/HubGates)
         expected = {"Mordin Solus": 21000, "Garrus Vakarian": 21001, "Jack": 21002, "Grunt": 21003, "Thane Krios": 21004,

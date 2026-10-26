@@ -28,7 +28,7 @@ from CommonClient import ClientCommandProcessor, CommonContext, get_base_parser,
 from NetUtils import ClientStatus
 
 from .data import (DLC_ACCESS_BOOLS, DLC_ACCESS_ITEMS, DOSSIERS, FEMALE_PLOT_BOOL, FIREWALKER_BOOL_BASE, FIREWALKER_ITEM,
-                   FIREWALKER_MISSIONS, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SALVAGE_MISSIONS,
+                   FIREWALKER_MISSIONS, LOYALTY_BOOL_BASE, LOYALTY_LOCATION, PROGRESSIVE_LOYALTY, RECRUIT_LOCATION, IFF_INTEL, ITEM_NAME_TO_ID, ITEMS, LOCATION_NAME_TO_ID, LOCATIONS, SALVAGE_MISSIONS,
                    SALVAGE_PICKUPS, SALVAGE_PRICES, SHIP_UPGRADES,
                    WEAPONS, me1_history_writes)
 from .world import MassEffectLE2World
@@ -417,6 +417,58 @@ def sync_ship_upgrades(bridge: "BridgeConnection", received: Sequence[ReceivedIt
     return changed
 
 
+LOYALTY_MEMBERS = tuple(LOYALTY_LOCATION)  # the order copies are handed out; mod bool LOYALTY_BOOL_BASE + index
+PROGRESSIVE_LOYALTY_ID = ITEM_NAME_TO_ID[PROGRESSIVE_LOYALTY]
+
+
+def sync_loyalty_tokens(bridge: "BridgeConnection", received: Sequence[ReceivedItem], members: Sequence[str],
+                        log: logging.Logger = logger) -> list[str]:
+    """Open one loyalty mission per Progressive Loyalty copy not yet spent (D26); returns the squadmates opened now.
+
+    members: this seed's squadmates (DLC ones only if enabled). A copy goes to the first, in LOYALTY_MEMBERS order, who
+    is recruited (starting squad always), not yet loyal and not already opened; spare copies wait for the next one."""
+    copies = sum(1 for item in received if item.item == PROGRESSIVE_LOYALTY_ID)
+    if not copies:
+        return []
+    flags = {m: LOYALTY_BOOL_BASE + LOYALTY_MEMBERS.index(m) for m in members}
+    opened = {m for m, value in zip(flags, bridge.get_bools(list(flags.values())).values()) if value}
+    spare = copies - len(opened)
+    if spare <= 0:
+        return []
+    ids = {LOCATION_NAME_TO_ID[name] for m in members for name in
+           ((RECRUIT_LOCATION[m],) if m in RECRUIT_LOCATION else ()) + (LOYALTY_LOCATION[m],)}
+    true = evaluate_locations(bridge, ids)
+    now = []
+    for member in sorted(set(members) - opened, key=LOYALTY_MEMBERS.index):
+        recruited = member not in RECRUIT_LOCATION or LOCATION_NAME_TO_ID[RECRUIT_LOCATION[member]] in true
+        loyal = LOCATION_NAME_TO_ID[LOYALTY_LOCATION[member]] in true
+        if recruited and not loyal and len(now) < spare:
+            bridge.set_bool(flags[member], True)
+            now.append(member)
+            log.info("Loyalty mission opened: %s", member)
+    return now
+
+
+def sync_open_gates(bridge: "BridgeConnection", progressive_loyalty: bool, dlc_access: bool, members: Sequence[str],
+                    dlc: Sequence[str]) -> list[int]:
+    """The mod gates loyalty and DLC missions on AP bools; when the seed has no such items (option off, or a seed from
+    before them) the client opens those gates itself. Returns the bools set now."""
+    want = []
+    if not progressive_loyalty:
+        want += [LOYALTY_BOOL_BASE + LOYALTY_MEMBERS.index(m) for m in members]
+    if not dlc_access:
+        want += [DLC_ACCESS_BOOLS[key] for key in DLC_ACCESS_BOOLS if key in dlc]
+        if "Firewalker" in dlc:
+            want += [FIREWALKER_BOOL_BASE + n for n in range(1, len(FIREWALKER_MISSIONS) + 1)]
+    if not want:
+        return []
+    current = bridge.get_bools(want)
+    missing = [index for index in want if not current[index]]
+    for index in missing:
+        bridge.set_bool(index, True)
+    return missing
+
+
 def intel_count(received: Sequence[ReceivedItem]) -> int:
     return sum(1 for item in received if item.item == IFF_INTEL_ID)
 
@@ -463,6 +515,12 @@ class ME2Context(CommonContext):
             # seeds generated before the salvage options have no salvage entries
             self.salvage = bool(slot_data.get("salvage", 0)) and slot_data.get("pickups", 0) != 0
             self.salvage_tier = int(slot_data.get("salvage_price", 2))
+            dlc = set(slot_data.get("enabled_dlc", ()))
+            self.enabled_dlc = tuple(dlc)
+            self.progressive_loyalty = bool(slot_data.get("progressive_loyalty", 0))
+            self.dlc_access = bool(slot_data.get("dlc_access", 0))
+            self.loyalty_members = tuple(m for m in LOYALTY_LOCATION
+                                         if m not in ("Zaeed Massani", "Kasumi Goto") or m.split()[0] in dlc)
             self.identity = seed_identity(self.seed_name or "", self.team or 0, self.slot or 0)
             self._mismatch_reported = False
 
@@ -549,6 +607,9 @@ class ME2Context(CommonContext):
         sync_received_items(self.bridge, received)
         sync_dossier_journals(self.bridge, received)
         sync_ship_upgrades(self.bridge, received)
+        sync_loyalty_tokens(self.bridge, received, getattr(self, "loyalty_members", ()))
+        sync_open_gates(self.bridge, getattr(self, "progressive_loyalty", False), getattr(self, "dlc_access", False),
+                        getattr(self, "loyalty_members", ()), getattr(self, "enabled_dlc", ()))
         open_locations = set(self.missing_locations) - set(self.locations_checked)
         salvaged = sync_salvage(self.bridge, getattr(self, "salvage", False), getattr(self, "salvage_tier", 2),
                                 open_locations)

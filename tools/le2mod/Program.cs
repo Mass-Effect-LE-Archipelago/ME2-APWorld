@@ -201,11 +201,21 @@ static class Program
         ("BioP_N7Ruins", 1563, 21113, "gv.GetBool(6206) == FALSE"),                                        // Firewalker 3: Prothean Site
         ("BioP_N7Shipwreck", 1565, 21114, "gv.GetBool(4042) == FALSE"),                                    // Firewalker 4: Rosalie Lost
         ("BioP_N7Mmnt8", 1567, 21115, "gv.GetBool(6219) == FALSE"),                                        // Firewalker 5: Volcano Station
+        // Progressive Loyalty (D26): loyalty missions that start from a galaxy-map planet; bool 21130 + loyalty index
+        ("BioP_BchLmL", 1571, 21131, "gv.GetBool(3995) == TRUE && gv.GetBool(34) == TRUE && gv.GetBool(1497) == FALSE && gv.GetBool(394) == TRUE"), // Jacob
+        ("BioP_JunCvL", 187, 21134, "gv.GetBool(35) == TRUE && gv.GetBool(1498) == FALSE && gv.GetBool(395) == TRUE"),   // Jack
+        ("BioP_QuaTlL", 192, 21138, "gv.GetBool(40) == TRUE && gv.GetBool(1503) == FALSE && gv.GetBool(400) == TRUE"),   // Tali
+        ("BioP_BlbGtl", 188, 21139, "gv.GetBool(36) == TRUE && gv.GetBool(1499) == FALSE && gv.GetBool(396) == TRUE"),   // Legion
+        ("BioP_ZyaVTL", 195, 21140, "gv.GetBool(44) == TRUE && gv.GetBool(1507) == FALSE && gv.GetBool(404) == TRUE"),   // Zaeed
+        ("biop_ptymtl", 189, 21141, "gv.GetBool(37) == TRUE && gv.GetBool(1500) == FALSE && gv.GetBool(397) == TRUE"),   // Kasumi
     ];
     // Hub conditionals (research/galaxy_gating.md section 6): same pattern, used by repointed PMCheckConditional nodes.
     static readonly (int vanilla, int ours, string body)[] HubConditionals =
     [
         (376, 21005, "gv.GetBool(1542) == TRUE && gv.GetBool(43) == FALSE && gv.GetBool(205) == FALSE"),   // Samara, cab console
+        (185, 21130, "gv.GetBool(33) == TRUE && gv.GetBool(1496) == FALSE && gv.GetBool(393) == TRUE"),    // Miranda loyalty (Illium lounge)
+        (1553, 21132, "gv.GetBool(5951) == TRUE && gv.GetBool(2051) == FALSE"),                            // Mordin loyalty (Tuchanka)
+        (468, 21137, "gv.GetBool(1947) == TRUE && gv.GetBool(1506) == FALSE && gv.GetBool(43) == TRUE"),  // Samara loyalty (Omega)
     ];
     // Galaxy-map recruit labels on the hub planets (SFXPlanetFeature FEATURE_LABEL, shown in the system tooltip): each
     // gets a conditional 21200+i = its vanilla VisibleConditional body AND the dossier bool, so a locked recruit's name
@@ -221,6 +231,10 @@ static class Program
         ("BioP_CitHub", 358125, 179, 21208, "gv.GetBool(37) == FALSE && gv.GetBool(199) == FALSE && gv.GetBool(2288) == TRUE && gv.GetBool(21008) == TRUE"), // Recruit The Master Thief
         ("BioP_TwrHub", 376969, 1987, 21210, "gv.GetInt(745) >= 2 && gv.GetBool(6844) == FALSE && gv.GetBool(21102) == TRUE"), // Give Liara Intel (Shadow Broker)
         ("BioP_TwrHub", 365856, 1998, 21211, "gv.GetBool(6844) == TRUE && gv.GetBool(6815) == FALSE && gv.GetBool(21102) == TRUE"), // Take Cab to Liara's
+        ("BioP_CitHub", 348624, 190, 21220, "gv.GetBool(38) == TRUE && gv.GetBool(1501) == FALSE && gv.GetBool(398) == TRUE && gv.GetBool(21133) == TRUE"), // Help Garrus
+        ("BioP_CitHub", 348623, 191, 21221, "gv.GetBool(39) == TRUE && gv.GetBool(1502) == FALSE && gv.GetBool(399) == TRUE && gv.GetBool(21136) == TRUE"), // Help Thane
+        ("BioP_OmgHub", 348620, 174, 21222, "gv.GetBool(312) == TRUE && gv.GetBool(43) == TRUE && gv.GetBool(1506) == FALSE && gv.GetBool(403) == TRUE && gv.GetBool(21137) == TRUE"), // Help Samara
+        ("BioP_TwrHub", 348627, 185, 21223, "gv.GetBool(33) == TRUE && gv.GetBool(1496) == FALSE && gv.GetBool(393) == TRUE && gv.GetBool(21130) == TRUE"), // Help Miranda
     ];
     const string MainSeq = "TheWorld.PersistentLevel.Main_Sequence.";
     // Per-dossier hub gates. "insert": a PMCheckState on the AP bool goes in front of the node (every link into it is
@@ -238,6 +252,13 @@ static class Program
         ("BioD_OmgHub_DLC_Veteran.pcc", "insert", MainSeq + "Initialization.SFXSeqAct_StartConversation_1", "zyavtl_zaeed_acq_d_dlg", 0, 21007),
         ("BioD_CitHub_DLC_500Thief.pcc", "insert", MainSeq + "SFXSeqAct_StartConversation_0", "citmtl_kasumi_acq_d_dlg", 0, 21008),         // Kasumi
         ("BioD_TwrHub_302CarPort.pcc", "insert", MainSeq + "DLC_MODIFIED_Cab_Console.SeqAct_ToggleInput_0", "", 0, 21102),                // Shadow Broker: cab to Liara's
+        // Progressive Loyalty (D26): the hub-based loyalty starts
+        ("BioD_TwrHub_202Lounge.pcc", "repoint", MainSeq + "Vixen_Loyalty", "", 185, 21130),                                         // Miranda
+        ("BioD_KroHub_120MordinLoyalty.pcc", "repoint", MainSeq + "Mordin_Loyalty", "", 1553, 21132),                              // Mordin
+        ("BioD_CitHub.pcc", "insert", MainSeq + "Transportation_Logic.BioSeqAct_PMExecuteTransition_5", "399", 0, 21133),          // Garrus
+        ("BioD_KroHub_110GruntLoyalty.pcc", "insert", MainSeq + "Shaman_Conversation.To_Grunt_Loyalty.BioSeqAct_ModifyPropertyNavigation_0", "", 0, 21135), // Grunt
+        ("BioD_CitHub_220AsL.pcc", "insert", MainSeq + "BioSeqAct_PMExecuteTransition_0", "1838", 0, 21136),                        // Thane
+        ("BioD_OmgHub_460MwL_Victim.pcc", "repoint", "TheWorld.PersistentLevel.Main_Sequence", "", 468, 21137),                     // Samara
     ];
 
     static string NodeTarget(ExportEntry node) =>
@@ -713,7 +734,7 @@ static class Program
         File.WriteAllText(Path.Combine(tmp, "moddesc.ini"),
             "[ModManager]\r\ncmmver = 8.0\r\n\r\n[ModInfo]\r\ngame = LE2\r\nmodname = Archipelago ME2 open start (TEST)\r\n" +
             "moddesc = Test build: a new career skips the SR-1 prologue and goes from the character creator straight to the Normandy SR-2 galaxy map.\r\n" +
-            "modver = 0.0.8\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
+            "modver = 0.0.9\r\nmoddev = Jerrod\r\n\r\n[CUSTOMDLC]\r\nsourcedirs = " + ModFolder + "\r\ndestdirs = " + ModFolder + "\r\n");
 
         if (Directory.Exists(modRoot)) Directory.Delete(modRoot, true);
         Directory.Move(tmp, modRoot);

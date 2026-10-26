@@ -109,6 +109,14 @@ class DLCAccess(DefaultOnToggle):
     display_name = "DLC Access Items"
 
 
+class ProgressiveLoyalty(DefaultOnToggle):
+    """Loyalty missions need a "Progressive Loyalty Mission" item (one copy per squadmate). Each copy opens the loyalty
+    mission of the next squadmate, in a fixed order, who is recruited and not yet loyal. The logic expects every copy
+    before any loyalty mission, since which mission a copy opens depends on your progress."""
+
+    display_name = "Progressive Loyalty Missions"
+
+
 class Salvage(DefaultOnToggle):
     """Missed-checks salvage: once you finish a mission that can't be replayed, the Normandy's research terminal offers
     "<mission> Salvage". Each purchase sends one of that mission's pickup checks you left behind. Only matters with
@@ -206,6 +214,7 @@ class MassEffectLE2Options(PerGameCommonOptions):
     pickups: Pickups
     codex: Codex
     dlc_access: DLCAccess
+    progressive_loyalty: ProgressiveLoyalty
     salvage: Salvage
     salvage_price: SalvagePrice
     weapon_unlocks: WeaponUnlocks
@@ -237,7 +246,7 @@ options_presets = {
 option_groups = [
     OptionGroup("Goal", [IntelTotal, IntelRequired, EndgameReadiness]),
     OptionGroup("Start", [StartOnNormandy]),
-    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, DLCAccess, Salvage, SalvagePrice, EnabledDLC]),
+    OptionGroup("Checks", [Assignments, Research, Collectibles, Pickups, Codex, DLCAccess, ProgressiveLoyalty, Salvage, SalvagePrice, EnabledDLC]),
     OptionGroup("Items", [WeaponUnlocks]),
     OptionGroup("ME1 History", [ME1VirmireSurvivor, ME1Romance, ME1Rachni, ME1Wrex, ME1Council, ME1HumanCouncilor]),
 ]

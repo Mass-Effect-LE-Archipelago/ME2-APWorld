@@ -80,6 +80,8 @@ class TestDefaults(LE2Helpers):
         self.collect_event(EVENT_HORIZON)
         self.assertFalse(self.can_reach_location("Garrus: Eye for an Eye"))
         self.collect_event(recruited("Garrus Vakarian"))
+        self.assertFalse(self.can_reach_location("Garrus: Eye for an Eye"))  # D26: needs every loyalty copy
+        self.collect(self.get_items_by_name("Progressive Loyalty Mission"))
         self.assertTrue(self.can_reach_location("Garrus: Eye for an Eye"))
         self.assertTrue(self.can_reach_location("Miranda: The Prodigal"))
 
@@ -258,6 +260,7 @@ class TestPickups(LE2Helpers):
         self.collect_event(EVENT_HORIZON)
         self.assertFalse(self.can_reach_location(name))
         self.collect_event(recruited("Jack"))
+        self.collect(self.get_items_by_name("Progressive Loyalty Mission"))
         self.assertTrue(self.can_reach_location(name))
 
     def test_arrival_pickups_are_excluded(self) -> None:

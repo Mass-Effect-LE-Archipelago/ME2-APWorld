@@ -548,3 +548,4 @@ Status: V-DB = predicate from the plot database, not yet observed in game. Exclu
 | 0x4d320051 | Shadow Broker Toenail | progression | access |
 | 0x4d320052 | Batarian Genocide | progression | access |
 | 0x4d320053 | I'm Sorry (Progressive Firewalker Mission) | progression | access |
+| 0x4d320058 | Progressive Loyalty Mission | progression | client count |

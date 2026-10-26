@@ -44,12 +44,26 @@ class MassEffectLE2World(World):
             self.multiworld.push_precollected(self.create_item(self.starting_dossier))
         # slots that can hold progression: not excluded, and not a pickup under pickups: safe
         safe = self.options.pickups == self.options.pickups.option_safe
-        open_slots = sum(1 for loc in data.LOCATIONS.values() if regions.location_included(self, loc)
-                         and not loc.excluded and not (safe and loc.category == "pickup") and loc.category != "codex")
-        fixed = sum(1 for name, item in data.ITEMS.items() if item.count
-                    and (name not in items.DLC_DOSSIERS or items.dlc_enabled(self, items.DLC_DOSSIERS[name])))
-        fixed += sum(count for _, count in items.dlc_access_items(self))
-        room = open_slots - fixed + (self.starting_dossier is not None) - MIN_FILLER_SLOTS
+        open_locations = [loc for loc in data.LOCATIONS.values() if regions.location_included(self, loc)
+                          and not loc.excluded and not (safe and loc.category == "pickup") and loc.category != "codex"]
+        base = sum(1 for name, item in data.ITEMS.items() if item.count
+                   and (name not in items.DLC_DOSSIERS or items.dlc_enabled(self, items.DLC_DOSSIERS[name])))
+        base -= self.starting_dossier is not None
+
+        def room(slots: int) -> int:
+            fixed = base + sum(count for _, count in items.dlc_access_items(self)) + items.loyalty_copies(self)
+            return slots - fixed - MIN_FILLER_SLOTS
+
+        # Small option sets may not fit the extra progression: Progressive Loyalty copies can't sit inside loyalty
+        # missions (those need every copy), so they must fit elsewhere; DLC access items go next if still short.
+        outside_loyalty = sum(1 for loc in open_locations if loc.region is not data.Region.LOYALTY)
+        if self.options.progressive_loyalty and room(outside_loyalty) < 1:
+            logger.warning(f"{self.player_name}: progressive_loyalty turned off (not enough locations for its items).")
+            self.options.progressive_loyalty.value = 0
+        if self.options.dlc_access and room(len(open_locations)) < 1:
+            logger.warning(f"{self.player_name}: dlc_access turned off (not enough locations for its items).")
+            self.options.dlc_access.value = 0
+        room = room(len(open_locations))
         total = self.options.intel_total
         if total.value > room:
             logger.warning(f"{self.player_name}: intel_total {total.value} lowered to {room} (location count).")
@@ -78,7 +92,7 @@ class MassEffectLE2World(World):
     def fill_slot_data(self) -> Mapping[str, Any]:
         return {
             **self.options.as_dict("intel_total", "intel_required", "endgame_readiness", "start_on_normandy", "assignments",
-                                 "research", "collectibles", "pickups", "codex", "dlc_access", "salvage", "salvage_price", "weapon_unlocks"),
+                                 "research", "collectibles", "pickups", "codex", "dlc_access", "progressive_loyalty", "salvage", "salvage_price", "weapon_unlocks"),
             "enabled_dlc": sorted(self.options.enabled_dlc.value),
             "starting_dossier": self.starting_dossier,
             "me1_history": {key: getattr(self.options, key).current_key for key in data.ME1_HISTORY},
