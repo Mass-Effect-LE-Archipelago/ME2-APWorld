@@ -34,9 +34,18 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
 2. Next: the real client against a local AP server on a fresh career (item delivery, checks), then merge this branch
    into claude/me2-ap-world (PR #1).
 
-## Now (2026-10-26, paused for the night)
-- Installed on Austin's PC: release 0.2.1 (apworld 0.2.1 in custom_worlds; game files as 0.2.0; Mod Manager's
-  LEBinkProxy is the ASI loader, restored after an aborted swap; backup in backups\loader-swap-2026-10-26).
+## Now (2026-10-27)
+- Release 0.2.2 staged in APWorldMaker\release\ME2LE-AP-0.2.2 (0.2.1 contents + setup app 0.2.2 + our loader
+  bink2w64.dll + hde license + README: no Mod Manager needed). World stays 0.2.1.
+- In-game loader test PASSED 2026-10-27: with our loader in place of LEBinkProxy, ME2 ran, the bridge answered
+  (PING OK pong, VER 4), and New Career skipped to the gender picker (DLC_MOD loads; Mod Manager's "DLC mods will not
+  load" warning is trilogy-era text, LEBinkProxy has no DLC module). Austin chose to KEEP OUR LOADER installed; Mod
+  Manager's copy is in backups\loader-swap-2026-10-26. Mod Manager will probably reinstall its own loader on its next
+  mod/ASI install (it has AutoInstallBink); harmless, it loads our bridge too.
+- Next: brother's YAML -> Generate -> upload at archipelago.gg; then the first multiworld session.
+
+## Earlier (2026-10-26)
+- Installed on Austin's PC: release 0.2.1 (apworld 0.2.1 in custom_worlds; game files as 0.2.0).
 - Our ASI loader (approved by Austin, so Mod Manager is not needed): tools/asiloader builds bink2w64.dll ("AP ASI
   Loader" 1.0.0). It forwards the 80 Bink exports by name to bink2w64_original.dll and loads ASI\*.asi. It implements
   SPI v3 (GetVersion, GetBuildMode, GetHostGame, FindPattern, InstallHook, UninstallHook) with its own x64 detour

@@ -19,7 +19,8 @@ Close Mass Effect 2 and the Archipelago client and run `ME2 AP Setup.exe` from t
    (in `backup\`). Mod Manager is optional: without it the mod is copied into the game and its file table rebuilt.
    If ME2 has no ASI loader yet, it adds ours (`bink2w64.dll`, "AP ASI Loader": it keeps the game's own DLL as
    `bink2w64_original.dll` and loads the `ASI` folder). If Mod Manager's loader is already there it is left alone.
-   The loader writes `APAsiLoader.log` next to MassEffect2.exe.
+   The loader writes `APAsiLoader.log` next to MassEffect2.exe. If you later install mods with Mod Manager it may
+   put its own loader in place of ours; that is fine, since it also loads the bridge (the status line then names it).
 3. **Options** has every option with an explanation, grouped, plus presets (Story Focus, Completionist, Everything)
    and your slot name. Save writes your YAML to Archipelago's Players folder (or Save As anywhere); "Save + Generate"
    also runs Archipelago's Generate and opens the output folder. No ME1 save is needed: ME1 choices are options.
