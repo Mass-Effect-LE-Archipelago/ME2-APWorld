@@ -42,6 +42,11 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   load" warning is trilogy-era text, LEBinkProxy has no DLC module). Austin chose to KEEP OUR LOADER installed; Mod
   Manager's copy is in backups\loader-swap-2026-10-26. Mod Manager will probably reinstall its own loader on its next
   mod/ASI install (it has AutoInstallBink); harmless, it loads our bridge too.
+- Published 2026-10-27 by Austin (glab; the auto-mode classifier blocks Claude from creating public GitLab pages):
+  public project gitlab.com/unowa001/ArchipelagoME2 (GitLab's default README only, no source), release
+  /-/releases/v0.2.2, lean zip (no Mod Manager mod zip, 186 MB) in the Generic Package Registry:
+  https://gitlab.com/api/v4/projects/unowa001%2FArchipelagoME2/packages/generic/ME2LE-AP/0.2.2/ME2LE-AP-0.2.2.zip
+  (anonymous download checked, size matches). Prepared README text: release\gitlab\README.md (not uploaded).
 - Next: brother's YAML -> Generate -> upload at archipelago.gg; then the first multiworld session.
 
 ## Earlier (2026-10-26)
