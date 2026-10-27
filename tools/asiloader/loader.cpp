@@ -13,6 +13,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cwchar>
+#include <share.h>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -351,7 +352,7 @@ namespace
         else if (name == L"masseffect3.exe") g_game = SPIGameVersion::LE3;
         else return;  // the launcher (or anything else): forward Bink only
 
-        _wfopen_s(&g_log, (g_exeDir + L"\\APAsiLoader.log").c_str(), L"w, ccs=UTF-8");
+        g_log = _wfsopen((g_exeDir + L"\\APAsiLoader.log").c_str(), L"w, ccs=UTF-8", _SH_DENYWR);  // readable while the game runs
         Log(L"AP ASI Loader " AP_LOADER_VERSION L" in %s (LE%d)", name.c_str(), static_cast<int>(g_game));
         HANDLE thread = CreateThread(nullptr, 0, Main, nullptr, 0, nullptr);
         if (thread)
