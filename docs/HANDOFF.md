@@ -1,6 +1,8 @@
 # Handoff (read this first in a fresh session)
 
-Updated 2026-10-20. Branch `claude/me2-ap-world` (draft PR #1). Owner: Austin (Unowa001). Keep sessions lean: read only
+Updated 2026-10-30. Repo: github.com/Mass-Effect-LE-Archipelago/ME2-APWorld, default branch `main` (holds the full
+history through 2510133, the 0.2.2 GitLab handoff). Owner: Austin (Unowa001). The old Unowa001/ME2-LE-Archipelago repo and
+its PR #1 are retired. Keep sessions lean: read only
 what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATALOG.md.
 
 ## Status
@@ -89,9 +91,10 @@ what the next step needs; details live in SCOPE.md, DECISIONS.md and CHECKS-CATA
   there; remove Brother_HK_standin.yaml first) and upload. First in-game run of 0.0.9/v4 on a New Career.
 - Desktop .bat now starts only the ME2 client (no local server).
 
-## Current state (2026-10-26, PC session; GitHub is down, so this local clone is the source of truth)
-- Commit locally on claude/project-thread-5kre14 only, never push; after each commit run
-  `git bundle create <APWorldMaker>\backups\ME2-LE-Archipelago-<date>.bundle --all`.
+## Current state (2026-10-26, PC session)
+- Source of truth (since 2026-10-30): GitHub, Mass-Effect-LE-Archipelago/ME2-APWorld `main`. Pushing is allowed again;
+  the PC clone should pull `main` before new work. Git bundles in APWorldMaker\backups are optional now.
+- Releases still download from GitLab (gitlab.com/unowa001/ArchipelagoME2) until they move to GitHub Releases.
 - **Test seed:** AustinME2 (C:\ProgramData\Archipelago\output\ME2Test\AP_52207553016037918111.zip), server
   localhost:38281, client from the installed AP 0.6.8 in C:\ProgramData\Archipelago (0.0.5-era .apworld in custom_worlds,
   protocol 3). Start both with `C:\Users\unowi\OneDrive\Desktop\Start ME2 AP Test.bat` (Austin can double-click it).
