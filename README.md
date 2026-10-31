@@ -24,3 +24,6 @@ cd Archipelago && python -m pytest worlds/mass_effect_le2/test
 ```
 
 Build the `.apworld` with `python tools/build_apworld.py` (writes `build/mass_effect_le2.apworld`).
+
+## AI Disclosure
+AI was used in the development of this Archipelago multiworld integration. 
